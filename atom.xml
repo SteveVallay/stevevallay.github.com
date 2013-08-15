@@ -4,7 +4,7 @@
   <title><![CDATA[Zhibin's blog]]></title>
   <link href="http://SteveVallay.github.io/atom.xml" rel="self"/>
   <link href="http://SteveVallay.github.io/"/>
-  <updated>2013-08-15T17:23:46+08:00</updated>
+  <updated>2013-08-15T23:06:43+08:00</updated>
   <id>http://SteveVallay.github.io/</id>
   <author>
     <name><![CDATA[zhibin]]></name>
@@ -97,20 +97,13 @@ $ bundle install
 <li>Add your Github Pages repository as the default origin remote.</li>
 <li>Switch the active branch from master to source.</li>
 <li>Configure your blog’s url according to your repository.</li>
-<li>Set up a master(gh-pages) branch for your project in the deploy directory, ready for deployment.</li>
+<li>Set up a gh-pages branch for your project in the _deploy directory, ready for deployment.</li>
 </ul>
 
 
-<p>Next run:</p>
+<p>two things you need to konw:</p>
 
-<pre><code>$ rake generate
-$ rake deploy
-</code></pre>
-
-<p>this will generate the content of your blog under deploy and push it to master(gh-pages) branch ,
-a few minites later , you can view your blog at <strong>yourname.github.io(com)</strong></p>
-
-<h3>Step4:<a href="http://octopress.org/docs/configuring">Configure Octopress</a></h3>
+<p>*</p>
 ]]></content>
   </entry>
   
