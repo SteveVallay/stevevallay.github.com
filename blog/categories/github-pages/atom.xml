@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: github pages | Zhibin's blog]]></title>
+  <link href="http://SteveVallay.github.io/blog/categories/github-pages/atom.xml" rel="self"/>
+  <link href="http://SteveVallay.github.io/"/>
+  <updated>2013-08-16T00:26:40+08:00</updated>
+  <id>http://SteveVallay.github.io/</id>
+  <author>
+    <name><![CDATA[zhibin]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[blog = octopress + github pages]]></title>
+    <link href="http://SteveVallay.github.io/blog/2013/08/15/blog-equals-octopress-plus-github-pages/"/>
+    <updated>2013-08-15T10:44:00+08:00</updated>
+    <id>http://SteveVallay.github.io/blog/2013/08/15/blog-equals-octopress-plus-github-pages</id>
+    <content type="html"><![CDATA[<p>Thanks to github , we have another choice to setup a blog beyond the popluar wordpress, <a href="http://page.github.com">github pages</a> +  <a href="http://octopress.org">octopress</a> (based on <a href="http://jekyllrb.com">jekyll</a>, simply we can say : octopress is jekyll + themes).</p>
+
+<p>Using octopress we can setup a blog very easy , the most import is that the blog is host at <a href="http://github.com">github</a>:</p>
+
+<ul>
+<li>it is free!</li>
+<li>version control !</li>
+<li>without bandwith limit !</li>
+<li>without storage space limit!</li>
+<li>keep as long as you wish !</li>
+</ul>
+
+
+<p><em>Let&rsquo;s go &hellip;</em></p>
+
+<!--more-->
+
+
+<h3>Step1: setup your project on <a href="http://github.com">github</a>.</h3>
+
+<p>first , you need a <a href="http://github.com">github</a> account , if you do not have one , please apply one on <a href="http://github.com">github</a></p>
+
+<p>second ,you need create a new repository  with your name , assume your github account name is <strong>yourname</strong> , you need create your project with the name <strong>yourname.github.io</strong> or <strong>yourname.github.com</strong> .</p>
+
+<h3>Step2: <a href="http://octopress.org/docs/setup">Setup Octopress</a></h3>
+
+<p>assume you are working on uinx or linux, you alredy have <a href="http://git-scm.com">git</a> installed.</p>
+
+<p>then , <a href="http://octopress.org/docs/setup/rvm">install ruby with rvm</a> or <a href="http://octopress.org/docs/setup/rbenv">install ruby with Rbenv</a> , use  rvm for example :</p>
+
+<p>run the following command from terminal to get rvm:
+``` bash</p>
+
+<pre><code>$ curl -L https://get.rvm.io | bash -s stable --ruby
+</code></pre>
+
+<p><code>
+install latest ruby (1.9.3 currently):
+</code>ruby</p>
+
+<pre><code>$ rvm install 1.9.3 
+$ rvm use 1.9.3 
+$ rvm rubygems latest 
+</code></pre>
+
+<p><code>
+get octopress from github:
+</code>bash</p>
+
+<pre><code>$ git clone git://github.com/imathis/octopress.git octopress
+$ cd octopress    # If you use RVM, You'll be asked if you trust the .rvmrc file (say yes) 
+$ ruby --version  # Should report Ruby 1.9.3 
+</code></pre>
+
+<p><code>
+install dependencies:
+</code> ruby</p>
+
+<pre><code>$ gem install bundler 
+$ bundle install
+</code></pre>
+
+<p><code>
+install the default theme:
+</code> ruby</p>
+
+<pre><code>$ rake install
+</code></pre>
+
+<p>```</p>
+
+<h3>Step3: <a href="http://octopress.org/docs/deploying/githug">deploy to github pages</a></h3>
+
+<p>```ruby</p>
+
+<pre><code>$ rake setup_github_pages #input your repo name as git@github.com://yourname/yourname.github.io(com).git
+</code></pre>
+
+<p>```
+this command will do a couple things for you:</p>
+
+<ul>
+<li>Ask you for your github pages repository url.</li>
+<li>Rename the remote pointing to imathis/octopress from ‘origin’ to ‘octopress’</li>
+<li>Add your Github Pages repository as the default origin remote.</li>
+<li>Switch the active branch from master to source.</li>
+<li>Configure your blog’s url according to your repository.</li>
+<li>Set up a master branch for your project in the _deploy directory, ready for deployment.</li>
+</ul>
+
+
+<p>Next run:
+``` ruby</p>
+
+<pre><code>$rake generate
+$rake deploy 
+</code></pre>
+
+<p>```
+this will generate the content of your blog under _deploy directory and push it to master(gh-pages) branch ,
+a few minites later, you can view your blog at <strong>yourname.github.io(com)</strong></p>
+
+<h3>Step4: <a href="http://octopress.org/docs/configuring">Configure Octopress</a></h3>
+
+<p>open _config.yml, change the config as you like:
+```</p>
+
+<pre><code>url: http://stevevallay.github.io
+title: Zhibin's blog
+subtitle: alway's smile :-)
+author: zhibin 
+...
+</code></pre>
+
+<p>```</p>
+
+<h3>Step5: <a href="http://octopress.org/odcs/blogging">Blogging</a></h3>
+
+<p>``` ruby</p>
+
+<pre><code>$ rake new_post['blog title']
+</code></pre>
+
+<p>```</p>
+
+<p>then, it will generate a file <em>source/_post/YYYY-MM-DD-XXXX.markdown</em> , this is
+the blog source , you can edit it with <a href="http://http://daringfireball.net/projects/markdown/">markdown</a> , if you havn&rsquo;t familiar with
+<em>markdown</em> , refer <a href="http://en.wikipedia.org/wiki/Markdown">markdown wiki</a> or  <a href="http://wowubuntu.com/markdown">markdown in Chinese</a></p>
+
+<h3>Step6: Generate &amp; Preview</h3>
+
+<p>after finish one post , you can preview it:</p>
+
+<p>``` ruby</p>
+
+<pre><code>$ rake generate  #Generates posts and pages into the public directory
+$ rake watch      # Watches source/ and sass/ for changes and regenerates
+$ rake preview    # Watches, and mounts a webserver at http://localhost:4000
+</code></pre>
+
+<p>```</p>
+
+<p>open browser <a href="http://localhost:4000">http://localhost:4000</a> you can see your blog.</p>
+
+<p><em>Do not</em> forget two things :</p>
+
+<ul>
+<li>Commit sources of your blog to github , from your local source branch to source branch in github.
+<code>bash
+ $ git add .
+ $ git commit -m "blog = github pages + octopress"
+ $ git push origin source
+</code></li>
+<li>Deploy your blog, this will generate all files under_deploy and commit it to github master(gh-pages) branch.</li>
+</ul>
+
+
+<p>``` ruby</p>
+
+<pre><code>$ rake deploy
+</code></pre>
+
+<p>```</p>
+
+<p>Finally , you will get a similar blog as current <a href="http://stevevallay.github.io">stevevallay.github.io</a></p>
+
+<h3><a href="http://http://octopress.org/docs/plugins/">Octopress Plugin</a></h3>
+
+<p>the first octopress plugin i recommanded is <a href="http://octopress.org/docs/plugins/backtick-codeblock/">backtick code block</a> , it can help
+add line number and syntax hightlight, octopress default installed it under plugin directory.
+Simple you can use it as following:</p>
+
+<p><strong>Syntax</strong></p>
+
+<pre><code>``` [language] [title] [url] [line text]
+    code snipt
+```
+</code></pre>
+
+<p><strong>Example</strong></p>
+
+<pre><code>``` bash
+    $ sudo make me a sandwich 
+```
+</code></pre>
+
+<p>``` bash</p>
+
+<pre><code>$ sudo make me a sandwich 
+</code></pre>
+
+<p>```</p>
+]]></content>
+  </entry>
+  
+</feed>

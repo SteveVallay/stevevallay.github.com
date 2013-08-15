@@ -4,7 +4,7 @@
   <title><![CDATA[Zhibin's blog]]></title>
   <link href="http://SteveVallay.github.io/atom.xml" rel="self"/>
   <link href="http://SteveVallay.github.io/"/>
-  <updated>2013-08-15T23:06:43+08:00</updated>
+  <updated>2013-08-16T00:26:40+08:00</updated>
   <id>http://SteveVallay.github.io/</id>
   <author>
     <name><![CDATA[zhibin]]></name>
@@ -42,6 +42,9 @@
 
 <p><em>Let&rsquo;s go &hellip;</em></p>
 
+<!--more-->
+
+
 <h3>Step1: setup your project on <a href="http://github.com">github</a>.</h3>
 
 <p>first , you need a <a href="http://github.com">github</a> account , if you do not have one , please apply one on <a href="http://github.com">github</a></p>
@@ -56,38 +59,55 @@
 
 <p>run the following command from terminal to get rvm:</p>
 
-<pre><code>$ curl -L https://get.rvm.io | bash -s stable --ruby
-</code></pre>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>curl -L https://get.rvm.io | bash -s stable --ruby
+</span></code></pre></td></tr></table></div></figure>
+
 
 <p>install latest ruby (1.9.3 currently):</p>
 
-<pre><code>$ rvm install 1.9.3 
-$ rvm use 1.9.3 
-$ rvm rubygems latest 
-</code></pre>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span> <span class="n">rvm</span> <span class="n">install</span> <span class="mi">1</span><span class="o">.</span><span class="mi">9</span><span class="o">.</span><span class="mi">3</span>
+</span><span class='line'><span class="err">$</span> <span class="n">rvm</span> <span class="n">use</span> <span class="mi">1</span><span class="o">.</span><span class="mi">9</span><span class="o">.</span><span class="mi">3</span>
+</span><span class='line'><span class="err">$</span> <span class="n">rvm</span> <span class="n">rubygems</span> <span class="n">latest</span>
+</span></code></pre></td></tr></table></div></figure>
+
 
 <p>get octopress from github:</p>
 
-<pre><code>$ git clone git://github.com/imathis/octopress.git octopress
-$ cd octopress    # If you use RVM, You'll be asked if you trust the .rvmrc file (say yes) 
-$ ruby --version  # Should report Ruby 1.9.3 
-</code></pre>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>git clone git://github.com/imathis/octopress.git octopress
+</span><span class='line'><span class="nv">$ </span><span class="nb">cd </span>octopress    <span class="c"># If you use RVM, You&#39;ll be asked if you trust the .rvmrc file (say yes) </span>
+</span><span class='line'><span class="nv">$ </span>ruby --version  <span class="c"># Should report Ruby 1.9.3 </span>
+</span></code></pre></td></tr></table></div></figure>
+
 
 <p>install dependencies:</p>
 
-<pre><code>$ gem install bundler 
-$ bundle install
-</code></pre>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span> <span class="n">gem</span> <span class="n">install</span> <span class="n">bundler</span>
+</span><span class='line'><span class="err">$</span> <span class="n">bundle</span> <span class="n">install</span>
+</span></code></pre></td></tr></table></div></figure>
+
 
 <p>install the default theme:</p>
 
-<pre><code>$ rake install
-</code></pre>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span> <span class="n">rake</span> <span class="n">install</span>
+</span></code></pre></td></tr></table></div></figure>
+
 
 <h3>Step3: <a href="http://octopress.org/docs/deploying/githug">deploy to github pages</a></h3>
 
-<pre><code>$ rake setup_github_pages #input your repo name as git@github.com://yourname/yourname.github.io(com).git
-</code></pre>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span> <span class="n">rake</span> <span class="n">setup_github_pages</span> <span class="c1">#input your repo name as git@github.com://yourname/yourname.github.io(com).git</span>
+</span></code></pre></td></tr></table></div></figure>
+
 
 <p>this command will do a couple things for you:</p>
 
@@ -97,13 +117,119 @@ $ bundle install
 <li>Add your Github Pages repository as the default origin remote.</li>
 <li>Switch the active branch from master to source.</li>
 <li>Configure your blog’s url according to your repository.</li>
-<li>Set up a gh-pages branch for your project in the _deploy directory, ready for deployment.</li>
+<li>Set up a master branch for your project in the _deploy directory, ready for deployment.</li>
 </ul>
 
 
-<p>two things you need to konw:</p>
+<p>Next run:</p>
 
-<p>*</p>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="vg">$rake</span> <span class="n">generate</span>
+</span><span class='line'><span class="vg">$rake</span> <span class="n">deploy</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>this will generate the content of your blog under _deploy directory and push it to master(gh-pages) branch ,
+a few minites later, you can view your blog at <strong>yourname.github.io(com)</strong></p>
+
+<h3>Step4: <a href="http://octopress.org/docs/configuring">Configure Octopress</a></h3>
+
+<p>open _config.yml, change the config as you like:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="ss">url</span><span class="p">:</span> <span class="ss">http</span><span class="p">:</span><span class="sr">//s</span><span class="n">tevevallay</span><span class="o">.</span><span class="n">github</span><span class="o">.</span><span class="n">io</span>
+</span><span class='line'><span class="ss">title</span><span class="p">:</span> <span class="no">Zhibin</span><span class="s1">&#39;s blog</span>
+</span><span class='line'><span class="s1">subtitle: alway&#39;</span><span class="n">s</span> <span class="n">smile</span> <span class="ss">:-</span><span class="p">)</span>
+</span><span class='line'><span class="ss">author</span><span class="p">:</span> <span class="n">zhibin</span>
+</span><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Step5: <a href="http://octopress.org/odcs/blogging">Blogging</a></h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span> <span class="n">rake</span> <span class="n">new_post</span><span class="o">[</span><span class="s1">&#39;blog title&#39;</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>then, it will generate a file <em>source/_post/YYYY-MM-DD-XXXX.markdown</em> , this is
+the blog source , you can edit it with <a href="http://http://daringfireball.net/projects/markdown/">markdown</a> , if you havn&rsquo;t familiar with
+<em>markdown</em> , refer <a href="http://en.wikipedia.org/wiki/Markdown">markdown wiki</a> or  <a href="http://wowubuntu.com/markdown">markdown in Chinese</a></p>
+
+<h3>Step6: Generate &amp; Preview</h3>
+
+<p>after finish one post , you can preview it:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span> <span class="n">rake</span> <span class="n">generate</span>  <span class="c1">#Generates posts and pages into the public directory</span>
+</span><span class='line'><span class="err">$</span> <span class="n">rake</span> <span class="n">watch</span>      <span class="c1"># Watches source/ and sass/ for changes and regenerates</span>
+</span><span class='line'><span class="err">$</span> <span class="n">rake</span> <span class="n">preview</span>    <span class="c1"># Watches, and mounts a webserver at http://localhost:4000</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>open browser <a href="http://localhost:4000">http://localhost:4000</a> you can see your blog.</p>
+
+<p><em>Do not</em> forget two things :</p>
+
+<ul>
+<li>Commit sources of your blog to github , from your local source branch to source branch in github.</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>git add .
+</span><span class='line'><span class="nv">$ </span>git commit -m <span class="s2">&quot;blog = github pages + octopress&quot;</span>
+</span><span class='line'><span class="nv">$ </span>git push origin <span class="nb">source</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>Deploy your blog, this will generate all files under_deploy and commit it to github master(gh-pages) branch.</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span> <span class="n">rake</span> <span class="n">deploy</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Finally , you will get a similar blog as current <a href="http://stevevallay.github.io">stevevallay.github.io</a></p>
+
+<h3><a href="http://http://octopress.org/docs/plugins/">Octopress Plugin</a></h3>
+
+<p>the first octopress plugin i recommanded is <a href="http://octopress.org/docs/plugins/backtick-codeblock/">backtick code block</a> , it can help
+add line number and syntax hightlight, octopress default installed it under plugin directory.
+Simple you can use it as following:</p>
+
+<p><strong>Syntax</strong></p>
+
+<pre><code>``` [language] [title] [url] [line text]
+    code snipt
+```
+</code></pre>
+
+<p><strong>Example</strong></p>
+
+<pre><code>``` bash
+    $ sudo make me a sandwich 
+```
+</code></pre>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>sudo make me a sandwich
+</span></code></pre></td></tr></table></div></figure>
+
+
+
 ]]></content>
   </entry>
   
