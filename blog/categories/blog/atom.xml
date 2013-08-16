@@ -4,7 +4,7 @@
   <title><![CDATA[Category: blog | Zhibin's blog]]></title>
   <link href="http://SteveVallay.github.io/blog/categories/blog/atom.xml" rel="self"/>
   <link href="http://SteveVallay.github.io/"/>
-  <updated>2013-08-16T00:28:01+08:00</updated>
+  <updated>2013-08-16T08:56:27+08:00</updated>
   <id>http://SteveVallay.github.io/</id>
   <author>
     <name><![CDATA[zhibin]]></name>
@@ -60,7 +60,7 @@ install latest ruby (1.9.3 currently):
 
 <pre><code>$ rvm install 1.9.3 
 $ rvm use 1.9.3 
-$ rvm rubygems latest 
+$ rvm rubygems latest
 </code></pre>
 
 <p><code>
@@ -68,15 +68,15 @@ get octopress from github:
 </code>bash</p>
 
 <pre><code>$ git clone git://github.com/imathis/octopress.git octopress
-$ cd octopress    # If you use RVM, You'll be asked if you trust the .rvmrc file (say yes) 
-$ ruby --version  # Should report Ruby 1.9.3 
+$ cd octopress    # If you use RVM, You'll be asked if you trust the .rvmrc file (say yes)
+$ ruby --version  # Should report Ruby 1.9.3
 </code></pre>
 
 <p><code>
 install dependencies:
 </code> ruby</p>
 
-<pre><code>$ gem install bundler 
+<pre><code>$ gem install bundler
 $ bundle install
 </code></pre>
 
@@ -113,7 +113,7 @@ this command will do a couple things for you:</p>
 ``` ruby</p>
 
 <pre><code>$rake generate
-$rake deploy 
+$rake deploy
 </code></pre>
 
 <p>```
@@ -128,7 +128,7 @@ a few minites later, you can view your blog at <strong>yourname.github.io(com)</
 <pre><code>url: http://stevevallay.github.io
 title: Zhibin's blog
 subtitle: alway's smile :-)
-author: zhibin 
+author: zhibin
 ...
 </code></pre>
 
@@ -143,9 +143,7 @@ author: zhibin
 
 <p>```</p>
 
-<p>then, it will generate a file <em>source/_post/YYYY-MM-DD-XXXX.markdown</em> , this is
-the blog source , you can edit it with <a href="http://http://daringfireball.net/projects/markdown/">markdown</a> , if you havn&rsquo;t familiar with
-<em>markdown</em> , refer <a href="http://en.wikipedia.org/wiki/Markdown">markdown wiki</a> or  <a href="http://wowubuntu.com/markdown">markdown in Chinese</a></p>
+<p>then, it will generate a file <em>source/_post/YYYY-MM-DD-XXXX.markdown</em> , this is the blog source , you can edit it with <a href="http://http://daringfireball.net/projects/markdown/">markdown</a> , if you havn&rsquo;t familiar with <em>markdown</em> , refer <a href="http://en.wikipedia.org/wiki/Markdown">markdown wiki</a> or  <a href="http://wowubuntu.com/markdown">markdown in Chinese</a></p>
 
 <h3>Step6: Generate &amp; Preview</h3>
 
@@ -200,13 +198,13 @@ Simple you can use it as following:</p>
 <p><strong>Example</strong></p>
 
 <pre><code>``` bash
-    $ sudo make me a sandwich 
+    $ sudo make me a sandwich
 ```
 </code></pre>
 
 <p>``` bash</p>
 
-<pre><code>$ sudo make me a sandwich 
+<pre><code>$ sudo make me a sandwich
 </code></pre>
 
 <p>```</p>
