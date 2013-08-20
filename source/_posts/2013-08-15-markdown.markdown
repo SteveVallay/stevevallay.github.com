@@ -3,7 +3,17 @@ layout: post
 title: "markdown usage"
 date: 2013-08-15 11:15
 comments: true
-categories: 
+categories:
+- markdown
+- octopress
 ---
 
 
+###Image Example
+
+```
+   ![Image Description](/image/path/aa.img)
+```
+it will display as following:
+
+![Example Image](/images/blog/create_a_repo.png)
