@@ -4,7 +4,7 @@
   <title><![CDATA[Zhibin's blog]]></title>
   <link href="http://SteveVallay.github.io/atom.xml" rel="self"/>
   <link href="http://SteveVallay.github.io/"/>
-  <updated>2013-08-16T09:11:44+08:00</updated>
+  <updated>2013-08-20T22:51:45+08:00</updated>
   <id>http://SteveVallay.github.io/</id>
   <author>
     <name><![CDATA[zhibin]]></name>
@@ -18,7 +18,15 @@
     <link href="http://SteveVallay.github.io/blog/2013/08/15/markdown/"/>
     <updated>2013-08-15T11:15:00+08:00</updated>
     <id>http://SteveVallay.github.io/blog/2013/08/15/markdown</id>
-    <content type="html"><![CDATA[
+    <content type="html"><![CDATA[<h3>Image Example</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>   ![Image Description](/image/path/aa.img)</span></code></pre></td></tr></table></div></figure>
+
+
+<p>it will display as following:</p>
+
+<p><img src="http://SteveVallay.github.io/images/blog/create_a_repo.png" alt="Example Image" /></p>
 ]]></content>
   </entry>
   

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: octopress | Zhibin's blog]]></title>
   <link href="http://SteveVallay.github.io/blog/categories/octopress/atom.xml" rel="self"/>
   <link href="http://SteveVallay.github.io/"/>
-  <updated>2013-08-16T09:11:44+08:00</updated>
+  <updated>2013-08-20T22:51:45+08:00</updated>
   <id>http://SteveVallay.github.io/</id>
   <author>
     <name><![CDATA[zhibin]]></name>
@@ -12,6 +12,22 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[markdown usage]]></title>
+    <link href="http://SteveVallay.github.io/blog/2013/08/15/markdown/"/>
+    <updated>2013-08-15T11:15:00+08:00</updated>
+    <id>http://SteveVallay.github.io/blog/2013/08/15/markdown</id>
+    <content type="html"><![CDATA[<h3>Image Example</h3>
+
+<p><code>
+   ![Image Description](/image/path/aa.img)
+</code>
+it will display as following:</p>
+
+<p><img src="/images/blog/create_a_repo.png" alt="Example Image" /></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[blog = octopress + github pages]]></title>
