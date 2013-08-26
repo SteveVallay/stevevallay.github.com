@@ -74,6 +74,24 @@ markdown 包含两层含义，一层是 markdown 语法；另外一层是解析 
 
 >Stay hungry, stay foolish !
 
+在块引用内部也支持 markdown 标记，多级引用： 比如：
+
+    >###Title
+    >some code
+    >
+    >    sudo make me a sandwitch
+    >>二级引用
+
+显示效果：
+
+>###Title
+>some code
+>
+>     sudo make me a sandwidth
+>>二级引用
+
+
+
 ###Image Example
 
 ```
