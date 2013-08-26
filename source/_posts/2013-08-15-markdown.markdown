@@ -75,6 +75,17 @@ markdown 包含两层含义，一层是 markdown 语法；另外一层是解析 
 ##二级标题
 ###三级标题
 
+### 块引用
+
+在每行的行首加入 `>` 可建立一个块引用
+
+如：
+
+    >Stay hungry, stay foolish !
+
+显示效果：
+
+>Stay hungry, stay foolish !
 
 ###Image Example
 
