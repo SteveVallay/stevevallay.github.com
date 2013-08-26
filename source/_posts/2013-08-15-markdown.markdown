@@ -8,6 +8,45 @@ categories:
 - octopress
 ---
 
+###什么是 markdown ?
+
+随着 [Github][3] 的流行，markdown 渐渐获得了人们的青睐，当作一种更便于读写的格式流行起来. github 默认支持 markdown格式的文件，例如这个 [README.markdown][4] 文件，在github 上展示的时候会被直接解析成漂亮的格式。
+
+随后，[github page][5] 的出现可以使你可以在 github 上搭建一个免费博客，使用 markdown 语法。
+
+再然后，出现了[jekyllrb][1] 和 [Octopress][2]  这种基于 [github page][5] 和 markdown 的 Blog 框架，使人们摆脱 wordpress 的臃肿，不必担心找不到托管服务器。使用简单的 markdown 语法即可快速的来撰写和发布博客。(当前这个 blog 正是使用 [Octopress][2] + [github page][5] 搭建的博客)
+
+简单的说，markdown 是一种轻量级的标记语言，它的目标是易读易写，使用 markdown 书写的格式可被 markdown 解析器转换成格式良好的 html/xhtml 文件。
+
+markdown 包含两层含义，一层是 markdown 语法；另外一层是解析 markdown 语法文件的软件。
+
+一些介绍 markdown 语法的资源：
+
+- [markdown 作者博客][6]
+- [中文 wiki][7]
+- [英文 wiki][8]
+- [Markdown 语法说明 (简体中文版)][9]
+
+<!-- more -->
+
+###谁使用 markdown ?
+
+列举几个著名的： 
+
+- [Github][3]
+- [Github pages][5]
+- [Github Gist][10]
+
+- [Stack Overflow][11]
+
+- [StackOverflow edit help][12]
+
+
+
+### mark down 语法简介
+
+
+
 
 ###Image Example
 
@@ -17,3 +56,17 @@ categories:
 it will display as following:
 
 ![Example Image](/images/blog/create_a_repo.png)
+
+
+[1]:http://jekyllrb.com/
+[2]:http://octopress.org/
+[3]:https://github.com
+[4]:https://github.com/SteveVallay/stevevallay.github.com/blob/source/README.markdown
+[5]:http://pages.github.com/
+[6]:http://daringfireball.net/projects/markdown/
+[7]:http://zh.wikipedia.org/wiki/Markdown
+[8]:http://en.wikipedia.org/wiki/Markdown
+[9]:http://wowubuntu.com/markdown/
+[10]:https://gist.github.com/
+[11]:http://stackoverflow.com/
+[12]:http://stackoverflow.com/editing-help
