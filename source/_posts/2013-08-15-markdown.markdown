@@ -90,6 +90,27 @@ markdown 包含两层含义，一层是 markdown 语法；另外一层是解析 
 >     sudo make me a sandwidth
 >>二级引用
 
+###强调
+markdown 使用 `*` 和 `_` 来表示强调，被一个或多个 `*` `_` 包围的字句会被显示为强调。
+
+如：
+
+    *one*
+    _one_
+    **two**
+    __two__
+    ***three***
+    ___three___
+
+显示效果：
+
+*one*
+_one_
+**two**
+__two__
+***three***
+___three___
+
 
 
 ###Image Example
