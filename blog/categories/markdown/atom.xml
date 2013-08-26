@@ -4,7 +4,7 @@
   <title><![CDATA[Category: markdown | Zhibin's blog]]></title>
   <link href="http://SteveVallay.github.io/blog/categories/markdown/atom.xml" rel="self"/>
   <link href="http://SteveVallay.github.io/"/>
-  <updated>2013-08-26T13:27:44+08:00</updated>
+  <updated>2013-08-26T14:53:11+08:00</updated>
   <id>http://SteveVallay.github.io/</id>
   <author>
     <name><![CDATA[zhibin]]></name>
@@ -56,7 +56,41 @@
 </ul>
 
 
-<h3>mark down 语法简介</h3>
+<h3>mark down 语法 Example</h3>
+
+<h4>标题</h4>
+
+<p>使用任意数量的 <code>===</code>  表示一级标题，<code>----</code> 表示二级标题。</p>
+
+<p>如：</p>
+
+<pre><code>一级标题
+===========
+
+二级标题
+--------
+</code></pre>
+
+<p>显示效果：</p>
+
+<h1>一级标题</h1>
+
+<h2>二级标题</h2>
+
+<p>也可以采用在行首插入 <code>#</code> 的格式，行首插入 1-6 个 <code>#</code> ，对应1级到6级标题</p>
+
+<pre><code>#一级标题
+##二级标题
+###三级标题
+</code></pre>
+
+<p>显示效果：</p>
+
+<h1>一级标题</h1>
+
+<h2>二级标题</h2>
+
+<h3>三级标题</h3>
 
 <h3>Image Example</h3>
 
