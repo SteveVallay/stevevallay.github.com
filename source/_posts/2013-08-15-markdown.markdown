@@ -14,7 +14,7 @@ categories:
 
 随后，[github page][5] 的出现可以使你可以在 github 上搭建一个免费博客，使用 markdown 语法。
 
-再然后，出现了[jekyllrb][1] 和 [Octopress][2]  这种基于 [github page][5] 和 markdown 的 Blog 框架，使人们摆脱 wordpress 的臃肿，不必担心找不到托管服务器。使用简单的 markdown 语法即可快速的来撰写和发布博客。(当前这个 blog 正是使用 [Octopress][2] + [github page][5] 搭建的博客)
+再然后，出现了[jekyllrb][1] 和 [Octopress][2]  这种基于 [github page][5] 和 markdown 的 Blog 框架，使人们摆脱 wordpress 的臃肿，不必担心找不到托管服务器,使用简单的 markdown 语法即可快速撰写和发布博客。(当前这个 blog 正是使用 [Octopress][2] + [github page][5] 搭建的博客)
 
 简单的说，markdown 是一种轻量级的标记语言，它的目标是易读易写，使用 markdown 书写的格式可被 markdown 解析器转换成格式良好的 html/xhtml 文件。
 
@@ -36,9 +36,7 @@ markdown 包含两层含义，一层是 markdown 语法；另外一层是解析 
 - [Github][3]
 - [Github pages][5]
 - [Github Gist][10]
-
 - [Stack Overflow][11]
-
 - [StackOverflow edit help][12]
 
 
