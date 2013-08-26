@@ -4,7 +4,7 @@
   <title><![CDATA[Category: markdown | Zhibin's blog]]></title>
   <link href="http://SteveVallay.github.io/blog/categories/markdown/atom.xml" rel="self"/>
   <link href="http://SteveVallay.github.io/"/>
-  <updated>2013-08-26T17:34:27+08:00</updated>
+  <updated>2013-08-26T17:43:25+08:00</updated>
   <id>http://SteveVallay.github.io/</id>
   <author>
     <name><![CDATA[zhibin]]></name>
@@ -234,14 +234,27 @@ eat it
 
 <p>```</p>
 
-<h3>Image Example</h3>
+<h3>图片</h3>
+
+<p>markdown 使用和链接类似的语法来插入图片，同样也有两种样式：<strong>行内</strong>和<strong>参考</strong>。</p>
+
+<p><strong>行内</strong>引用:</p>
 
 <p><code>
    ![Image Description](/image/path/aa.img)
 </code>
-it will display as following:</p>
+显示效果：</p>
 
 <p><img src="/images/blog/create_a_repo.png" alt="Example Image" /></p>
+
+<p><strong>参考</strong>引用:</p>
+
+<p><code>
+![示例图片][101]
+</code>
+显示效果：</p>
+
+<p><img src="/images/blog/create_a_repo.png" alt="示例图片" /></p>
 ]]></content>
   </entry>
   
