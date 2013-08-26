@@ -4,7 +4,7 @@
   <title><![CDATA[Category: octopress | Zhibin's blog]]></title>
   <link href="http://SteveVallay.github.io/blog/categories/octopress/atom.xml" rel="self"/>
   <link href="http://SteveVallay.github.io/"/>
-  <updated>2013-08-26T15:41:32+08:00</updated>
+  <updated>2013-08-26T16:02:58+08:00</updated>
   <id>http://SteveVallay.github.io/</id>
   <author>
     <name><![CDATA[zhibin]]></name>
@@ -110,6 +110,29 @@
 </code></pre>
 
 <blockquote><p>二级引用</p></blockquote></blockquote>
+
+<h3>强调</h3>
+
+<p>markdown 使用 <code>*</code> 和 <code>_</code> 来表示强调，被一个或多个 <code>*</code> <code>_</code> 包围的字句会被显示为强调。</p>
+
+<p>如：</p>
+
+<pre><code>*one*
+_one_
+**two**
+__two__
+***three***
+___three___
+</code></pre>
+
+<p>显示效果：</p>
+
+<p><em>one</em>
+<em>one</em>
+<strong>two</strong>
+<strong>two</strong>
+<strong><em>three</em></strong>
+<strong><em>three</em></strong></p>
 
 <h3>Image Example</h3>
 
