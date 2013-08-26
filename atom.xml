@@ -4,7 +4,7 @@
   <title><![CDATA[Zhibin's blog]]></title>
   <link href="http://SteveVallay.github.io/atom.xml" rel="self"/>
   <link href="http://SteveVallay.github.io/"/>
-  <updated>2013-08-20T22:51:45+08:00</updated>
+  <updated>2013-08-26T12:44:57+08:00</updated>
   <id>http://SteveVallay.github.io/</id>
   <author>
     <name><![CDATA[zhibin]]></name>
@@ -18,7 +18,36 @@
     <link href="http://SteveVallay.github.io/blog/2013/08/15/markdown/"/>
     <updated>2013-08-15T11:15:00+08:00</updated>
     <id>http://SteveVallay.github.io/blog/2013/08/15/markdown</id>
-    <content type="html"><![CDATA[<h3>Image Example</h3>
+    <content type="html"><![CDATA[<h3>什么是 markdown ?</h3>
+
+<p>随着 <a href="https://github.com">Github</a> 的流行，markdown 渐渐获得了人们的青睐，当作一种更便于读写的格式流行起来. github 默认支持 markdown格式的文件，例如这个 <a href="https://github.com/SteveVallay/stevevallay.github.com/blob/source/README.markdown">README.markdown</a> 文件，在github 上展示的时候会被直接解析成漂亮的格式。</p>
+
+<p>随后，<a href="http://pages.github.com/">github page</a> 的出现可以使你可以在 github 上搭建一个免费博客，使用 markdown 语法。</p>
+
+<p>再然后，出现了<a href="http://jekyllrb.com/">jekyllrb</a> 和 <a href="http://octopress.org/">Octopress</a>  这种基于 <a href="http://pages.github.com/">github page</a> 和 markdown 的 Blog 框架，使人们摆脱 wordpress 的臃肿，不必担心找不到托管服务器。使用简单的 markdown 语法即可快速的来撰写和发布博客。(当前这个 blog 正是使用 <a href="http://octopress.org/">Octopress</a> + <a href="http://pages.github.com/">github page</a> 搭建的博客)</p>
+
+<p>简单的说，markdown 是一种轻量级的标记语言，它的目标是易读易写，使用 markdown 书写的格式可被 markdown 解析器转换成格式良好的 html/xhtml 文件。</p>
+
+<p>markdown 包含两层含义，一层是 markdown 语法；另外一层是解析 markdown 语法文件的软件。</p>
+
+<p>一些介绍 markdown 语法的资源：</p>
+
+<ul>
+<li><a href="http://daringfireball.net/projects/markdown/">markdown 作者博客</a></li>
+<li><a href="http://zh.wikipedia.org/wiki/Markdown">中文 wiki</a></li>
+<li><a href="http://en.wikipedia.org/wiki/Markdown">英文 wiki</a></li>
+<li><a href="http://wowubuntu.com/markdown/">Markdown 语法说明 (简体中文版)</a></li>
+</ul>
+
+
+<!-- more -->
+
+
+<blockquote><h3>谁使用 markdown ?</h3></blockquote>
+
+<h3>mark down 语法简介</h3>
+
+<h3>Image Example</h3>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 </pre></td><td class='code'><pre><code class=''><span class='line'>   ![Image Description](/image/path/aa.img)</span></code></pre></td></tr></table></div></figure>
