@@ -193,15 +193,29 @@ get help from `man bash`
     eat it
 ```
 
+###图片
 
-###Image Example
+markdown 使用和链接类似的语法来插入图片，同样也有两种样式：__行内__和__参考__。
+
+__行内__引用:
 
 ```
    ![Image Description](/image/path/aa.img)
 ```
-it will display as following:
+显示效果：
 
 ![Example Image](/images/blog/create_a_repo.png)
+
+__参考__引用:
+
+```
+![示例图片][101]
+[101]:/images/blog/create_a_repo.png
+```
+显示效果：
+
+![示例图片][101]
+[101]:/images/blog/create_a_repo.png
 
 
 [1]:http://jekyllrb.com/
