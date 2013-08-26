@@ -4,7 +4,7 @@
   <title><![CDATA[Zhibin's blog]]></title>
   <link href="http://SteveVallay.github.io/atom.xml" rel="self"/>
   <link href="http://SteveVallay.github.io/"/>
-  <updated>2013-08-26T14:53:11+08:00</updated>
+  <updated>2013-08-26T15:19:45+08:00</updated>
   <id>http://SteveVallay.github.io/</id>
   <author>
     <name><![CDATA[zhibin]]></name>
@@ -91,6 +91,19 @@
 <h2>二级标题</h2>
 
 <h3>三级标题</h3>
+
+<h3>块引用</h3>
+
+<p>在每行的行首加入 <code>&gt;</code> 可建立一个块引用</p>
+
+<p>如：</p>
+
+<pre><code>&gt;Stay hungry, stay foolish !
+</code></pre>
+
+<p>显示效果：</p>
+
+<blockquote><p>Stay hungry, stay foolish !</p></blockquote>
 
 <h3>Image Example</h3>
 
