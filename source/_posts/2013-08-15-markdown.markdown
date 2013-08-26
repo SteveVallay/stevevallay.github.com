@@ -129,7 +129,7 @@ markdown 支持无序列表和有序列表。
 * ul 2
 * ul 3
 
-有序列表使用数字和一个英文句点 `.`。
+有序列表使用数字和一个英文句点 `.` 加一个空格。
 
 如：
 
@@ -142,6 +142,29 @@ markdown 支持无序列表和有序列表。
 2. ol 2
 3. ol 3
 
+###链接
+
+markdown 支持两种链接：**行内**和__参考__两种形式。
+
+__行内__链接的写法：将链接文字用 `[]` 括起来，链接地址用 `()` 括起来。
+
+如：
+
+    [My Blog](http://stevevallay.github.io)
+显示效果:
+
+[My Blog](http://stevevallay.github.io)
+
+__参考__链接与**行内**链接不同，参考链接将链接地址放在另外的地方（一般集中放在页面下方),用数字来引用：
+
+如：
+
+    [My Blog][100]
+    [100]:http://stevevallay.github.io
+显示效果：
+
+[My Blog][100]
+[100]:http://stevevallay.github.io
 
 ###Image Example
 
