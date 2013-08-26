@@ -166,6 +166,34 @@ __参考__链接与**行内**链接不同，参考链接将链接地址放在另
 [My Blog][100]
 [100]:http://stevevallay.github.io
 
+###引用代码
+
+在句子中，可以使用反引号(`` ` ``）标记一小段代码。
+
+如：
+
+    get bash help from `man bash`
+
+显示效果：
+
+get help from `man bash`
+
+插入一段多行程序代码，使用多个反引号开头和结尾。
+
+如：
+
+    ```
+    sudo make me a sandwich
+    eat it
+    ```
+显示效果：(这里的显示效果可能有些不同，因为这里使用了 Octopress 的 [Backtick Code Block ][13] 插件
+
+```
+    sudo make me a sandwich
+    eat it
+```
+
+
 ###Image Example
 
 ```
@@ -188,3 +216,4 @@ it will display as following:
 [10]:https://gist.github.com/
 [11]:http://stackoverflow.com/
 [12]:http://stackoverflow.com/editing-help
+[13]:http://octopress.org/docs/plugins/backtick-codeblock/
