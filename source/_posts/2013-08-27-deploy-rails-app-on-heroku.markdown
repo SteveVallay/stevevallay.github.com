@@ -12,7 +12,7 @@ categories:
 
 ##什么是 Heroku ?
 
-
+<!-- more -->
 ##Step 1：创建账户
 
 ##Step 2： 安装 Heroku Toolbelt
