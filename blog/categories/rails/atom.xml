@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Rails | Zhibin's blog]]></title>
+  <link href="http://SteveVallay.github.io/blog/categories/rails/atom.xml" rel="self"/>
+  <link href="http://SteveVallay.github.io/"/>
+  <updated>2013-08-27T17:38:20+08:00</updated>
+  <id>http://SteveVallay.github.io/</id>
+  <author>
+    <name><![CDATA[zhibin]]></name>
+    <email><![CDATA[zhibinwang.q@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[部署 Rails 程序到 Heroku]]></title>
+    <link href="http://SteveVallay.github.io/blog/2013/08/27/deploy-rails-app-on-heroku/"/>
+    <updated>2013-08-27T17:26:00+08:00</updated>
+    <id>http://SteveVallay.github.io/blog/2013/08/27/deploy-rails-app-on-heroku</id>
+    <content type="html"><![CDATA[<h2>什么是 Heroku ?</h2>
+
+<h2>Step 1：创建账户</h2>
+
+<h2>Step 2： 安装 Heroku Toolbelt</h2>
+
+<h2>Step 3: 登录</h2>
+
+<h2>Step 4: 准备好自己的程序</h2>
+
+<h2>Step 5： 部署程序到 Heroku</h2>
+]]></content>
+  </entry>
+  
+</feed>

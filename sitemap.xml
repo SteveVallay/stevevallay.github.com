@@ -11,8 +11,12 @@
         <lastmod>2013-08-26T17:57:49+08:00</lastmod>
     </url>
     <url>
+        <loc>http://SteveVallay.github.io/blog/2013/08/27/deploy-rails-app-on-heroku/</loc>
+        <lastmod>2013-08-27T17:37:44+08:00</lastmod>
+    </url>
+    <url>
         <loc>http://SteveVallay.github.io/</loc>
-        <lastmod>2013-08-26T17:57:49+08:00</lastmod>
+        <lastmod>2013-08-27T17:37:44+08:00</lastmod>
     </url>
     <url>
         <loc>http://SteveVallay.github.io/robots.txt</loc>
@@ -20,6 +24,6 @@
     </url>
     <url>
         <loc>http://SteveVallay.github.io/blog/archives/</loc>
-        <lastmod>2013-08-26T17:57:49+08:00</lastmod>
+        <lastmod>2013-08-27T17:37:44+08:00</lastmod>
     </url>
 </urlset>
