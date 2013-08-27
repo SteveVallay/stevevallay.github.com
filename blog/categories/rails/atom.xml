@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Rails | Zhibin's blog]]></title>
   <link href="http://SteveVallay.github.io/blog/categories/rails/atom.xml" rel="self"/>
   <link href="http://SteveVallay.github.io/"/>
-  <updated>2013-08-27T17:38:20+08:00</updated>
+  <updated>2013-08-27T18:31:16+08:00</updated>
   <id>http://SteveVallay.github.io/</id>
   <author>
     <name><![CDATA[zhibin]]></name>
@@ -19,6 +19,19 @@
     <updated>2013-08-27T17:26:00+08:00</updated>
     <id>http://SteveVallay.github.io/blog/2013/08/27/deploy-rails-app-on-heroku</id>
     <content type="html"><![CDATA[<h2>什么是 Heroku ?</h2>
+
+<p><a href="https://www.heroku.com/">Heroku</a> 是一个 <a href="http://en.wikipedia.org/wiki/Platform_as_a_service">Saas</a> (云应用平台)，用户可以将自己的 web 程序部署到 <a href="https://www.heroku.com/">Heroku</a> 云主机上。使用简单的命令就可以部署你的程序到 <a href="https://www.heroku.com/">Heroku</a>。 <a href="https://www.heroku.com/">Heroku</a> 使用 <a href="http://git-scm.com/">Git</a> 作为版本控制工具。<a href="https://www.heroku.com/">Heroku</a> 目前支持 <a href="http://www.ruby-lang.org/en/">Ruby</a>， <a href="http://nodejs.org/">Node.js</a>，<a href="http://clojure.org/">Clojure</a>，Java，<a href="http://www.python.org/">Python</a>，<a href="http://www.scala-lang.org/">Scala</a>。默认数据库是 <a href="http://www.postgresql.org/">PostgreSQL</a>。</p>
+
+<blockquote><p>Build. Deploy. Scale. Heroku brings them together
+in an experience built and designed for developers.
+– Larry Marburger, CloudApp</p></blockquote>
+
+<p>想要部署你的程序到 <a href="https://www.heroku.com/">Heroku</a>？</p>
+
+<p>Let&rsquo;s Go !</p>
+
+<!-- more -->
+
 
 <h2>Step 1：创建账户</h2>
 
