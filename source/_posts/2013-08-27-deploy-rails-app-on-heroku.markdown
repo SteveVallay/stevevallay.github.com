@@ -54,7 +54,7 @@ Let's Go !
 ##Step 3: 登录
 安装好之后，就可用命令行登录 heroku:
 
-```
+``` bash
 $ heroku login
 Enter your Heroku credentials.
 Email: adam@example.com
@@ -90,9 +90,9 @@ end
 
 确保你的 app 已经纳入 Git 版本控制之中，如果没有请执行:
 
-``` git
+``` bash
 git init
-git add .
+git add -A
 git commit -m "initial commit"
 ```
 
@@ -100,7 +100,38 @@ git commit -m "initial commit"
 
 下面该上传你的 app 到 Heroku 了:
 
+创建 Heroku App:
 
+``` bash
+$ heroku create
+Creating stark-fog-398... done, stack is cedar
+http://stark-fog-398.herokuapp.com/ | git@heroku.com:stark-fog-398.git
+Git remote heroku added
+
+-----> Heroku receiving push
+-----> Rails app detected
+-----> Installing dependencies using Bundler version 1.1
+       Checking for unresolved dependencies.
+       Unresolved dependencies detected.
+       Running: bundle install --without development:test --path vendor/bundle --deployment
+       Fetching source index for https://rubygems.org/
+       Installing rake (0.8.7)
+       ...
+       Installing rails (3.0.5)
+       Your bundle is complete! It was installed into ./vendor/bundle
+-----> Rails plugin injection
+       Injecting rails_log_stdout
+       Injecting rails3_serve_static_assets
+-----> Discovering process types
+       Procfile declares types -> (none)
+       Default types for Rails -> console, rake, web, worker
+-----> Compiled slug size is 8.3MB
+-----> Launching... done, v5
+       http://severe-mountain-793.herokuapp.com deployed to Heroku
+
+To git@heroku.com:severe-mountain-793.git
+ * [new branch]      master -> master
+```
 
 
 [1]:https://www.heroku.com/
