@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby | Zhibin's blog]]></title>
   <link href="http://SteveVallay.github.io/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="http://SteveVallay.github.io/"/>
-  <updated>2013-08-28T13:14:09+08:00</updated>
+  <updated>2013-08-28T13:31:06+08:00</updated>
   <id>http://SteveVallay.github.io/</id>
   <author>
     <name><![CDATA[zhibin]]></name>
@@ -119,6 +119,50 @@ git commit -m "initial commit"
 <h2>Step 5： 部署程序到 Heroku</h2>
 
 <p>下面该上传你的 app 到 Heroku 了:</p>
+
+<p>创建 Heroku App:</p>
+
+<p><code>
+$ heroku create
+Creating stark-fog-398... done, stack is cedar
+http://stark-fog-398.herokuapp.com/ | git@heroku.com:stark-fog-398.git
+Git remote heroku added
+</code></p>
+
+<p><code>push</code> 到 Heroku :</p>
+
+<pre><code>$ git push heroku master
+Counting objects: 67, done.
+Delta compression using up to 4 threads.
+Compressing objects: 100% (52/52), done.
+Writing objects: 100% (67/67), 86.33 KiB, done.
+Total 67 (delta 5), reused 0 (delta 0)
+
+-----&gt; Heroku receiving push
+-----&gt; Rails app detected
+-----&gt; Installing dependencies using Bundler version 1.1
+   Checking for unresolved dependencies.
+   Unresolved dependencies detected.
+   Running: bundle install --without development:test --path vendor/bundle --deployment
+   Fetching source index for https://rubygems.org/
+   Installing rake (0.8.7)
+   ...
+   Installing rails (3.0.5)
+   Your bundle is complete! It was installed into ./vendor/bundle
+-----&gt; Rails plugin injection
+   Injecting rails_log_stdout
+   Injecting rails3_serve_static_assets
+-----&gt; Discovering process types
+   Procfile declares types -&gt; (none)
+   Default types for Rails -&gt; console, rake, web, worker
+-----&gt; Compiled slug size is 8.3MB
+-----&gt; Launching... done, v5
+http://severe-mountain-793.herokuapp.com deployed to Heroku
+To git@heroku.com:severe-mountain-793.git
+ * [new branch]      master -&gt; master
+</code></pre>
+
+<p>```</p>
 ]]></content>
   </entry>
   
