@@ -144,6 +144,14 @@ To git@heroku.com:severe-mountain-793.git
  * [new branch]      master -> master
 ```
 
+如果这一步时间很长，或者返回 `Timeout` , 而且你在 China ，那可能遇到 [这个问题][13] 了。
+
+`Note:`
+不要使用 `rails new yourapp` 新建一个 app 来测试 Heroku, 至少你也得建个 `welcome#index`
+来测试吧。
+
+[这里][14] 是我用来测试的 rails app.
+
 
 
 [1]:https://www.heroku.com/
@@ -158,3 +166,5 @@ To git@heroku.com:severe-mountain-793.git
 [10]:https://api.heroku.com/signup/devcenter "创建 Heroku 账户"
 [11]:https://toolbelt.heroku.com/debian "install heroku toolbet linux"
 [12]:https://toolbelt.heroku.com/install-ubuntu.sh "https://toolbelt.heroku.com/install-ubuntu.sh"
+[13]:http://ruby-china.org/topics/10813
+[14]:http://enjoyhacking.heroku.com
