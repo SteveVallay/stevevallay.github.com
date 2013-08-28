@@ -65,11 +65,42 @@ Generating new SSH public key.
 Uploading ssh public key /Users/adam/.ssh/id_rsa.pub
 ```
 
-
 ## Step 4: 准备好自己的程序
 
+一切就绪，你需要准备好自己的程序。
+
+由于 Heroku上 使用的是 PostgreSQL ， 所以我们需要修改下Gemfile。
+
+将:
+
+``` ruby
+gem 'sqlite3'
+```
+
+修改为:
+
+``` ruby
+group :development do
+  gem 'sqlite3'
+end
+group :production do
+  gem 'pg'
+end
+```
+
+确保你的 app 已经纳入 Git 版本控制之中，如果没有请执行:
+
+``` git
+git init
+git add .
+git commit -m "initial commit"
+```
 
 ## Step 5： 部署程序到 Heroku
+
+下面该上传你的 app 到 Heroku 了:
+
+
 
 
 [1]:https://www.heroku.com/
