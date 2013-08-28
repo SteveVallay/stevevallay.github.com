@@ -141,7 +141,7 @@ in an experience built and designed for developers.
 
 <p>安装好之后，就可用命令行登录 heroku:</p>
 
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
@@ -149,14 +149,15 @@ in an experience built and designed for developers.
 <span class='line-number'>6</span>
 <span class='line-number'>7</span>
 <span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ heroku login
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>heroku login
 </span><span class='line'>Enter your Heroku credentials.
 </span><span class='line'>Email: adam@example.com
 </span><span class='line'>Password:
 </span><span class='line'>Could not find an existing public key.
-</span><span class='line'>Would you like to generate one? [Yn]
+</span><span class='line'>Would you like to generate one? <span class="o">[</span>Yn<span class="o">]</span>
 </span><span class='line'>Generating new SSH public key.
-</span><span class='line'>Uploading ssh public key /Users/adam/.ssh/id_rsa.pub</span></code></pre></td></tr></table></div></figure>
+</span><span class='line'>Uploading ssh public key /Users/adam/.ssh/id_rsa.pub
+</span></code></pre></td></tr></table></div></figure>
 
 
 <h2>Step 4: 准备好自己的程序</h2>
@@ -210,6 +211,19 @@ in an experience built and designed for developers.
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>heroku create
+</span><span class='line'>Creating stark-fog-398... <span class="k">done</span>, stack is cedar
+</span><span class='line'>http://stark-fog-398.herokuapp.com/ | git@heroku.com:stark-fog-398.git
+</span><span class='line'>Git remote heroku added
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
 <span class='line-number'>5</span>
 <span class='line-number'>6</span>
 <span class='line-number'>7</span>
@@ -234,10 +248,14 @@ in an experience built and designed for developers.
 <span class='line-number'>26</span>
 <span class='line-number'>27</span>
 <span class='line-number'>28</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>heroku create
-</span><span class='line'>Creating stark-fog-398... <span class="k">done</span>, stack is cedar
-</span><span class='line'>http://stark-fog-398.herokuapp.com/ | git@heroku.com:stark-fog-398.git
-</span><span class='line'>Git remote heroku added
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>git push heroku master
+</span><span class='line'>Counting objects: 67, <span class="k">done</span>.
+</span><span class='line'>Delta compression using up to 4 threads.
+</span><span class='line'>Compressing objects: 100% <span class="o">(</span>52/52<span class="o">)</span>, <span class="k">done</span>.
+</span><span class='line'>Writing objects: 100% <span class="o">(</span>67/67<span class="o">)</span>, 86.33 KiB, <span class="k">done</span>.
+</span><span class='line'>Total 67 <span class="o">(</span>delta 5<span class="o">)</span>, reused 0 <span class="o">(</span>delta 0<span class="o">)</span>
 </span><span class='line'>
 </span><span class='line'>-----&gt; Heroku receiving push
 </span><span class='line'>-----&gt; Rails app detected
