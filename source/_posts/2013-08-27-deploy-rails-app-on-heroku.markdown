@@ -26,10 +26,31 @@ Let's Go !
 
 ##Step 1：创建账户
 
+你需要先创建一个 Heroku的账户，如果你已经有了，直接看 Step 2.
+
+[点此创建 Heroku 账户][10]
 
 ##Step 2： 安装 Heroku Toolbelt
 
+`Linux` 用户请查看 [安装 Heroku toolbelt][11] , 或直接执行下面命令：
 
+```
+    wget -qO- https://toolbelt.heroku.com/install-ubuntu.sh | sh
+```
+
+我在执行的时候发现非常的慢，就在浏览器打开了上面这个[URL][12] 然后，保存下来，手动执行了一下。
+
+我还修改了一行,
+将:
+
+```
+    apt-get install -y heroku-toolbelt
+```
+改为:
+
+```
+    apt-get install -y --force-yes heroku-toolbelt
+```
 ##Step 3: 登录
 
 
@@ -48,3 +69,6 @@ Let's Go !
 [7]:http://www.python.org/
 [8]:http://www.scala-lang.org/
 [9]:http://www.postgresql.org/
+[10]:https://api.heroku.com/signup/devcenter "创建 Heroku 账户"
+[11]:https://toolbelt.heroku.com/debian "install heroku toolbet linux"
+[12]:https://toolbelt.heroku.com/install-ubuntu.sh "https://toolbelt.heroku.com/install-ubuntu.sh"
