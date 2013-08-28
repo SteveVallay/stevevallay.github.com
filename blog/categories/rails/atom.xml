@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Rails | Zhibin's blog]]></title>
   <link href="http://SteveVallay.github.io/blog/categories/rails/atom.xml" rel="self"/>
   <link href="http://SteveVallay.github.io/"/>
-  <updated>2013-08-28T13:44:29+08:00</updated>
+  <updated>2013-08-28T13:52:45+08:00</updated>
   <id>http://SteveVallay.github.io/</id>
   <author>
     <name><![CDATA[zhibin]]></name>
@@ -110,7 +110,7 @@ end
 
 <p>确保你的 app 已经纳入 Git 版本控制之中，如果没有请执行:</p>
 
-<p><code>git
+<p><code>bash
 git init
 git add -A
 git commit -m "initial commit"
@@ -121,6 +121,48 @@ git commit -m "initial commit"
 <p>下面该上传你的 app 到 Heroku 了:</p>
 
 <p>创建 Heroku App:</p>
+
+<p>``` bash
+$ heroku create
+Creating stark-fog-398&hellip; done, stack is cedar
+<a href="http://stark-fog-398.herokuapp.com/">http://stark-fog-398.herokuapp.com/</a> | git@heroku.com:stark-fog-398.git
+Git remote heroku added</p>
+
+<p>&mdash;&mdash;&ndash;> Heroku receiving push
+&mdash;&mdash;&ndash;> Rails app detected
+&mdash;&mdash;&ndash;> Installing dependencies using Bundler version 1.1</p>
+
+<pre><code>   Checking for unresolved dependencies.
+   Unresolved dependencies detected.
+   Running: bundle install --without development:test --path vendor/bundle --deployment
+   Fetching source index for https://rubygems.org/
+   Installing rake (0.8.7)
+   ...
+   Installing rails (3.0.5)
+   Your bundle is complete! It was installed into ./vendor/bundle
+</code></pre>
+
+<p>&mdash;&mdash;&ndash;> Rails plugin injection</p>
+
+<pre><code>   Injecting rails_log_stdout
+   Injecting rails3_serve_static_assets
+</code></pre>
+
+<p>&mdash;&mdash;&ndash;> Discovering process types</p>
+
+<pre><code>   Procfile declares types -&gt; (none)
+   Default types for Rails -&gt; console, rake, web, worker
+</code></pre>
+
+<p>&mdash;&mdash;&ndash;> Compiled slug size is 8.3MB
+&mdash;&mdash;&ndash;> Launching&hellip; done, v5</p>
+
+<pre><code>   http://severe-mountain-793.herokuapp.com deployed to Heroku
+</code></pre>
+
+<p>To git@heroku.com:severe-mountain-793.git
+ * [new branch]      master &ndash;> master
+```</p>
 ]]></content>
   </entry>
   

@@ -167,39 +167,105 @@ in an experience built and designed for developers.
 
 <p>将:</p>
 
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>gem 'sqlite3'</span></code></pre></td></tr></table></div></figure>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s1">&#39;sqlite3&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
 <p>修改为:</p>
 
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
 <span class='line-number'>5</span>
 <span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>group :development do
-</span><span class='line'>  gem 'sqlite3'
-</span><span class='line'>end
-</span><span class='line'>group :production do
-</span><span class='line'>  gem 'pg'
-</span><span class='line'>end</span></code></pre></td></tr></table></div></figure>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">group</span> <span class="ss">:development</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">gem</span> <span class="s1">&#39;sqlite3&#39;</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'><span class="n">group</span> <span class="ss">:production</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">gem</span> <span class="s1">&#39;pg&#39;</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
 <p>确保你的 app 已经纳入 Git 版本控制之中，如果没有请执行:</p>
 
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>git init
-</span><span class='line'>git add .
-</span><span class='line'>git commit -m "initial commit"</span></code></pre></td></tr></table></div></figure>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>git init
+</span><span class='line'>git add -A
+</span><span class='line'>git commit -m <span class="s2">&quot;initial commit&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
 <h2>Step 5： 部署程序到 Heroku</h2>
 
 <p>下面该上传你的 app 到 Heroku 了:</p>
+
+<p>创建 Heroku App:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>heroku create
+</span><span class='line'>Creating stark-fog-398... <span class="k">done</span>, stack is cedar
+</span><span class='line'>http://stark-fog-398.herokuapp.com/ | git@heroku.com:stark-fog-398.git
+</span><span class='line'>Git remote heroku added
+</span><span class='line'>
+</span><span class='line'>-----&gt; Heroku receiving push
+</span><span class='line'>-----&gt; Rails app detected
+</span><span class='line'>-----&gt; Installing dependencies using Bundler version 1.1
+</span><span class='line'>       Checking <span class="k">for </span>unresolved dependencies.
+</span><span class='line'>       Unresolved dependencies detected.
+</span><span class='line'>       Running: bundle install --without development:test --path vendor/bundle --deployment
+</span><span class='line'>       Fetching <span class="nb">source </span>index <span class="k">for </span>https://rubygems.org/
+</span><span class='line'>       Installing rake <span class="o">(</span>0.8.7<span class="o">)</span>
+</span><span class='line'>       ...
+</span><span class='line'>       Installing rails <span class="o">(</span>3.0.5<span class="o">)</span>
+</span><span class='line'>       Your bundle is <span class="nb">complete</span>! It was installed into ./vendor/bundle
+</span><span class='line'>-----&gt; Rails plugin injection
+</span><span class='line'>       Injecting rails_log_stdout
+</span><span class='line'>       Injecting rails3_serve_static_assets
+</span><span class='line'>-----&gt; Discovering process types
+</span><span class='line'>       Procfile declares types -&gt; <span class="o">(</span>none<span class="o">)</span>
+</span><span class='line'>       Default types <span class="k">for </span>Rails -&gt; console, rake, web, worker
+</span><span class='line'>-----&gt; Compiled slug size is 8.3MB
+</span><span class='line'>-----&gt; Launching... <span class="k">done</span>, v5
+</span><span class='line'>       http://severe-mountain-793.herokuapp.com deployed to Heroku
+</span><span class='line'>
+</span><span class='line'>To git@heroku.com:severe-mountain-793.git
+</span><span class='line'> * <span class="o">[</span>new branch<span class="o">]</span>      master -&gt; master
+</span></code></pre></td></tr></table></div></figure>
+
+
+
 </div>
 
 
