@@ -52,6 +52,18 @@ Let's Go !
     apt-get install -y --force-yes heroku-toolbelt
 ```
 ##Step 3: 登录
+安装好之后，就可用命令行登录 heroku:
+
+```
+$ heroku login
+Enter your Heroku credentials.
+Email: adam@example.com
+Password:
+Could not find an existing public key.
+Would you like to generate one? [Yn]
+Generating new SSH public key.
+Uploading ssh public key /Users/adam/.ssh/id_rsa.pub
+```
 
 
 ## Step 4: 准备好自己的程序
