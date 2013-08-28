@@ -4,7 +4,7 @@
   <title><![CDATA[Zhibin's blog]]></title>
   <link href="http://SteveVallay.github.io/atom.xml" rel="self"/>
   <link href="http://SteveVallay.github.io/"/>
-  <updated>2013-08-28T12:55:31+08:00</updated>
+  <updated>2013-08-28T13:12:28+08:00</updated>
   <id>http://SteveVallay.github.io/</id>
   <author>
     <name><![CDATA[zhibin]]></name>
@@ -64,9 +64,67 @@ in an experience built and designed for developers.
 
 <h2>Step 3: 登录</h2>
 
+<p>安装好之后，就可用命令行登录 heroku:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ heroku login
+</span><span class='line'>Enter your Heroku credentials.
+</span><span class='line'>Email: adam@example.com
+</span><span class='line'>Password:
+</span><span class='line'>Could not find an existing public key.
+</span><span class='line'>Would you like to generate one? [Yn]
+</span><span class='line'>Generating new SSH public key.
+</span><span class='line'>Uploading ssh public key /Users/adam/.ssh/id_rsa.pub</span></code></pre></td></tr></table></div></figure>
+
+
 <h2>Step 4: 准备好自己的程序</h2>
 
+<p>一切就绪，你需要准备好自己的程序。</p>
+
+<p>由于 Heroku上 使用的是 PostgreSQL ， 所以我们需要修改下Gemfile。</p>
+
+<p>将:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>gem 'sqlite3'</span></code></pre></td></tr></table></div></figure>
+
+
+<p>修改为:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>group :development do
+</span><span class='line'>  gem 'sqlite3'
+</span><span class='line'>end
+</span><span class='line'>group :production do
+</span><span class='line'>  gem 'pg'
+</span><span class='line'>end</span></code></pre></td></tr></table></div></figure>
+
+
+<p>确保你的 app 已经纳入 Git 版本控制之中，如果没有请执行:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>git init
+</span><span class='line'>git add .
+</span><span class='line'>git commit -m "initial commit"</span></code></pre></td></tr></table></div></figure>
+
+
 <h2>Step 5： 部署程序到 Heroku</h2>
+
+<p>下面该上传你的 app 到 Heroku 了:</p>
 ]]></content>
   </entry>
   

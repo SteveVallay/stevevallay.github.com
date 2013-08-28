@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Heroku | Zhibin's blog]]></title>
   <link href="http://SteveVallay.github.io/blog/categories/heroku/atom.xml" rel="self"/>
   <link href="http://SteveVallay.github.io/"/>
-  <updated>2013-08-28T12:55:31+08:00</updated>
+  <updated>2013-08-28T13:14:09+08:00</updated>
   <id>http://SteveVallay.github.io/</id>
   <author>
     <name><![CDATA[zhibin]]></name>
@@ -72,9 +72,53 @@ in an experience built and designed for developers.
 
 <h2>Step 3: 登录</h2>
 
+<p>安装好之后，就可用命令行登录 heroku:</p>
+
+<p><code>
+$ heroku login
+Enter your Heroku credentials.
+Email: adam@example.com
+Password:
+Could not find an existing public key.
+Would you like to generate one? [Yn]
+Generating new SSH public key.
+Uploading ssh public key /Users/adam/.ssh/id_rsa.pub
+</code></p>
+
 <h2>Step 4: 准备好自己的程序</h2>
 
+<p>一切就绪，你需要准备好自己的程序。</p>
+
+<p>由于 Heroku上 使用的是 PostgreSQL ， 所以我们需要修改下Gemfile。</p>
+
+<p>将:</p>
+
+<p><code>ruby
+gem 'sqlite3'
+</code></p>
+
+<p>修改为:</p>
+
+<p><code>ruby
+group :development do
+  gem 'sqlite3'
+end
+group :production do
+  gem 'pg'
+end
+</code></p>
+
+<p>确保你的 app 已经纳入 Git 版本控制之中，如果没有请执行:</p>
+
+<p><code>git
+git init
+git add .
+git commit -m "initial commit"
+</code></p>
+
 <h2>Step 5： 部署程序到 Heroku</h2>
+
+<p>下面该上传你的 app 到 Heroku 了:</p>
 ]]></content>
   </entry>
   
