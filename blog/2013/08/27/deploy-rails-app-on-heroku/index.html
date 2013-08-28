@@ -110,7 +110,32 @@ in an experience built and designed for developers.
 
 <h2>Step 1：创建账户</h2>
 
+<p>你需要先创建一个 Heroku的账户，如果你已经有了，直接看 Step 2.</p>
+
+<p><a href="https://api.heroku.com/signup/devcenter" title="创建 Heroku 账户">点此创建 Heroku 账户</a></p>
+
 <h2>Step 2： 安装 Heroku Toolbelt</h2>
+
+<p><code>Linux</code> 用户请查看 <a href="https://toolbelt.heroku.com/debian" title="install heroku toolbet linux">安装 Heroku toolbelt</a> , 或直接执行下面命令：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>wget -qO- https://toolbelt.heroku.com/install-ubuntu.sh | sh</span></code></pre></td></tr></table></div></figure>
+
+
+<p>我在执行的时候发现非常的慢，就在浏览器打开了上面这个<a href="https://toolbelt.heroku.com/install-ubuntu.sh" title="https://toolbelt.heroku.com/install-ubuntu.sh">URL</a> 然后，保存下来，手动执行了一下。</p>
+
+<p>我还修改了一行,
+将:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>apt-get install -y heroku-toolbelt</span></code></pre></td></tr></table></div></figure>
+
+
+<p>改为:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>apt-get install -y --force-yes heroku-toolbelt</span></code></pre></td></tr></table></div></figure>
+
 
 <h2>Step 3: 登录</h2>
 

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby | Zhibin's blog]]></title>
   <link href="http://SteveVallay.github.io/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="http://SteveVallay.github.io/"/>
-  <updated>2013-08-27T18:31:16+08:00</updated>
+  <updated>2013-08-28T12:55:31+08:00</updated>
   <id>http://SteveVallay.github.io/</id>
   <author>
     <name><![CDATA[zhibin]]></name>
@@ -35,7 +35,40 @@ in an experience built and designed for developers.
 
 <h2>Step 1：创建账户</h2>
 
+<p>你需要先创建一个 Heroku的账户，如果你已经有了，直接看 Step 2.</p>
+
+<p><a href="https://api.heroku.com/signup/devcenter" title="创建 Heroku 账户">点此创建 Heroku 账户</a></p>
+
 <h2>Step 2： 安装 Heroku Toolbelt</h2>
+
+<p><code>Linux</code> 用户请查看 <a href="https://toolbelt.heroku.com/debian" title="install heroku toolbet linux">安装 Heroku toolbelt</a> , 或直接执行下面命令：</p>
+
+<p>```</p>
+
+<pre><code>wget -qO- https://toolbelt.heroku.com/install-ubuntu.sh | sh
+</code></pre>
+
+<p>```</p>
+
+<p>我在执行的时候发现非常的慢，就在浏览器打开了上面这个<a href="https://toolbelt.heroku.com/install-ubuntu.sh" title="https://toolbelt.heroku.com/install-ubuntu.sh">URL</a> 然后，保存下来，手动执行了一下。</p>
+
+<p>我还修改了一行,
+将:</p>
+
+<p>```</p>
+
+<pre><code>apt-get install -y heroku-toolbelt
+</code></pre>
+
+<p>```
+改为:</p>
+
+<p>```</p>
+
+<pre><code>apt-get install -y --force-yes heroku-toolbelt
+</code></pre>
+
+<p>```</p>
 
 <h2>Step 3: 登录</h2>
 
