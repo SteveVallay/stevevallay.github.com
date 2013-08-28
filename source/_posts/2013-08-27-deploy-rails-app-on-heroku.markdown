@@ -107,6 +107,17 @@ $ heroku create
 Creating stark-fog-398... done, stack is cedar
 http://stark-fog-398.herokuapp.com/ | git@heroku.com:stark-fog-398.git
 Git remote heroku added
+```
+
+`push` 代码到 Heroku：
+
+```
+$ git push heroku master
+Counting objects: 67, done.
+Delta compression using up to 4 threads.
+Compressing objects: 100% (52/52), done.
+Writing objects: 100% (67/67), 86.33 KiB, done.
+Total 67 (delta 5), reused 0 (delta 0)
 
 -----> Heroku receiving push
 -----> Rails app detected
@@ -132,6 +143,7 @@ Git remote heroku added
 To git@heroku.com:severe-mountain-793.git
  * [new branch]      master -> master
 ```
+
 
 
 [1]:https://www.heroku.com/
