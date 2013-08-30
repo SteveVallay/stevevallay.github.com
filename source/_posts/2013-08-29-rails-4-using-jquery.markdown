@@ -60,7 +60,17 @@ categories:
 
 ## 添加一段 `js` 代码测试 `jQuery`
 
+当然，我们也可以加一段 `js` 代码来测试 `jQuery` 是否可以被正确的调用。
 
+在 `app/assets/javascripts/application.js` 文件末尾添加如下代码:
+
+``` javascript
+$(document).ready(function(){
+        alert("success!");
+});
+```
+
+你再次打开 <http://localhost:3000/welcome/index> 的时候，会弹出一个  `success!` 的 `dialog`，那就说明成功了!
 
 ## 添加 `jQuery` `plugin`
 
