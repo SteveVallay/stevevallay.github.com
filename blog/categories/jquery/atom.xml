@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: jquery | Zhibin's blog]]></title>
+  <link href="http://SteveVallay.github.io/blog/categories/jquery/atom.xml" rel="self"/>
+  <link href="http://SteveVallay.github.io/"/>
+  <updated>2013-08-30T12:54:20+08:00</updated>
+  <id>http://SteveVallay.github.io/</id>
+  <author>
+    <name><![CDATA[zhibin]]></name>
+    <email><![CDATA[zhibinwang.q@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[rails 4 using jquery]]></title>
+    <link href="http://SteveVallay.github.io/blog/2013/08/29/rails-4-using-jquery/"/>
+    <updated>2013-08-29T12:40:00+08:00</updated>
+    <id>http://SteveVallay.github.io/blog/2013/08/29/rails-4-using-jquery</id>
+    <content type="html"><![CDATA[<p>本人 rails 新手，在学习 <code>rails</code> (version 4.0.0） 程序的时候，需要用到 <code>javascript</code>，想使用现成的 <code>java script</code> 库，就想着把 <a href="http://jquery.com/">JQuery</a> 添加进来，并且要使用一个 <code>jquery</code> 的 <code>plugin</code> &mdash; <a href="http://jqueryvalidation.org/">jquery validation</a>。</p>
+
+<!-- more -->
+
+
+<h2>rails 怎么加入 jQuery ?</h2>
+
+<p><a href="http://google.com">Google</a> 了很久，有很多 <code>rails 3</code> 如何添加使用 <code>jQuery</code> 的， <code>rails4</code> 的就没找到。后来，终于发现原来<strong>自 <code>rails 3.1</code> 之后，<code>rails</code> 已经包含了对 <code>jQuery</code>的支持</strong>。:&ndash;) <a href="https://github.com/rails/jquery-rails">jquery-rails</a> 这个 <code>gem</code> 就是 <code>rails</code> 对 <code>jQuery</code> 的支持， 查看 Gemfile , 如果已经包含了 <a href="https://github.com/rails/jquery-rails">jquery-rails</a> , 而且 <code>rails</code> 版本等于或高于 <code>rails3.1</code> 那就说明已经支持 jQuery 了。</p>
+
+<p>具体请看 <a href="https://github.com/rails/jquery-rails">jquery-rails 的 github</a>。</p>
+
+<p>查看 <code>Gemfile</code> :</p>
+
+<p>如果有下面这一行，那么 <code>rails new app</code> 的时候会自动用 <code>bundle install</code> 安装 <code>jquery-rails</code>。</p>
+
+<pre><code>gem "jquery-rails"
+</code></pre>
+
+<p>在 <code>app/assets/javascripts/application.js</code> 里面应该有下面这两句，这样 <code>application.js</code> 就自动包含了 <code>jquery.js</code> 和 <code>jquery_ujs.js</code> :</p>
+
+<pre><code>//= require jquery
+//= require jquery_ujs
+</code></pre>
+
+<h2>怎么测试我的 <code>rails</code> 已经包含了 <code>jQuery</code> ?</h2>
+
+<p>有个简单的方法可以测试你的 rails 是否已经包含了对 jQuery的支持，首先，你要确保上面所说的 <code>Gemfile</code> 和 <code>application.js</code> 都如上所示。</p>
+
+<p>新建一个 <code>rails app</code> (如果已经有了就不用新建了),新建个 <code>welcome#index</code></p>
+
+<p>``` ruby</p>
+
+<pre><code>$ rails new my-app
+$ rails generate controller welcome index
+</code></pre>
+
+<p>```</p>
+
+<p>启动你的 <code>rails app</code> ：</p>
+
+<p>```</p>
+
+<pre><code>cd my-app
+rails s
+</code></pre>
+
+<p>```</p>
+
+<p>打开 <a href="http://localhost:3000/welcome/index">http://localhost:3000/welcome/index</a>, 右击页面，查看源代码,如果有了下面两行，应该是 <code>Ok</code> 了。</p>
+
+<p>```html</p>
+
+<pre><code>&lt;script data-turbolinks-track="true" src="http://SteveVallay.github.io/assets/jquery.js?body=1"&gt;&lt;/script&gt;
+&lt;script data-turbolinks-track="true" src="http://SteveVallay.github.io/assets/jquery_ujs.js?body=1"&gt;&lt;/script&gt;
+</code></pre>
+
+<p>```</p>
+]]></content>
+  </entry>
+  
+</feed>
