@@ -148,7 +148,24 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
+<h2>添加一段 <code>js</code> 代码测试 <code>jQuery</code></h2>
 
+<p>当然，我们也可以加一段 <code>js</code> 代码来测试 <code>jQuery</code> 是否可以被正确的调用。</p>
+
+<p>在 <code>app/assets/javascripts/application.js</code> 文件末尾添加如下代码:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">).</span><span class="nx">ready</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+</span><span class='line'>        <span class="nx">alert</span><span class="p">(</span><span class="s2">&quot;success!&quot;</span><span class="p">);</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>你再次打开 <a href="http://localhost:3000/welcome/index">http://localhost:3000/welcome/index</a> 的时候，会弹出一个  <code>success!</code> 的 <code>dialog</code>，那就说明成功了!</p>
+
+<h2>添加 <code>jQuery</code> <code>plugin</code></h2>
 </div>
 
 

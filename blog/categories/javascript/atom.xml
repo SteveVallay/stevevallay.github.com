@@ -4,7 +4,7 @@
   <title><![CDATA[Category: javascript | Zhibin's blog]]></title>
   <link href="http://SteveVallay.github.io/blog/categories/javascript/atom.xml" rel="self"/>
   <link href="http://SteveVallay.github.io/"/>
-  <updated>2013-08-30T12:54:20+08:00</updated>
+  <updated>2013-08-30T18:04:39+08:00</updated>
   <id>http://SteveVallay.github.io/</id>
   <author>
     <name><![CDATA[zhibin]]></name>
@@ -75,6 +75,25 @@ rails s
 </code></pre>
 
 <p>```</p>
+
+<h2>添加一段 <code>js</code> 代码测试 <code>jQuery</code></h2>
+
+<p>当然，我们也可以加一段 <code>js</code> 代码来测试 <code>jQuery</code> 是否可以被正确的调用。</p>
+
+<p>在 <code>app/assets/javascripts/application.js</code> 文件末尾添加如下代码:</p>
+
+<p>``` javascript
+$(document).ready(function(){</p>
+
+<pre><code>    alert("success!");
+</code></pre>
+
+<p>});
+```</p>
+
+<p>你再次打开 <a href="http://localhost:3000/welcome/index">http://localhost:3000/welcome/index</a> 的时候，会弹出一个  <code>success!</code> 的 <code>dialog</code>，那就说明成功了!</p>
+
+<h2>添加 <code>jQuery</code> <code>plugin</code></h2>
 ]]></content>
   </entry>
   
