@@ -97,4 +97,4 @@ disqus_show_comment_count: true
 google_analytics_tracking_id: UA-39252101-2
 
 # Facebook Like
-facebook_like: true
+facebook_like: false
