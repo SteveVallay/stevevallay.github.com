@@ -4,7 +4,7 @@
   <title><![CDATA[Category: jquery | Zhibin's blog]]></title>
   <link href="http://SteveVallay.github.io/blog/categories/jquery/atom.xml" rel="self"/>
   <link href="http://SteveVallay.github.io/"/>
-  <updated>2013-08-30T18:04:39+08:00</updated>
+  <updated>2013-09-03T13:45:48+08:00</updated>
   <id>http://SteveVallay.github.io/</id>
   <author>
     <name><![CDATA[zhibin]]></name>
@@ -93,7 +93,11 @@ $(document).ready(function(){</p>
 
 <p>你再次打开 <a href="http://localhost:3000/welcome/index">http://localhost:3000/welcome/index</a> 的时候，会弹出一个  <code>success!</code> 的 <code>dialog</code>，那就说明成功了!</p>
 
-<h2>添加 <code>jQuery</code> <code>plugin</code></h2>
+<h2>添加 <code>jQuery</code> <code>Validation</code> <code>plugin</code></h2>
+
+<p>下载 <a href="http://jqueryvalidation.org/">jQuery Validation</a>，把 <code>jquery.validate.min.js</code> 放在 <code>app/assets/javascripts</code> 下面就可以用了。</p>
+
+<p>使用方法可以参考 <a href="http://sleekd.com/tutorials/jquery-validation-in-ruby-on-rails/">这个tutorials</a>，或者<a href="http://jqueryvalidation.org/documentation">官方文档</a>。</p>
 ]]></content>
   </entry>
   
