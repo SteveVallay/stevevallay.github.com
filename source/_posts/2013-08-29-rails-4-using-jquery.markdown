@@ -72,12 +72,11 @@ $(document).ready(function(){
 
 你再次打开 <http://localhost:3000/welcome/index> 的时候，会弹出一个  `success!` 的 `dialog`，那就说明成功了!
 
-## 添加 `jQuery` `plugin`
+## 添加 `jQuery` `Validation ` `plugin`
 
+下载 [jQuery Validation][5]，把 `jquery.validate.min.js` 放在 `app/assets/javascripts` 下面就可以用了。
 
-
-
-
+使用方法可以参考 [这个tutorials][6]，或者[官方文档][7]。
 
 
 
@@ -85,3 +84,6 @@ $(document).ready(function(){
 [2]:http://jqueryvalidation.org/
 [3]:http://google.com
 [4]:https://github.com/rails/jquery-rails
+[5]:http://jqueryvalidation.org/
+[6]:http://sleekd.com/tutorials/jquery-validation-in-ruby-on-rails/
+[7]:http://jqueryvalidation.org/documentation
