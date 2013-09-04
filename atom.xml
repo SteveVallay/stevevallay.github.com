@@ -4,7 +4,7 @@
   <title><![CDATA[Zhibin's blog]]></title>
   <link href="http://SteveVallay.github.io/atom.xml" rel="self"/>
   <link href="http://SteveVallay.github.io/"/>
-  <updated>2013-09-03T13:48:42+08:00</updated>
+  <updated>2013-09-04T14:18:08+08:00</updated>
   <id>http://SteveVallay.github.io/</id>
   <author>
     <name><![CDATA[zhibin]]></name>
@@ -12,6 +12,82 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[using bootstrap in rails]]></title>
+    <link href="http://SteveVallay.github.io/blog/2013/09/04/using-bootstrap-in-rails/"/>
+    <updated>2013-09-04T12:41:00+08:00</updated>
+    <id>http://SteveVallay.github.io/blog/2013/09/04/using-bootstrap-in-rails</id>
+    <content type="html"><![CDATA[<p>本人 <code>rails</code> 新手，使用 <code>rails 4.0</code> ， 在 <code>rails</code> <code>app</code> 中添加 <a href="http://getbootstrap.com/" title="home page">Bootstrap</a> 支持, 参考 <code>Ruby on Rails tutorial 2nd edition En</code>。</p>
+
+<!-- more -->
+
+
+<h2>Step 1  添加 <a href="https://github.com/thomas-mcdonald/bootstrap-sass" title="github">bootstrap-sass</a> 到 <strong>Gemfile</strong></h2>
+
+<p>打开 <strong>Gemfile</strong> 添加如下内容：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># Use bootstrap</span>
+</span><span class='line'>  <span class="n">gem</span> <span class="s1">&#39;bootstrap-sass&#39;</span><span class="p">,</span><span class="s1">&#39;~&gt;2.3.2&#39;</span> <span class="c1">#tutorial 上用的是2.0.0</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Step 2 安装</h2>
+
+<p>直接运行：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bundle</span> <span class="n">install</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Step 3 创建 <code>custom.css.scss</code></h2>
+
+<p>创建 <code>custom.css.scss</code> 文件：</p>
+
+<p><strong>app/assets/stylesheets/custom.css.scss</strong></p>
+
+<p>在 <strong>app/assets/stylesheets</strong> 下的文件会自动被 <strong>application.css</strong> <code>include</code>进来。</p>
+
+<p>在这个文件中可以添加 bootstrap CSS 进来，在 <code>custom.css.scss</code> 中添加：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='css'><span class='line'><span class="k">@import</span> <span class="s2">&quot;bootstrap&quot;</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>当然，还可以在<code>custom.css.sass</code>文件中添加自己的<code>custom</code> 如：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='css'><span class='line'><span class="k">@import</span> <span class="s2">&quot;bootstrap&quot;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c">/*universal*/</span>
+</span><span class='line'>
+</span><span class='line'><span class="nt">html</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">overflow-y</span><span class="o">:</span><span class="k">scroll</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="nt">body</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">padding-top</span><span class="o">:</span> <span class="m">10px</span><span class="p">;</span>
+</span><span class='line'>        <span class="k">padding-left</span><span class="o">:</span> <span class="m">10px</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[rails 4 using jquery]]></title>
