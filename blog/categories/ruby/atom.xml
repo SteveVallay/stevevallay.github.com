@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: Ruby | Zhibin's blog]]></title>
+  <title><![CDATA[Category: ruby | Zhibin's blog]]></title>
   <link href="http://SteveVallay.github.io/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="http://SteveVallay.github.io/"/>
-  <updated>2013-09-04T15:33:42+08:00</updated>
+  <updated>2013-09-04T23:00:09+08:00</updated>
   <id>http://SteveVallay.github.io/</id>
   <author>
     <name><![CDATA[zhibin]]></name>
@@ -14,174 +14,90 @@
 
   
   <entry>
-    <title type="html"><![CDATA[部署 Rails 程序到 Heroku]]></title>
-    <link href="http://SteveVallay.github.io/blog/2013/08/27/deploy-rails-app-on-heroku/"/>
-    <updated>2013-08-27T17:26:00+08:00</updated>
-    <id>http://SteveVallay.github.io/blog/2013/08/27/deploy-rails-app-on-heroku</id>
-    <content type="html"><![CDATA[<h2>什么是 Heroku ?</h2>
-
-<p><a href="https://www.heroku.com/">Heroku</a> 是一个 <a href="http://en.wikipedia.org/wiki/Platform_as_a_service">Saas</a> (云应用平台)，用户可以将自己的 web 程序部署到 <a href="https://www.heroku.com/">Heroku</a> 云主机上。使用简单的命令就可以部署你的程序到 <a href="https://www.heroku.com/">Heroku</a>。 <a href="https://www.heroku.com/">Heroku</a> 使用 <a href="http://git-scm.com/">Git</a> 作为版本控制工具。<a href="https://www.heroku.com/">Heroku</a> 目前支持 <a href="http://www.ruby-lang.org/en/">Ruby</a>， <a href="http://nodejs.org/">Node.js</a>，<a href="http://clojure.org/">Clojure</a>，Java，<a href="http://www.python.org/">Python</a>，<a href="http://www.scala-lang.org/">Scala</a>。默认数据库是 <a href="http://www.postgresql.org/">PostgreSQL</a>。</p>
-
-<blockquote><p>Build. Deploy. Scale. Heroku brings them together
-in an experience built and designed for developers.
-– Larry Marburger, CloudApp</p></blockquote>
-
-<p>想要部署你的程序到 <a href="https://www.heroku.com/">Heroku</a>？</p>
-
-<p>Let&rsquo;s Go !</p>
+    <title type="html"><![CDATA[rails 4 using jquery]]></title>
+    <link href="http://SteveVallay.github.io/blog/2013/08/29/rails-4-using-jquery/"/>
+    <updated>2013-08-29T12:40:00+08:00</updated>
+    <id>http://SteveVallay.github.io/blog/2013/08/29/rails-4-using-jquery</id>
+    <content type="html"><![CDATA[<p>本人 rails 新手，在学习 <code>rails</code> (version 4.0.0） 程序的时候，需要用到 <code>javascript</code>，想使用现成的 <code>java script</code> 库，就想着把 <a href="http://jquery.com/">JQuery</a> 添加进来，并且要使用一个 <code>jquery</code> 的 <code>plugin</code> &mdash; <a href="http://jqueryvalidation.org/">jquery validation</a>。</p>
 
 <!-- more -->
 
 
-<h2>Step 1：创建账户</h2>
+<h2>rails 怎么加入 jQuery ?</h2>
 
-<p>你需要先创建一个 Heroku的账户，如果你已经有了，直接看 Step 2.</p>
+<p><a href="http://google.com">Google</a> 了很久，有很多 <code>rails 3</code> 如何添加使用 <code>jQuery</code> 的， <code>rails4</code> 的就没找到。后来，终于发现原来<strong>自 <code>rails 3.1</code> 之后，<code>rails</code> 已经包含了对 <code>jQuery</code>的支持</strong>。:&ndash;) <a href="https://github.com/rails/jquery-rails">jquery-rails</a> 这个 <code>gem</code> 就是 <code>rails</code> 对 <code>jQuery</code> 的支持， 查看 Gemfile , 如果已经包含了 <a href="https://github.com/rails/jquery-rails">jquery-rails</a> , 而且 <code>rails</code> 版本等于或高于 <code>rails3.1</code> 那就说明已经支持 jQuery 了。</p>
 
-<p><a href="https://api.heroku.com/signup/devcenter" title="创建 Heroku 账户">点此创建 Heroku 账户</a></p>
+<p>具体请看 <a href="https://github.com/rails/jquery-rails">jquery-rails 的 github</a>。</p>
 
-<h2>Step 2： 安装 Heroku Toolbelt</h2>
+<p>查看 <code>Gemfile</code> :</p>
 
-<p><code>Linux</code> 用户请查看 <a href="https://toolbelt.heroku.com/debian" title="install heroku toolbet linux">安装 Heroku toolbelt</a> , 或直接执行下面命令：</p>
+<p>如果有下面这一行，那么 <code>rails new app</code> 的时候会自动用 <code>bundle install</code> 安装 <code>jquery-rails</code>。</p>
 
-<p>```</p>
+<pre><code>gem "jquery-rails"
+</code></pre>
 
-<pre><code>wget -qO- https://toolbelt.heroku.com/install-ubuntu.sh | sh
+<p>在 <code>app/assets/javascripts/application.js</code> 里面应该有下面这两句，这样 <code>application.js</code> 就自动包含了 <code>jquery.js</code> 和 <code>jquery_ujs.js</code> :</p>
+
+<pre><code>//= require jquery
+//= require jquery_ujs
+</code></pre>
+
+<h2>怎么测试我的 <code>rails</code> 已经包含了 <code>jQuery</code> ?</h2>
+
+<p>有个简单的方法可以测试你的 rails 是否已经包含了对 jQuery的支持，首先，你要确保上面所说的 <code>Gemfile</code> 和 <code>application.js</code> 都如上所示。</p>
+
+<p>新建一个 <code>rails app</code> (如果已经有了就不用新建了),新建个 <code>welcome#index</code></p>
+
+<p>``` ruby</p>
+
+<pre><code>$ rails new my-app
+$ rails generate controller welcome index
 </code></pre>
 
 <p>```</p>
 
-<p>我在执行的时候发现非常的慢，就在浏览器打开了上面这个<a href="https://toolbelt.heroku.com/install-ubuntu.sh" title="https://toolbelt.heroku.com/install-ubuntu.sh">URL</a> 然后，保存下来，手动执行了一下。</p>
-
-<p>我还修改了一行,
-将:</p>
+<p>启动你的 <code>rails app</code> ：</p>
 
 <p>```</p>
 
-<pre><code>apt-get install -y heroku-toolbelt
-</code></pre>
-
-<p>```
-改为:</p>
-
-<p>```</p>
-
-<pre><code>apt-get install -y --force-yes heroku-toolbelt
+<pre><code>cd my-app
+rails s
 </code></pre>
 
 <p>```</p>
 
-<h2>Step 3: 登录</h2>
+<p>打开 <a href="http://localhost:3000/welcome/index">http://localhost:3000/welcome/index</a>, 右击页面，查看源代码,如果有了下面两行，应该是 <code>Ok</code> 了。</p>
 
-<p>安装好之后，就可用命令行登录 heroku:</p>
+<p>```html</p>
 
-<p><code>bash
-$ heroku login
-Enter your Heroku credentials.
-Email: adam@example.com
-Password:
-Could not find an existing public key.
-Would you like to generate one? [Yn]
-Generating new SSH public key.
-Uploading ssh public key /Users/adam/.ssh/id_rsa.pub
-</code></p>
-
-<h2>Step 4: 准备好自己的程序</h2>
-
-<p>一切就绪，你需要准备好自己的程序。</p>
-
-<p>由于 Heroku上 使用的是 PostgreSQL ， 所以我们需要修改下Gemfile。</p>
-
-<p>将:</p>
-
-<p><code>ruby
-gem 'sqlite3'
-</code></p>
-
-<p>修改为:</p>
-
-<p><code>ruby
-group :development do
-  gem 'sqlite3'
-end
-group :production do
-  gem 'pg'
-end
-</code></p>
-
-<p>确保你的 app 已经纳入 Git 版本控制之中，如果没有请执行:</p>
-
-<p><code>bash
-git init
-git add -A
-git commit -m "initial commit"
-</code></p>
-
-<h2>Step 5： 部署程序到 Heroku</h2>
-
-<p>下面该上传你的 app 到 Heroku 了:</p>
-
-<p>创建 Heroku App:</p>
-
-<p><code>bash
-$ heroku create
-Creating stark-fog-398... done, stack is cedar
-http://stark-fog-398.herokuapp.com/ | git@heroku.com:stark-fog-398.git
-Git remote heroku added
-</code></p>
-
-<p><code>push</code> 代码到 Heroku：</p>
-
-<p>```
-$ git push heroku master
-Counting objects: 67, done.
-Delta compression using up to 4 threads.
-Compressing objects: 100% (52/52), done.
-Writing objects: 100% (67/67), 86.33 KiB, done.
-Total 67 (delta 5), reused 0 (delta 0)</p>
-
-<p>&mdash;&mdash;&ndash;> Heroku receiving push
-&mdash;&mdash;&ndash;> Rails app detected
-&mdash;&mdash;&ndash;> Installing dependencies using Bundler version 1.1</p>
-
-<pre><code>   Checking for unresolved dependencies.
-   Unresolved dependencies detected.
-   Running: bundle install --without development:test --path vendor/bundle --deployment
-   Fetching source index for https://rubygems.org/
-   Installing rake (0.8.7)
-   ...
-   Installing rails (3.0.5)
-   Your bundle is complete! It was installed into ./vendor/bundle
+<pre><code>&lt;script data-turbolinks-track="true" src="http://SteveVallay.github.io/assets/jquery.js?body=1"&gt;&lt;/script&gt;
+&lt;script data-turbolinks-track="true" src="http://SteveVallay.github.io/assets/jquery_ujs.js?body=1"&gt;&lt;/script&gt;
 </code></pre>
 
-<p>&mdash;&mdash;&ndash;> Rails plugin injection</p>
+<p>```</p>
 
-<pre><code>   Injecting rails_log_stdout
-   Injecting rails3_serve_static_assets
+<h2>添加一段 <code>js</code> 代码测试 <code>jQuery</code></h2>
+
+<p>当然，我们也可以加一段 <code>js</code> 代码来测试 <code>jQuery</code> 是否可以被正确的调用。</p>
+
+<p>在 <code>app/assets/javascripts/application.js</code> 文件末尾添加如下代码:</p>
+
+<p>``` javascript
+$(document).ready(function(){</p>
+
+<pre><code>    alert("success!");
 </code></pre>
 
-<p>&mdash;&mdash;&ndash;> Discovering process types</p>
-
-<pre><code>   Procfile declares types -&gt; (none)
-   Default types for Rails -&gt; console, rake, web, worker
-</code></pre>
-
-<p>&mdash;&mdash;&ndash;> Compiled slug size is 8.3MB
-&mdash;&mdash;&ndash;> Launching&hellip; done, v5</p>
-
-<pre><code>   http://severe-mountain-793.herokuapp.com deployed to Heroku
-</code></pre>
-
-<p>To git@heroku.com:severe-mountain-793.git
- * [new branch]      master &ndash;> master
+<p>});
 ```</p>
 
-<p>如果这一步时间很长，或者返回 <code>Timeout</code> , 而且你在 China ，那可能遇到 <a href="http://ruby-china.org/topics/10813">这个问题</a> 了。</p>
+<p>你再次打开 <a href="http://localhost:3000/welcome/index">http://localhost:3000/welcome/index</a> 的时候，会弹出一个  <code>success!</code> 的 <code>dialog</code>，那就说明成功了!</p>
 
-<p><code>Note:</code>
-不要使用 <code>rails new yourapp</code> 新建一个 app 来测试 Heroku, 至少你也得建个 <code>welcome#index</code>
-来测试吧。</p>
+<h2>添加 <code>jQuery</code> <code>Validation</code> <code>plugin</code></h2>
 
-<p><a href="http://enjoyhacking.heroku.com">这里</a> 是我用来测试的 rails app.</p>
+<p>下载 <a href="http://jqueryvalidation.org/">jQuery Validation</a>，把 <code>jquery.validate.min.js</code> 放在 <code>app/assets/javascripts</code> 下面就可以用了。</p>
+
+<p>使用方法可以参考 <a href="http://sleekd.com/tutorials/jquery-validation-in-ruby-on-rails/">这个tutorials</a>，或者<a href="http://jqueryvalidation.org/documentation">官方文档</a>。</p>
 ]]></content>
   </entry>
   
