@@ -6,7 +6,6 @@ comments: true
 categories:
 - bootstrap
 - rails
-- 
 ---
 
 
@@ -39,7 +38,7 @@ __app/assets/stylesheets/custom.css.scss__
 
 在 **app/assets/stylesheets** 下的文件会自动被 **application.css** `include`进来。
 
-在这个文件中可以添加 bootstrap CSS 进来，在 `custom.css.scss` 中添加： 
+在这个文件中可以添加 bootstrap CSS 进来，在 `custom.css.scss` 中添加：
 
 ``` css
 @import "bootstrap";
