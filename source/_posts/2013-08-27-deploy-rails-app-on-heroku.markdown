@@ -7,6 +7,8 @@ categories:
 - Rails
 - Ruby
 - Heroku
+keywords: rails,heroku
+description:部署Rails 程序到 Heroku
 ---
 
 

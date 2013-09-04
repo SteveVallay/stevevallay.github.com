@@ -6,6 +6,8 @@ comments: true
 categories:
 - bootstrap
 - rails
+keywords:bootstrap,css,rails,framework
+description:using bootstrap css framework rails
 ---
 
 

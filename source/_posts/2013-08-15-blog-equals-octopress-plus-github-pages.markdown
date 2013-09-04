@@ -7,6 +7,8 @@ categories:
 - github pages
 - octopress
 - blog
+keywords: blog,octopress,github,pages
+description: blog=octopress + github pages
 ---
 
 Thanks to github , we have another choice to setup a blog beyond the popluar wordpress, [github pages][1] +  [octopress][2] (based on [jekyll][3], simply we can say : octopress is jekyll + themes).
