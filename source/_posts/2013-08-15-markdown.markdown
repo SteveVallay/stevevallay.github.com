@@ -6,8 +6,8 @@ comments: true
 categories:
 - markdown
 - octopress
-keywords:markdown
-description:markdown usage
+keywords: markdown
+description: markdown usage
 ---
 
 ###什么是 markdown ?

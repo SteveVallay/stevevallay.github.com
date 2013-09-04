@@ -6,10 +6,9 @@ comments: true
 categories:
 - bootstrap
 - rails
-keywords:bootstrap,css,rails,framework
-description:using bootstrap css framework rails
+keywords: bootstrap,css,rails,framework
+description: "using bootstrap css framework rails"
 ---
-
 
 本人 `rails` 新手，使用 `rails 4.0` ， 在 `rails` `app ` 中添加 [Bootstrap][1] 支持, 参考 `Ruby on Rails tutorial 2nd edition En`。
 

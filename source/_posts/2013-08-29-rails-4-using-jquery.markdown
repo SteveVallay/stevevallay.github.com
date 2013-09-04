@@ -8,8 +8,8 @@ categories:
 - jquery
 - javascript
 - ruby
-keywords:rails,jquery
-description:using jquery rails
+keywords: rails,jquery
+description: using jquery rails
 ---
 
 
