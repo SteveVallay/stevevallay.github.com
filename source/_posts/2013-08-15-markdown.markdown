@@ -219,6 +219,19 @@ __参考__引用:
 ![示例图片][101]
 [101]:/images/blog/create_a_repo.png
 
+### 注脚
+注脚和链接类似，只是编号使用一个 `^`符号开头，比如：
+
+```
+  footnote example[^1]
+  
+  [^1]:this is a footnote
+```
+显示效果
+
+this is a fotnote[^1]
+
+
 ###转义
 
 markdown 语法中特殊意义的字符输入的时候要用反斜杠`\`来转义。
@@ -240,6 +253,10 @@ _  底线
 !  惊叹号
 ```
 
+### Markdown 编辑器
+
+`Windows` 下我使用 [MarkdownPad][14] 作为 markdown 编辑器。
+
 [1]:http://jekyllrb.com/
 [2]:http://octopress.org/
 [3]:https://github.com
@@ -253,3 +270,5 @@ _  底线
 [11]:http://stackoverflow.com/
 [12]:http://stackoverflow.com/editing-help
 [13]:http://octopress.org/docs/plugins/backtick-codeblock/
+[14]:http://markdownpad.com/
+[^1]:this is a footnote
