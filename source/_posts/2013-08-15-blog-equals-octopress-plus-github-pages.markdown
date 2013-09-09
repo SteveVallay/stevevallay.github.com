@@ -40,7 +40,7 @@ run the following command from terminal to get rvm:
 ``` bash
     $ curl -L https://get.rvm.io | bash -s stable --ruby
 ```
-install latest ruby (1.9.3 currently):
+install ruby 1.9.3 or later [^1]:
 ```ruby
     $ rvm install 1.9.3 
     $ rvm use 1.9.3 
@@ -61,6 +61,8 @@ install the default theme:
 ``` ruby
     $ rake install
 ```
+if you met some error when using `rake install`, please try `bundle exec rake install`[^2] .
+
 ### Step3: [deploy to github pages][9]
 
 ```ruby
@@ -173,3 +175,6 @@ Simple you can use it as following:
 [15]:http://stevevallay.github.io
 [16]:http://http://octopress.org/docs/plugins/
 [17]:http://octopress.org/docs/plugins/backtick-codeblock/
+
+[^1]:我使用的是 `1.9.3p448`,我在帮朋友 [大兵](dabing1022.github.com) 安装 `Octopress` 的时候使用的是 `2.0.0` ，运行 `rake preview` 等命令的时候遇到一些版本相关的错误，使用 `bundle exec rake xxxx` 才可正常。
+[^2]:`bundle exec command` means *Execute a command in the context of the bundle*.使用 `bundle exec ` 执行命令可以保证使用 `Gemfile` 中匹配的 `gem` 版本。
