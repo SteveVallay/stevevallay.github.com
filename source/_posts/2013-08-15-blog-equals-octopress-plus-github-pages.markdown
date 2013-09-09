@@ -153,8 +153,22 @@ Simple you can use it as following:
     $ sudo make me a sandwich
 ```
 
+### [Disqus][18]
 
 
+`Disqus` is a blog comment hosting service for websites and online communities that uses a networked platform.
+
+Octopress already have support for Disqus, to add `Disqus` comments to your Octopress: 
+
+1. You need [Sign up][19] an account of `Disqus` if you do not have one.
+2. [Register your site to Disqus][20], input `Site URL` , `Site Name` and `Site ShortName`(remember this , it is used in step 3).
+3. Modify the `_config.yml` under your octopress directory as following (add your `Site ShortName` and set `disqus_show_comment_count` as true).
+
+``` ruby
+# Disqus Comments
+disqus_short_name: zhibin #this is the `Site ShortName` you input in step 2
+disqus_show_comment_count: true
+```
 
 
 
@@ -175,6 +189,9 @@ Simple you can use it as following:
 [15]:http://stevevallay.github.io
 [16]:http://http://octopress.org/docs/plugins/
 [17]:http://octopress.org/docs/plugins/backtick-codeblock/
+[18]:http://disqus.com
+[19]:https://disqus.com/profile/signup/
+[20]:https://disqus.com/admin/signup/?utm_source=New-Site
 
 [^1]:我使用的是 `1.9.3p448`,我在帮朋友 [大兵](dabing1022.github.com) 安装 `Octopress` 的时候使用的是 `2.0.0` ，运行 `rake preview` 等命令的时候遇到一些版本相关的错误，使用 `bundle exec rake xxxx` 才可正常。
 [^2]:`bundle exec command` means *Execute a command in the context of the bundle*.使用 `bundle exec ` 执行命令可以保证使用 `Gemfile` 中匹配的 `gem` 版本。
