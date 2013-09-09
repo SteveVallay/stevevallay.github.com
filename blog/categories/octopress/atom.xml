@@ -4,7 +4,7 @@
   <title><![CDATA[Category: octopress | Zhibin's blog]]></title>
   <link href="http://SteveVallay.github.io/blog/categories/octopress/atom.xml" rel="self"/>
   <link href="http://SteveVallay.github.io/"/>
-  <updated>2013-09-04T23:00:09+08:00</updated>
+  <updated>2013-09-09T16:03:35+08:00</updated>
   <id>http://SteveVallay.github.io/</id>
   <author>
     <name><![CDATA[zhibin]]></name>
@@ -326,7 +326,7 @@ _  底线
 </code></pre>
 
 <p><code>
-install latest ruby (1.9.3 currently):
+install ruby 1.9.3 or later [^1]:
 </code>ruby</p>
 
 <pre><code>$ rvm install 1.9.3 
@@ -358,7 +358,8 @@ install the default theme:
 <pre><code>$ rake install
 </code></pre>
 
-<p>```</p>
+<p><code>``
+if you met some error when using</code>rake install<code>, please try</code>bundle exec rake install`<sup id="fnref:1"><a href="#fn:1" rel="footnote">1</a></sup> .</p>
 
 <h3>Step3: <a href="http://octopress.org/docs/deploying/githug">deploy to github pages</a></h3>
 
@@ -479,6 +480,14 @@ Simple you can use it as following:</p>
 </code></pre>
 
 <p>```</p>
+<div class="footnotes">
+<hr/>
+<ol>
+<li id="fn:1">
+<p><code>bundle exec command</code> means <em>Execute a command in the context of the bundle</em>.使用 <code>bundle exec</code> 执行命令可以保证使用 <code>Gemfile</code> 中匹配的 <code>gem</code> 版本。<a href="#fnref:1" rev="footnote">&#8617;</a></p></li>
+</ol>
+</div>
+
 ]]></content>
   </entry>
   

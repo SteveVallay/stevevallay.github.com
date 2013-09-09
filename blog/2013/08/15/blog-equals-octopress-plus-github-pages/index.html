@@ -143,7 +143,7 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>install latest ruby (1.9.3 currently):</p>
+<p>install ruby 1.9.3 or later <sup id="fnref:1"><a href="#fn:1" rel="footnote">1</a></sup>:</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -180,6 +180,8 @@
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span> <span class="n">rake</span> <span class="n">install</span>
 </span></code></pre></td></tr></table></div></figure>
 
+
+<p>if you met some error when using <code>rake install</code>, please try <code>bundle exec rake install</code><sup id="fnref:2"><a href="#fn:2" rel="footnote">2</a></sup> .</p>
 
 <h3>Step3: <a href="http://octopress.org/docs/deploying/githug">deploy to github pages</a></h3>
 
@@ -306,6 +308,16 @@ Simple you can use it as following:</p>
 </span></code></pre></td></tr></table></div></figure>
 
 
+
+<div class="footnotes">
+<hr/>
+<ol>
+<li id="fn:1">
+<p>我使用的是 <code>1.9.3p448</code>,我在帮朋友 <a href="dabing1022.github.com">大兵</a> 安装 <code>Octopress</code> 的时候使用的是 <code>2.0.0</code> ，运行 <code>rake preview</code> 等命令的时候遇到一些版本相关的错误，使用 <code>bundle exec rake xxxx</code> 才可正常。<a href="#fnref:1" rev="footnote">&#8617;</a></p></li>
+<li id="fn:2">
+<p><code>bundle exec command</code> means <em>Execute a command in the context of the bundle</em>.使用 <code>bundle exec</code> 执行命令可以保证使用 <code>Gemfile</code> 中匹配的 <code>gem</code> 版本。<a href="#fnref:2" rev="footnote">&#8617;</a></p></li>
+</ol>
+</div>
 
 </div>
 
