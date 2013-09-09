@@ -4,7 +4,7 @@
   <title><![CDATA[Zhibin's blog]]></title>
   <link href="http://SteveVallay.github.io/atom.xml" rel="self"/>
   <link href="http://SteveVallay.github.io/"/>
-  <updated>2013-09-09T16:34:33+08:00</updated>
+  <updated>2013-09-09T16:48:22+08:00</updated>
   <id>http://SteveVallay.github.io/</id>
   <author>
     <name><![CDATA[zhibin]]></name>
@@ -624,6 +624,22 @@ eat it
 
 <p><img src="http://SteveVallay.github.io/images/blog/create_a_repo.png" alt="示例图片" /></p>
 
+<h3>注脚</h3>
+
+<p>注脚和链接类似，只是编号使用一个 <code>^</code>符号开头，比如：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>  footnote example[^1]
+</span><span class='line'>  
+</span><span class='line'>  [^1]:this is a footnote</span></code></pre></td></tr></table></div></figure>
+
+
+<p>显示效果</p>
+
+<p>this is a fotnote<sup id="fnref:1"><a href="#fn:1" rel="footnote">1</a></sup></p>
+
 <h3>转义</h3>
 
 <p>markdown 语法中特殊意义的字符输入的时候要用反斜杠<code>\</code>来转义。</p>
@@ -656,6 +672,16 @@ eat it
 </span><span class='line'>!  惊叹号</span></code></pre></td></tr></table></div></figure>
 
 
+<h3>Markdown 编辑器</h3>
+
+<p><code>Windows</code> 下我使用 <a href="http://markdownpad.com/">MarkdownPad</a> 作为 markdown 编辑器。</p>
+<div class="footnotes">
+<hr/>
+<ol>
+<li id="fn:1">
+<p>this is a footnote<a href="#fnref:1" rev="footnote">&#8617;</a></p></li>
+</ol>
+</div>
 
 ]]></content>
   </entry>
