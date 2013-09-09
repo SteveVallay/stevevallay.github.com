@@ -4,7 +4,7 @@
   <title><![CDATA[Category: blog | Zhibin's blog]]></title>
   <link href="http://SteveVallay.github.io/blog/categories/blog/atom.xml" rel="self"/>
   <link href="http://SteveVallay.github.io/"/>
-  <updated>2013-09-09T16:03:35+08:00</updated>
+  <updated>2013-09-09T16:34:33+08:00</updated>
   <id>http://SteveVallay.github.io/</id>
   <author>
     <name><![CDATA[zhibin]]></name>
@@ -209,6 +209,27 @@ Simple you can use it as following:</p>
 </code></pre>
 
 <p>```</p>
+
+<h3><a href="http://disqus.com">Disqus</a></h3>
+
+<p><code>Disqus</code> is a blog comment hosting service for websites and online communities that uses a networked platform.</p>
+
+<p>Octopress already have support for Disqus, to add <code>Disqus</code> comments to your Octopress:</p>
+
+<ol>
+<li>You need <a href="https://disqus.com/profile/signup/">Sign up</a> an account of <code>Disqus</code> if you do not have one.</li>
+<li><a href="https://disqus.com/admin/signup/?utm_source=New-Site">Register your site to Disqus</a>, input <code>Site URL</code> , <code>Site Name</code> and <code>Site ShortName</code>(remember this , it is used in step 3).</li>
+<li>Modify the <code>_config.yml</code> under your octopress directory as following (add your <code>Site ShortName</code> and set <code>disqus_show_comment_count</code> as true).</li>
+</ol>
+
+
+<p>``` ruby</p>
+
+<h1>Disqus Comments</h1>
+
+<p>disqus_short_name: zhibin #this is the <code>Site ShortName</code> you input in step 2
+disqus_show_comment_count: true
+```</p>
 <div class="footnotes">
 <hr/>
 <ol>
