@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: 番茄工作法，tomato | Zhibin's blog]]></title>
+  <link href="http://SteveVallay.github.io/blog/categories/fan-qie-gong-zuo-fa-,tomato/atom.xml" rel="self"/>
+  <link href="http://SteveVallay.github.io/"/>
+  <updated>2013-09-10T12:54:24+08:00</updated>
+  <id>http://SteveVallay.github.io/</id>
+  <author>
+    <name><![CDATA[zhibin]]></name>
+    <email><![CDATA[zhibinwang.q@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[番茄工作法]]></title>
+    <link href="http://SteveVallay.github.io/blog/2013/09/10/tomato/"/>
+    <updated>2013-09-10T10:14:00+08:00</updated>
+    <id>http://SteveVallay.github.io/blog/2013/09/10/tomato</id>
+    <content type="html"><![CDATA[<p><img src="/images/blog/tomato-tech.png" alt="" /></p>
+
+<!--more-->
+
+
+<p>经常会遇到这样的情况：在忙碌了一天之后，发现 <strong>咦?一天结束了，可是怎么觉得什么都没干呢？</strong>
+，回想一下自己一天工作的场景：</p>
+
+<p>收邮件->回邮件->干会儿活A->收到新邮件->擦，新Bug->回复下->干会儿活->有人来问问题->过去看下->搞定->回来->看下邮件->休息下看看twitter->继续干活->fouban.fm换首歌->有新邮件->再干会儿活->看看github->有人IM找你->IM聊天&hellip;&ndash;>干活儿->有人电话你->新问题看下代码->回来干活->看邮件->干活->看邮件->看邮件->下班&hellip;&hellip;</p>
+
+<p>真实的情况可能比上面更复杂，尤其是你有QQ提醒等等之类的东西的时候。我不知道别的公司怎么样，反正在我公司现在邮件是比较重要的，如果不及时回复很可能一会儿就会IM或者电话找你了。</p>
+
+<p>自己反省可能有几个原因导致效率降低：</p>
+
+<ul>
+<li>缺少一天的计划。最好是每一天都有每一天的计划，而且关键要写下来。我们习惯于将各种计划都放在头脑中，导致同时想着太多的事情，致使不能专注。</li>
+<li>不断被打断，使得自己很难持续一段时间专注在一件事情上。尤其是同时又几件任务并发的时候，做这件事情的时候又被那件事情的邮件干扰。虽然有些客观因素不可避免，但是只有强制自己少被其他事情干扰，才能专注的把事情做完。</li>
+<li>事情的优先级没有安排好。俗话啊<strong>人有旦夕祸福，事有轻重缓急</strong>，将事情按轻重缓急的优先级列出，使得自己一目了然，不用再在头脑思考切换，让头脑专注的做应该做具体的事情，不要让再思考该做哪个，不该做哪个(当然我指定是不影响你做事的时间，事实上想清楚应该做什么是最重要的，我们第一应该做的就是花时间思考清楚这一点)。</li>
+</ul>
+
+
+<p>我在考虑如何提高自己效率的时候，偶然间，邂逅了 “番茄工作法”，使用 “番茄钟” 来提醒自己，在这25分钟的时间要专注在当前的事情上，“番茄钟”没有响起，你不可以去干其他事情。下面就介绍一下，希望对你也有帮助。:&ndash;)</p>
+
+<h3>什么是番茄工作法？</h3>
+
+<blockquote><p>番茄工作法（Pomodoro Technique）由弗朗西斯科·西里洛于1992年创立的相对于<a href="http://www.baike.com/wiki/gtd&amp;prd=button_doc_jinru">GTD</a>更微观的时间管理方法。</p>
+
+<p>他在大学生活的头几年，曾一度苦于学习效率低下，于是便和自己打赌，狠狠鄙视自己说：“我能学一会儿习吗？真正学上10分钟？”后来他找到了一枚厨房定时器，形状像西红柿（Pomodoro ，意大利语的“番茄”）。就这样，遇到了他的番茄钟。</p>
+
+<p>所谓“番茄工作法”，指的是把任务分解成半小时左右，集中精力工作25分钟后休息5分钟，如此视作种一个“番茄”。哪怕工作没有完成，也要定时休息，然后再进入下一个番茄时间。收获4个“番茄”后，能休息15至30分钟。</p>
+
+<p>这样的设定是考虑到，对庞大任务的恐惧和抗拒是导致拖延的重要原因，把注意力集中在“当下”，能帮助人更好地集中精力、摆脱过去失败的阴影和对“万一任务完不成”的焦虑。而种“番茄”期间的休息安排，这样的小小激励能使下一个30分钟更有动力。</p>
+
+<p>&mdash;参考<a href="http://www.baike.com/wiki/%E7%95%AA%E8%8C%84%E5%B7%A5%E4%BD%9C%E6%B3%95">互动百科</a></p></blockquote>
+
+<h3>我如何应用番茄工作法</h3>
+
+<p>要实践<strong>番茄工作法</strong>，首先你要有一个<strong>番茄钟</strong>,这个助手帮助你设定好时间，时间到了之后提醒你。我发现在 Windows平台和Android平台都已经有这样的应用程序，不过尝试了一下，我都觉得不是很好用，直到我发现了一个 <a href="http://stevevallay.github.io/tomato/">web 版本</a>，它很好的解决了我在 windows（在公司) 和 linux(在家) 都要使用的需求。而且界面简单易用，代码在 <a href="https://github.com/">Github</a> 上还可以自己修改。这个小程序是由腾讯的 <a href="https://github.com/AlloyTeam">Alloy Team</a> 用 <code>html</code> 和 <code>js</code> 写成的，我 <a href="https://github.com/SteveVallay/tomato">Fork 了一下</a> ，小小的改动了一下，你可以<a href="http://stevevallay.github.io/tomato/">预览一下</a>。</p>
+
+<p>界面非常简洁，使用 bootstrap css 看起来很清秀。如下：</p>
+
+<p><img src="/images/blog/tomato.png" alt="tomato" /></p>
+
+<h3>番茄工作法带来的好处</h3>
+]]></content>
+  </entry>
+  
+</feed>

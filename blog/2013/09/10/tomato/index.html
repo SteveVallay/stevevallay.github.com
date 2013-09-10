@@ -5,12 +5,12 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>using bootstrap in rails - Zhibin's blog</title>
+  <title>番茄工作法 - Zhibin's blog</title>
   <meta name="author" content="zhibin">
 
   
-  <meta name="description" content="using bootstrap css framework rails">
-  <meta name="keywords" content="bootstrap,css,rails,framework">
+  <meta name="description" content="番茄工作法">
+  <meta name="keywords" content="番茄工作法，时间管理">
 
   <!-- http://t.co/dKP3o1e -->
   <meta name="HandheldFriendly" content="True">
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://SteveVallay.github.io/blog/2013/09/04/using-bootstrap-in-rails">
+  <link rel="canonical" href="http://SteveVallay.github.io/blog/2013/09/10/tomato">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="Zhibin's blog" type="application/atom+xml">
@@ -81,7 +81,7 @@
   
   <header>
     
-      <h1 class="entry-title">Using Bootstrap in Rails</h1>
+      <h1 class="entry-title">番茄工作法</h1>
     
     
       <p class="meta">
@@ -97,7 +97,7 @@
   
 
 
-<time datetime="2013-09-04T12:41:00+08:00" pubdate data-updated="true">Sep 4<span>th</span>, 2013</time>
+<time datetime="2013-09-10T10:14:00+08:00" pubdate data-updated="true">Sep 10<span>th</span>, 2013</time>
         
          | <a href="#disqus_thread">Comments</a>
         
@@ -106,74 +106,50 @@
   </header>
 
 
-<div class="entry-content"><p>本人 <code>rails</code> 新手，使用 <code>rails 4.0</code> ， 在 <code>rails</code> <code>app</code> 中添加 <a href="http://getbootstrap.com/" title="home page">Bootstrap</a> 支持, 参考 <code>Ruby on Rails tutorial 2nd edition En</code>。</p>
+<div class="entry-content"><p><img src="/images/blog/tomato-tech.png" alt="" /></p>
 
-<!-- more -->
-
-
-<h2>Step 1  添加 <a href="https://github.com/thomas-mcdonald/bootstrap-sass" title="github">bootstrap-sass</a> 到 <strong>Gemfile</strong></h2>
-
-<p>打开 <strong>Gemfile</strong> 添加如下内容：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># Use bootstrap</span>
-</span><span class='line'>  <span class="n">gem</span> <span class="s1">&#39;bootstrap-sass&#39;</span><span class="p">,</span><span class="s1">&#39;~&gt;2.3.2&#39;</span> <span class="c1">#tutorial 上用的是2.0.0</span>
-</span></code></pre></td></tr></table></div></figure>
+<!--more-->
 
 
-<h2>Step 2 安装</h2>
+<p>经常会遇到这样的情况：在忙碌了一天之后，发现 <strong>咦?一天结束了，可是怎么觉得什么都没干呢？</strong>
+，回想一下自己一天工作的场景：</p>
 
-<p>直接运行：</p>
+<p>收邮件->回邮件->干会儿活A->收到新邮件->擦，新Bug->回复下->干会儿活->有人来问问题->过去看下->搞定->回来->看下邮件->休息下看看twitter->继续干活->fouban.fm换首歌->有新邮件->再干会儿活->看看github->有人IM找你->IM聊天&hellip;&ndash;>干活儿->有人电话你->新问题看下代码->回来干活->看邮件->干活->看邮件->看邮件->下班&hellip;&hellip;</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bundle</span> <span class="n">install</span>
-</span></code></pre></td></tr></table></div></figure>
+<p>真实的情况可能比上面更复杂，尤其是你有QQ提醒等等之类的东西的时候。我不知道别的公司怎么样，反正在我公司现在邮件是比较重要的，如果不及时回复很可能一会儿就会IM或者电话找你了。</p>
 
+<p>自己反省可能有几个原因导致效率降低：</p>
 
-<h2>Step 3 创建 <code>custom.css.scss</code></h2>
-
-<p>创建 <code>custom.css.scss</code> 文件：</p>
-
-<p><strong>app/assets/stylesheets/custom.css.scss</strong></p>
-
-<p>在 <strong>app/assets/stylesheets</strong> 下的文件会自动被 <strong>application.css</strong> <code>include</code>进来。</p>
-
-<p>在这个文件中可以添加 bootstrap CSS 进来，在 <code>custom.css.scss</code> 中添加：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='css'><span class='line'><span class="k">@import</span> <span class="s2">&quot;bootstrap&quot;</span><span class="p">;</span>
-</span></code></pre></td></tr></table></div></figure>
+<ul>
+<li>缺少一天的计划。最好是每一天都有每一天的计划，而且关键要写下来。我们习惯于将各种计划都放在头脑中，导致同时想着太多的事情，致使不能专注。</li>
+<li>不断被打断，使得自己很难持续一段时间专注在一件事情上。尤其是同时又几件任务并发的时候，做这件事情的时候又被那件事情的邮件干扰。虽然有些客观因素不可避免，但是只有强制自己少被其他事情干扰，才能专注的把事情做完。</li>
+<li>事情的优先级没有安排好。俗话啊<strong>人有旦夕祸福，事有轻重缓急</strong>，将事情按轻重缓急的优先级列出，使得自己一目了然，不用再在头脑思考切换，让头脑专注的做应该做具体的事情，不要让再思考该做哪个，不该做哪个(当然我指定是不影响你做事的时间，事实上想清楚应该做什么是最重要的，我们第一应该做的就是花时间思考清楚这一点)。</li>
+</ul>
 
 
-<p>当然，还可以在<code>custom.css.sass</code>文件中添加自己的<code>custom</code> 如：</p>
+<p>我在考虑如何提高自己效率的时候，偶然间，邂逅了 “番茄工作法”，使用 “番茄钟” 来提醒自己，在这25分钟的时间要专注在当前的事情上，“番茄钟”没有响起，你不可以去干其他事情。下面就介绍一下，希望对你也有帮助。:&ndash;)</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class='css'><span class='line'><span class="k">@import</span> <span class="s2">&quot;bootstrap&quot;</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="c">/*universal*/</span>
-</span><span class='line'>
-</span><span class='line'><span class="nt">html</span> <span class="p">{</span>
-</span><span class='line'>        <span class="k">overflow-y</span><span class="o">:</span><span class="k">scroll</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="nt">body</span> <span class="p">{</span>
-</span><span class='line'>        <span class="k">padding-top</span><span class="o">:</span> <span class="m">10px</span><span class="p">;</span>
-</span><span class='line'>        <span class="k">padding-left</span><span class="o">:</span> <span class="m">10px</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
+<h3>什么是番茄工作法？</h3>
 
+<blockquote><p>番茄工作法（Pomodoro Technique）由弗朗西斯科·西里洛于1992年创立的相对于<a href="http://www.baike.com/wiki/gtd&amp;prd=button_doc_jinru">GTD</a>更微观的时间管理方法。</p>
+
+<p>他在大学生活的头几年，曾一度苦于学习效率低下，于是便和自己打赌，狠狠鄙视自己说：“我能学一会儿习吗？真正学上10分钟？”后来他找到了一枚厨房定时器，形状像西红柿（Pomodoro ，意大利语的“番茄”）。就这样，遇到了他的番茄钟。</p>
+
+<p>所谓“番茄工作法”，指的是把任务分解成半小时左右，集中精力工作25分钟后休息5分钟，如此视作种一个“番茄”。哪怕工作没有完成，也要定时休息，然后再进入下一个番茄时间。收获4个“番茄”后，能休息15至30分钟。</p>
+
+<p>这样的设定是考虑到，对庞大任务的恐惧和抗拒是导致拖延的重要原因，把注意力集中在“当下”，能帮助人更好地集中精力、摆脱过去失败的阴影和对“万一任务完不成”的焦虑。而种“番茄”期间的休息安排，这样的小小激励能使下一个30分钟更有动力。</p>
+
+<p>&mdash;参考<a href="http://www.baike.com/wiki/%E7%95%AA%E8%8C%84%E5%B7%A5%E4%BD%9C%E6%B3%95">互动百科</a></p></blockquote>
+
+<h3>我如何应用番茄工作法</h3>
+
+<p>要实践<strong>番茄工作法</strong>，首先你要有一个<strong>番茄钟</strong>,这个助手帮助你设定好时间，时间到了之后提醒你。我发现在 Windows平台和Android平台都已经有这样的应用程序，不过尝试了一下，我都觉得不是很好用，直到我发现了一个 <a href="http://stevevallay.github.io/tomato/">web 版本</a>，它很好的解决了我在 windows（在公司) 和 linux(在家) 都要使用的需求。而且界面简单易用，代码在 <a href="https://github.com/">Github</a> 上还可以自己修改。这个小程序是由腾讯的 <a href="https://github.com/AlloyTeam">Alloy Team</a> 用 <code>html</code> 和 <code>js</code> 写成的，我 <a href="https://github.com/SteveVallay/tomato">Fork 了一下</a> ，小小的改动了一下，你可以<a href="http://stevevallay.github.io/tomato/">预览一下</a>。</p>
+
+<p>界面非常简洁，使用 bootstrap css 看起来很清秀。如下：</p>
+
+<p><img src="/images/blog/tomato.png" alt="tomato" /></p>
+
+<h3>番茄工作法带来的好处</h3>
 </div>
 
 
@@ -196,12 +172,12 @@
   
 
 
-<time datetime="2013-09-04T12:41:00+08:00" pubdate data-updated="true">Sep 4<span>th</span>, 2013</time>
+<time datetime="2013-09-10T10:14:00+08:00" pubdate data-updated="true">Sep 10<span>th</span>, 2013</time>
       
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/bootstrap/'>bootstrap</a>, <a class='category' href='/blog/categories/rails/'>rails</a>
+    <a class='category' href='/blog/categories/shi-jian-guan-li-,todo/'>时间管理，todo</a>, <a class='category' href='/blog/categories/fan-qie-gong-zuo-fa-,tomato/'>番茄工作法，tomato</a>
   
 </span>
 
@@ -210,7 +186,7 @@
     
       <div class="sharing">
   
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://SteveVallay.github.io/blog/2013/09/04/using-bootstrap-in-rails/" data-via="zhibin_" data-counturl="http://SteveVallay.github.io/blog/2013/09/04/using-bootstrap-in-rails/" >Tweet</a>
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://SteveVallay.github.io/blog/2013/09/10/tomato/" data-via="zhibin_" data-counturl="http://SteveVallay.github.io/blog/2013/09/10/tomato/" >Tweet</a>
   
   
   <div class="g-plusone" data-size="medium"></div>
@@ -221,10 +197,8 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2013/08/29/rails-4-using-jquery/" title="Previous Post: rails 4 using jquery">&laquo; rails 4 using jquery</a>
+        <a class="basic-alignment left" href="/blog/2013/09/04/using-bootstrap-in-rails/" title="Previous Post: using bootstrap in rails">&laquo; using bootstrap in rails</a>
       
-      
-        <a class="basic-alignment right" href="/blog/2013/09/10/tomato/" title="Next Post: 番茄工作法">番茄工作法 &raquo;</a>
       
     </p>
   </footer>
@@ -319,8 +293,8 @@
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://SteveVallay.github.io/blog/2013/09/04/using-bootstrap-in-rails/';
-        var disqus_url = 'http://SteveVallay.github.io/blog/2013/09/04/using-bootstrap-in-rails/';
+        var disqus_identifier = 'http://SteveVallay.github.io/blog/2013/09/10/tomato/';
+        var disqus_url = 'http://SteveVallay.github.io/blog/2013/09/10/tomato/';
         var disqus_script = 'embed.js';
       
     (function () {
