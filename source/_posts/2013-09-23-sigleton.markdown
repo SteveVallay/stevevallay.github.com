@@ -1,0 +1,151 @@
+---
+layout: post
+title: "Crational Pattern - Sigleton"
+date: 2013-09-23 13:54
+comments: true
+categories: [design pattern,Singleton]
+keywords: Design Pattern, Singleton, Softwrare, Object Oriented
+description: Singleton Pattern
+---
+
+发现习惯 [Octopress][1] 之后，就懒得再去照顾 [Wordpress 博客][2] 了 ;-)。使用 `Octopress` 一个多月的时间，发觉使用这个轻量级的 `Framework` 写博客真是很舒服：
+
+- 简单的 `MarkDown` 语法，方便快速的处理基本的格式，比起处理 `HTML` 来要轻松多了。
+- 托管使用 [GitHub][gh], 免费，还不用担心服务器性能问题。自带版本控制。
+
+唯一的缺点可能是：你得在本地搭建一个环境，对于非程序员的一般用户来说，可能稍显复杂。
+
+如果你也想搭建一个这样的博客，请参考[这里][blog]
+
+继续[这里][2] 学习 `Design Patterns`，今天来学习 `Singleton` 。
+
+<!--more-->
+
+又看了一遍 [这篇文章][cool], 写的真是不错，`Design Patterns` 是从[建筑领域][pattern-lan]借鉴过来，解决软件设计中的问题。`GOF` 的 `Desgin Patterns`  中探讨了如何应用 Design Pattern 解决面向对象程序设计中的问题，如果我们能够不局限于此，从一般的软件设计和更加宽泛的角度来认识，或许能认识的更加深刻和独到。
+
+### 为什么使用 `Singleton` 模式
+
+使用 `Singleton` 是为了保证一个类只有一个实例，并且提供一个全局统一的接口来访问这个实例。
+
+有很多情况下，需要保证一个类只有一个全局的实例：比如，全局的配置类需要保证有一个实例，这样才能保证所有使用的地方取到的配置是一致的；再比如，系统中管理窗口的类，也需要保证只有一个实例，这样才能保证窗口正确的排序和切换。
+
+### 如何实现 `Singleton`
+
+如何保证一个类只有一个实例，而且是全局可以访问的？ 一个全局变量怎么样？虽然全局变量可以保证全局可以访问，但是不能保证只有一个实例。
+
+让一个类自己来保证只有一个实例，提供一个全局统一的访问接口似乎是更合理的做法。因为是由这个类自己来响应创建实例和访问实例的请求。
+
+来看一下这个结构图：
+
+![single][sin-gif]
+
+从上图可以看出，这个类需要有一个唯一的实例 `uniqueInstance` , 以及一个可以访问这个实例的接口 `Instance()`。`singletonData` 是其他数据成员，`SingletonOperation` 和 `GetSingletonData` 是类的一般方法。
+
+
+那么实现才能保证一个实例，全局访问呢？
+
+Singleton 的声明：
+
+``` c++
+ class Singleton {
+    public:
+        static Singleton* Instance();
+    protected:
+        Singleton();
+    private:
+        static Singleton* _instance;
+    };
+```
+定义一个 `static` 方法 `Instance()` 保证全局统一访问；将构造函数 `Singleton（）`设置为
+`protected` 使得外部无法调用此接口来创建新的实例，实现了自己控制实例的数量（此类或子类中），不受外部影响。
+
+Singleton 的实现：
+
+``` c++
+  Singleton* Singleton::_instance = 0;
+    
+    Singleton* Singleton::Instance () {
+        if (_instance == 0) {
+            _instance = new Singleton;
+        }
+        return _instance;
+    }
+```
+在返回 `Instance` 之前判断是否存在，如果不存在则创建这个实例，保证了实例只创建一次。
+
+
+## `Singleton` 的子类
+
+有时候可能 `Singleton` 需要满足不同的需求，因此需要几个不同的子类来是实现不同的需求，但是，如何保证运行时将正确的 `Instance` 绑定到 `_instance` 成员呢？
+
+最简单的方法是在 `Instance()` 方法中根据配置来决定使用哪一个 `Singleton`。使用一种 `Registry` 和 `Lookup` 来决定使用哪个子类。
+
+来看下新的 `Singleton` :
+
+```c++
+class Singleton {
+    public:
+        static void Register(const char* name, Singleton*);
+        static Singleton* Instance();
+    protected:
+        static Singleton* Lookup(const char* name);
+    private:
+        static Singleton* _instance;
+        static List<NameSingletonPair>* _registry;
+    };
+```
+
+`Register` 用来注册 `Singleton` 子类, 保存了一份 `Singleton` 子类的名字和实例 `map`，
+`Lookup` 通过名字来找到正确的 `Singleton` 子类的实例。(假定名字是可以通过上下文环境来获取的)
+
+`Instance()` 的实现：
+
+```c++
+    Singleton* Singleton::Instance () {
+        if (_instance == 0) {
+            const char* singletonName = getenv("SINGLETON");
+            // user or environment supplies this at startup
+    
+            _instance = Lookup(singletonName);
+            // Lookup returns 0 if there's no such singleton
+        }
+        return _instance;
+    }
+```
+
+`Singleton` 的子类：
+
+```
+static MySingleton theSingleton;
+
+   MySingleton::MySingleton() {
+        // ...
+        Singleton::Register("MySingleton", this);
+    }
+
+```
+
+###  android 中一个实现 `Singleton` 的例子
+
+*WindowManagerGlobal.java*
+
+```java
+  public static WindowManagerGlobal getInstance() {
+        synchronized (WindowManagerGlobal.class) {
+            if (sDefaultWindowManager == null) {
+                sDefaultWindowManager = new WindowManagerGlobal();
+            }
+            return sDefaultWindowManager;
+        }
+    }
+```
+
+
+[1]:http://octopress.org
+[2]:http://enjoyhacking.com
+[gh-pg]:http://pages.github.com/
+[gh]:http://github.com
+[blog]:http://stevevallay.github.io/blog/2013/08/15/blog-equals-octopress-plus-github-pages/
+[cool]:http://coolshell.cn/articles/8961.html
+[pattern-lan]:http://en.wikipedia.org/wiki/A_Pattern_Language
+[sin-gif]:/images/blog/singl014.gif
