@@ -1,0 +1,478 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Crational Pattern - Sigleton - Zhibin's blog</title>
+  <meta name="author" content="zhibin">
+
+  
+  <meta name="description" content="Singleton Pattern">
+  <meta name="keywords" content="Design Pattern, Singleton, Softwrare, Object Oriented">
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://SteveVallay.github.io/blog/2013/09/23/sigleton">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Zhibin's blog" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/lib/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-39252101-2']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Zhibin's blog</a></h1>
+  
+    <h2>always smile :-)</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:SteveVallay.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Crational Pattern - Sigleton</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-09-23T13:54:00+08:00" pubdate data-updated="true">Sep 23<span>rd</span>, 2013</time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>发现习惯 <a href="http://octopress.org">Octopress</a> 之后，就懒得再去照顾 <a href="http://enjoyhacking.com">Wordpress 博客</a> 了 ;&ndash;)。使用 <code>Octopress</code> 一个多月的时间，发觉使用这个轻量级的 <code>Framework</code> 写博客真是很舒服：</p>
+
+<ul>
+<li>简单的 <code>MarkDown</code> 语法，方便快速的处理基本的格式，比起处理 <code>HTML</code> 来要轻松多了。</li>
+<li>托管使用 <a href="http://github.com">GitHub</a>, 免费，还不用担心服务器性能问题。自带版本控制。</li>
+</ul>
+
+
+<p>唯一的缺点可能是：你得在本地搭建一个环境，对于非程序员的一般用户来说，可能稍显复杂。</p>
+
+<p>如果你也想搭建一个这样的博客，请参考<a href="http://stevevallay.github.io/blog/2013/08/15/blog-equals-octopress-plus-github-pages/">这里</a></p>
+
+<p>继续<a href="http://enjoyhacking.com">这里</a> 学习 <code>Design Patterns</code>，今天来学习 <code>Singleton</code> 。</p>
+
+<!--more-->
+
+
+<p>又看了一遍 <a href="http://coolshell.cn/articles/8961.html">这篇文章</a>, 写的真是不错，<code>Design Patterns</code> 是从<a href="http://en.wikipedia.org/wiki/A_Pattern_Language">建筑领域</a>借鉴过来，解决软件设计中的问题。<code>GOF</code> 的 <code>Desgin Patterns</code>  中探讨了如何应用 Design Pattern 解决面向对象程序设计中的问题，如果我们能够不局限于此，从一般的软件设计和更加宽泛的角度来认识，或许能认识的更加深刻和独到。</p>
+
+<h3>为什么使用 <code>Singleton</code> 模式</h3>
+
+<p>使用 <code>Singleton</code> 是为了保证一个类只有一个实例，并且提供一个全局统一的接口来访问这个实例。</p>
+
+<p>有很多情况下，需要保证一个类只有一个全局的实例：比如，全局的配置类需要保证有一个实例，这样才能保证所有使用的地方取到的配置是一致的；再比如，系统中管理窗口的类，也需要保证只有一个实例，这样才能保证窗口正确的排序和切换。</p>
+
+<h3>如何实现 <code>Singleton</code></h3>
+
+<p>如何保证一个类只有一个实例，而且是全局可以访问的？ 一个全局变量怎么样？虽然全局变量可以保证全局可以访问，但是不能保证只有一个实例。</p>
+
+<p>让一个类自己来保证只有一个实例，提供一个全局统一的访问接口似乎是更合理的做法。因为是由这个类自己来响应创建实例和访问实例的请求。</p>
+
+<p>来看一下这个结构图：</p>
+
+<p><img src="/images/blog/singl014.gif" alt="single" /></p>
+
+<p>从上图可以看出，这个类需要有一个唯一的实例 <code>uniqueInstance</code> , 以及一个可以访问这个实例的接口 <code>Instance()</code>。<code>singletonData</code> 是其他数据成员，<code>SingletonOperation</code> 和 <code>GetSingletonData</code> 是类的一般方法。</p>
+
+<p>那么实现才能保证一个实例，全局访问呢？</p>
+
+<p>Singleton 的声明：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='c++'><span class='line'> <span class="k">class</span> <span class="nc">Singleton</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">public</span><span class="o">:</span>
+</span><span class='line'>        <span class="k">static</span> <span class="n">Singleton</span><span class="o">*</span> <span class="n">Instance</span><span class="p">();</span>
+</span><span class='line'>    <span class="k">protected</span><span class="o">:</span>
+</span><span class='line'>        <span class="n">Singleton</span><span class="p">();</span>
+</span><span class='line'>    <span class="k">private</span><span class="o">:</span>
+</span><span class='line'>        <span class="k">static</span> <span class="n">Singleton</span><span class="o">*</span> <span class="n">_instance</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">};</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>定义一个 <code>static</code> 方法 <code>Instance()</code> 保证全局统一访问；将构造函数 <code>Singleton（）</code>设置为
+<code>protected</code> 使得外部无法调用此接口来创建新的实例，实现了自己控制实例的数量（此类或子类中），不受外部影响。</p>
+
+<p>Singleton 的实现：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='c++'><span class='line'>  <span class="n">Singleton</span><span class="o">*</span> <span class="n">Singleton</span><span class="o">::</span><span class="n">_instance</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">Singleton</span><span class="o">*</span> <span class="n">Singleton</span><span class="o">::</span><span class="n">Instance</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">if</span> <span class="p">(</span><span class="n">_instance</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>            <span class="n">_instance</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Singleton</span><span class="p">;</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">_instance</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在返回 <code>Instance</code> 之前判断是否存在，如果不存在则创建这个实例，保证了实例只创建一次。</p>
+
+<h2><code>Singleton</code> 的子类</h2>
+
+<p>有时候可能 <code>Singleton</code> 需要满足不同的需求，因此需要几个不同的子类来是实现不同的需求，但是，如何保证运行时将正确的 <code>Instance</code> 绑定到 <code>_instance</code> 成员呢？</p>
+
+<p>最简单的方法是在 <code>Instance()</code> 方法中根据配置来决定使用哪一个 <code>Singleton</code>。使用一种 <code>Registry</code> 和 <code>Lookup</code> 来决定使用哪个子类。</p>
+
+<p>来看下新的 <code>Singleton</code> :</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='c++'><span class='line'><span class="k">class</span> <span class="nc">Singleton</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">public</span><span class="o">:</span>
+</span><span class='line'>        <span class="k">static</span> <span class="kt">void</span> <span class="n">Register</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">name</span><span class="p">,</span> <span class="n">Singleton</span><span class="o">*</span><span class="p">);</span>
+</span><span class='line'>        <span class="k">static</span> <span class="n">Singleton</span><span class="o">*</span> <span class="n">Instance</span><span class="p">();</span>
+</span><span class='line'>    <span class="k">protected</span><span class="o">:</span>
+</span><span class='line'>        <span class="k">static</span> <span class="n">Singleton</span><span class="o">*</span> <span class="n">Lookup</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">name</span><span class="p">);</span>
+</span><span class='line'>    <span class="k">private</span><span class="o">:</span>
+</span><span class='line'>        <span class="k">static</span> <span class="n">Singleton</span><span class="o">*</span> <span class="n">_instance</span><span class="p">;</span>
+</span><span class='line'>        <span class="k">static</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">NameSingletonPair</span><span class="o">&gt;*</span> <span class="n">_registry</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">};</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>Register</code> 用来注册 <code>Singleton</code> 子类, 保存了一份 <code>Singleton</code> 子类的名字和实例 <code>map</code>，
+<code>Lookup</code> 通过名字来找到正确的 <code>Singleton</code> 子类的实例。(假定名字是可以通过上下文环境来获取的)</p>
+
+<p><code>Instance()</code> 的实现：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='c++'><span class='line'><span class="n">Singleton</span><span class="o">*</span> <span class="n">Singleton</span><span class="o">::</span><span class="n">Instance</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="n">_instance</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">singletonName</span> <span class="o">=</span> <span class="n">getenv</span><span class="p">(</span><span class="s">&quot;SINGLETON&quot;</span><span class="p">);</span>
+</span><span class='line'>        <span class="c1">// user or environment supplies this at startup</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">_instance</span> <span class="o">=</span> <span class="n">Lookup</span><span class="p">(</span><span class="n">singletonName</span><span class="p">);</span>
+</span><span class='line'>        <span class="c1">// Lookup returns 0 if there&#39;s no such singleton</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">_instance</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>Singleton</code> 的子类：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='c++'><span class='line'><span class="k">static</span> <span class="n">MySingleton</span> <span class="n">theSingleton</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>   <span class="n">MySingleton</span><span class="o">::</span><span class="n">MySingleton</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>        <span class="c1">// ...</span>
+</span><span class='line'>        <span class="n">Singleton</span><span class="o">::</span><span class="n">Register</span><span class="p">(</span><span class="s">&quot;MySingleton&quot;</span><span class="p">,</span> <span class="k">this</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>android 中一个实现 <code>Singleton</code> 的例子</h3>
+
+<p><em>WindowManagerGlobal.java</em></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'>  <span class="kd">public</span> <span class="kd">static</span> <span class="n">WindowManagerGlobal</span> <span class="nf">getInstance</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="kd">synchronized</span> <span class="o">(</span><span class="n">WindowManagerGlobal</span><span class="o">.</span><span class="na">class</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="k">if</span> <span class="o">(</span><span class="n">sDefaultWindowManager</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                <span class="n">sDefaultWindowManager</span> <span class="o">=</span> <span class="k">new</span> <span class="n">WindowManagerGlobal</span><span class="o">();</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>            <span class="k">return</span> <span class="n">sDefaultWindowManager</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">zhibin</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-09-23T13:54:00+08:00" pubdate data-updated="true">Sep 23<span>rd</span>, 2013</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/singleton/'>Singleton</a>, <a class='category' href='/blog/categories/design-pattern/'>design pattern</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://SteveVallay.github.io/blog/2013/09/23/sigleton/" data-via="zhibin_" data-counturl="http://SteveVallay.github.io/blog/2013/09/23/sigleton/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2013/09/10/tomato/" title="Previous Post: 番茄工作法">&laquo; 番茄工作法</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2013/09/23/sigleton/">Crational Pattern - Sigleton</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/09/10/tomato/">番茄工作法</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/09/04/using-bootstrap-in-rails/">Using Bootstrap in Rails</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/08/29/rails-4-using-jquery/">Rails 4 Using Jquery</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/08/27/deploy-rails-app-on-heroku/">部署 Rails 程序到 Heroku</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/SteveVallay">@SteveVallay</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'SteveVallay',
+            count: 2,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2013 - zhibin -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'zhibin';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://SteveVallay.github.io/blog/2013/09/23/sigleton/';
+        var disqus_url = 'http://SteveVallay.github.io/blog/2013/09/23/sigleton/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

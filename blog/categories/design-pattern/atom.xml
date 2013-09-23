@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: design pattern | Zhibin's blog]]></title>
+  <link href="http://SteveVallay.github.io/blog/categories/design-pattern/atom.xml" rel="self"/>
+  <link href="http://SteveVallay.github.io/"/>
+  <updated>2013-09-23T17:02:56+08:00</updated>
+  <id>http://SteveVallay.github.io/</id>
+  <author>
+    <name><![CDATA[zhibin]]></name>
+    <email><![CDATA[zhibinwang.q@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Crational Pattern - Sigleton]]></title>
+    <link href="http://SteveVallay.github.io/blog/2013/09/23/sigleton/"/>
+    <updated>2013-09-23T13:54:00+08:00</updated>
+    <id>http://SteveVallay.github.io/blog/2013/09/23/sigleton</id>
+    <content type="html"><![CDATA[<p>发现习惯 <a href="http://octopress.org">Octopress</a> 之后，就懒得再去照顾 <a href="http://enjoyhacking.com">Wordpress 博客</a> 了 ;&ndash;)。使用 <code>Octopress</code> 一个多月的时间，发觉使用这个轻量级的 <code>Framework</code> 写博客真是很舒服：</p>
+
+<ul>
+<li>简单的 <code>MarkDown</code> 语法，方便快速的处理基本的格式，比起处理 <code>HTML</code> 来要轻松多了。</li>
+<li>托管使用 <a href="http://github.com">GitHub</a>, 免费，还不用担心服务器性能问题。自带版本控制。</li>
+</ul>
+
+
+<p>唯一的缺点可能是：你得在本地搭建一个环境，对于非程序员的一般用户来说，可能稍显复杂。</p>
+
+<p>如果你也想搭建一个这样的博客，请参考<a href="http://stevevallay.github.io/blog/2013/08/15/blog-equals-octopress-plus-github-pages/">这里</a></p>
+
+<p>继续<a href="http://enjoyhacking.com">这里</a> 学习 <code>Design Patterns</code>，今天来学习 <code>Singleton</code> 。</p>
+
+<!--more-->
+
+
+<p>又看了一遍 <a href="http://coolshell.cn/articles/8961.html">这篇文章</a>, 写的真是不错，<code>Design Patterns</code> 是从<a href="http://en.wikipedia.org/wiki/A_Pattern_Language">建筑领域</a>借鉴过来，解决软件设计中的问题。<code>GOF</code> 的 <code>Desgin Patterns</code>  中探讨了如何应用 Design Pattern 解决面向对象程序设计中的问题，如果我们能够不局限于此，从一般的软件设计和更加宽泛的角度来认识，或许能认识的更加深刻和独到。</p>
+
+<h3>为什么使用 <code>Singleton</code> 模式</h3>
+
+<p>使用 <code>Singleton</code> 是为了保证一个类只有一个实例，并且提供一个全局统一的接口来访问这个实例。</p>
+
+<p>有很多情况下，需要保证一个类只有一个全局的实例：比如，全局的配置类需要保证有一个实例，这样才能保证所有使用的地方取到的配置是一致的；再比如，系统中管理窗口的类，也需要保证只有一个实例，这样才能保证窗口正确的排序和切换。</p>
+
+<h3>如何实现 <code>Singleton</code></h3>
+
+<p>如何保证一个类只有一个实例，而且是全局可以访问的？ 一个全局变量怎么样？虽然全局变量可以保证全局可以访问，但是不能保证只有一个实例。</p>
+
+<p>让一个类自己来保证只有一个实例，提供一个全局统一的访问接口似乎是更合理的做法。因为是由这个类自己来响应创建实例和访问实例的请求。</p>
+
+<p>来看一下这个结构图：</p>
+
+<p><img src="/images/blog/singl014.gif" alt="single" /></p>
+
+<p>从上图可以看出，这个类需要有一个唯一的实例 <code>uniqueInstance</code> , 以及一个可以访问这个实例的接口 <code>Instance()</code>。<code>singletonData</code> 是其他数据成员，<code>SingletonOperation</code> 和 <code>GetSingletonData</code> 是类的一般方法。</p>
+
+<p>那么实现才能保证一个实例，全局访问呢？</p>
+
+<p>Singleton 的声明：</p>
+
+<p>``` c++
+ class Singleton {</p>
+
+<pre><code>public:
+    static Singleton* Instance();
+protected:
+    Singleton();
+private:
+    static Singleton* _instance;
+};
+</code></pre>
+
+<p><code>``
+定义一个</code>static<code>方法</code>Instance()<code>保证全局统一访问；将构造函数</code>Singleton（）<code>设置为
+</code>protected` 使得外部无法调用此接口来创建新的实例，实现了自己控制实例的数量（此类或子类中），不受外部影响。</p>
+
+<p>Singleton 的实现：</p>
+
+<p>``` c++
+  Singleton* Singleton::_instance = 0;</p>
+
+<pre><code>Singleton* Singleton::Instance () {
+    if (_instance == 0) {
+        _instance = new Singleton;
+    }
+    return _instance;
+}
+</code></pre>
+
+<p><code>``
+在返回</code>Instance` 之前判断是否存在，如果不存在则创建这个实例，保证了实例只创建一次。</p>
+
+<h2><code>Singleton</code> 的子类</h2>
+
+<p>有时候可能 <code>Singleton</code> 需要满足不同的需求，因此需要几个不同的子类来是实现不同的需求，但是，如何保证运行时将正确的 <code>Instance</code> 绑定到 <code>_instance</code> 成员呢？</p>
+
+<p>最简单的方法是在 <code>Instance()</code> 方法中根据配置来决定使用哪一个 <code>Singleton</code>。使用一种 <code>Registry</code> 和 <code>Lookup</code> 来决定使用哪个子类。</p>
+
+<p>来看下新的 <code>Singleton</code> :</p>
+
+<p>```c++
+class Singleton {</p>
+
+<pre><code>public:
+    static void Register(const char* name, Singleton*);
+    static Singleton* Instance();
+protected:
+    static Singleton* Lookup(const char* name);
+private:
+    static Singleton* _instance;
+    static List&lt;NameSingletonPair&gt;* _registry;
+};
+</code></pre>
+
+<p>```</p>
+
+<p><code>Register</code> 用来注册 <code>Singleton</code> 子类, 保存了一份 <code>Singleton</code> 子类的名字和实例 <code>map</code>，
+<code>Lookup</code> 通过名字来找到正确的 <code>Singleton</code> 子类的实例。(假定名字是可以通过上下文环境来获取的)</p>
+
+<p><code>Instance()</code> 的实现：</p>
+
+<p>```c++</p>
+
+<pre><code>Singleton* Singleton::Instance () {
+    if (_instance == 0) {
+        const char* singletonName = getenv("SINGLETON");
+        // user or environment supplies this at startup
+
+        _instance = Lookup(singletonName);
+        // Lookup returns 0 if there's no such singleton
+    }
+    return _instance;
+}
+</code></pre>
+
+<p>```</p>
+
+<p><code>Singleton</code> 的子类：</p>
+
+<p>```
+static MySingleton theSingleton;</p>
+
+<p>   MySingleton::MySingleton() {</p>
+
+<pre><code>    // ...
+    Singleton::Register("MySingleton", this);
+}
+</code></pre>
+
+<p>```</p>
+
+<h3>android 中一个实现 <code>Singleton</code> 的例子</h3>
+
+<p><em>WindowManagerGlobal.java</em></p>
+
+<p>```java
+  public static WindowManagerGlobal getInstance() {</p>
+
+<pre><code>    synchronized (WindowManagerGlobal.class) {
+        if (sDefaultWindowManager == null) {
+            sDefaultWindowManager = new WindowManagerGlobal();
+        }
+        return sDefaultWindowManager;
+    }
+}
+</code></pre>
+
+<p>```</p>
+]]></content>
+  </entry>
+  
+</feed>
