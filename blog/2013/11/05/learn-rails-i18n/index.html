@@ -5,12 +5,12 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Rails Tutorial Learning - Zhibin's blog</title>
+  <title>learn rails i18n - Zhibin's blog</title>
   <meta name="author" content="zhibin">
 
   
-  <meta name="description" content="Ruby on Rails Tutorial Learning">
-  <meta name="keywords" content="Ruby on Rails, tutorial">
+  <meta name="description" content="Learning i18n of Rails">
+  <meta name="keywords" content="Rails,Ruby, i18n">
 
   <!-- http://t.co/dKP3o1e -->
   <meta name="HandheldFriendly" content="True">
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://SteveVallay.github.io/blog/2013/09/24/rails-tutorial-learning">
+  <link rel="canonical" href="http://SteveVallay.github.io/blog/2013/11/05/learn-rails-i18n">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="Zhibin's blog" type="application/atom+xml">
@@ -81,7 +81,7 @@
   
   <header>
     
-      <h1 class="entry-title">Rails Tutorial Learning</h1>
+      <h1 class="entry-title">Learn Rails I18n</h1>
     
     
       <p class="meta">
@@ -97,7 +97,7 @@
   
 
 
-<time datetime="2013-09-24T05:34:00+08:00" pubdate data-updated="true">Sep 24<span>th</span>, 2013</time>
+<time datetime="2013-11-05T17:56:00+08:00" pubdate data-updated="true">Nov 5<span>th</span>, 2013</time>
         
          | <a href="#disqus_thread">Comments</a>
         
@@ -106,23 +106,72 @@
   </header>
 
 
-<div class="entry-content"><p>最近终于读完了 <a href="http://ruby.railstutorial.org/ruby-on-rails-tutorial-book" title="online book">Ruby on Rails Tutorial</a> , 这是一本 <a href="http://rubyonrails.org/" title="official site">Ruby on Rails</a> 的入门书籍，这本书很适合从零开始的初学者。笔者也是最近才开始学习 <a href="http://rubyonrails.org/" title="official site">Ruby on Rails</a> 的，在看过了 <a href="http://guides.rubyonrails.org/" title="online guides">Ruby on Rails Guides</a> 中的 <a href="http://guides.rubyonrails.org/getting_started.html" title="Get started with Rails onlnie">Get Started with Rails</a>之后，开始学习此书的。</p>
+<div class="entry-content"><p>今天，学习了一下 Rails 的国际化，为 app 添加了中文翻译，非常简单。</p>
 
-<p>本书中的大部分内容在讲述如何一步一步的使用 <a href="http://rubyonrails.org/" title="official site">Ruby on Rails</a> 搭建一个简单版的 <a href="http://twitter.com">Twitter</a>，拥有基本功能：<code>Sign Up</code> , <code>Sign In/Out</code> , <code>发布 tweet</code> , <code>查看 tweet</code> , <code>Follow/unfollow  others</code>。虽然是功能很简单，但足以让你了解使用 <code>Ruby on Rails</code> 搭建一个完整的 <code>App</code> 所需要的东西。如果你也在学习 <a href="http://rubyonrails.org/" title="official site">Ruby on Rails</a> ,而且还没有读过 <a href="http://ruby.railstutorial.org/ruby-on-rails-tutorial-book" title="online book">Ruby on Rails Tutorial</a>，那么强烈推荐<a href="http://ruby.railstutorial.org/ruby-on-rails-tutorial-book" title="online book">这本书</a>给你！(<strong>一定要注意版本哦!</strong>)</p>
-
-<!--more-->
+<!--more -->
 
 
-<p>下面来回顾一下每一章的内容，总结一下学到的东西。</p>
+<p>参考这个 <a href="http://railscasts.com/episodes/138-i18n?autoplay=true">Railscasts 视频</a> 和 <a href="http://guides.rubyonrails.org/i18n.html">Rails Guide</a>.下面结合添加 中文翻译，简单介绍一下。</p>
 
-<p>第一章是基础知识介绍：</p>
+<p>每个平台都包含自己国际化的方式，比如 Android 平台，在 res 文件夹下， 会包含各种语言的字符串，放在特定名字的文件夹下，如 string, string-zh, string-en, string-fr 等等，应用开发者只要在 string-zh 下添加所需要的中文翻译，系统在中文环境下会自动加载 string-zh 下的字符串。</p>
 
-<ul>
-<li>开发环境：编辑器，安装 <code>Ruby</code> ， <code>Ruby Gems</code> ， <code>Rails</code> ， <code>Git</code> 。</li>
-<li>创建第一个应用： <code>rails new</code> 创建 <code>app</code>， 介绍 <code>Bundle</code> ，启动 <code>rails server</code>， MVC模式。</li>
-<li><code>Git/Github</code>： 使用 <a href="http://git-scm.com/">Git</a> 进行版本控制，将代码放到 <a href="http://github.coms">GitHub</a> 托管。</li>
-<li><code>Heroku</code>：将 <code>app</code> 发布到 <a href="https://www.heroku.com/">Heroku</a></li>
-</ul>
+<p>Rails 也有类似的机制，在 config/locales 下，默认只有 en.yml， 可以在这里添加多国语言的字符串来让 Rails app 支持多国语言版本。</p>
+
+<h3>添加中文翻译文件</h3>
+
+<p>首先在 config/locales 下 copy en.yml 成  zh.yml ，然后在 zh.yml 中添加字符 id 和 对应的字符内容。</p>
+
+<p>如下：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>zh:
+</span><span class='line'>  user:
+</span><span class='line'>    name: 用户名
+</span><span class='line'>    email: 邮箱
+</span><span class='line'>    password: 密码</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果内容比较多，你可以分成不同的 namespace , 上面例子中，user 就是 zh 下面的一个 namespace， 你可以船舰更多的层次， 引用的时候以 <code>.</code> 来引用就好了， 比如 user.name。</p>
+
+<h3>在你的 code 中引用字符串 id</h3>
+
+<p>支持多国的话，就要把 code 中 引用的字符串，改为字符 id 来引用。I18n 的 api  translate (t) 可以根据字符 id 来找到对应的字符串。</p>
+
+<p>将直接引用字符串，改为使用 api 函数 t 来查找对应的语言的字符串:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">h2</span><span class="o">&gt;&lt;%=</span> <span class="no">Create</span> <span class="no">New</span> <span class="no">User</span> <span class="sx">%&gt;&lt;/h2&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>改为:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">h2</span><span class="o">&gt;&lt;%=</span> <span class="n">t</span><span class="p">(</span><span class="s1">&#39;user.new_user_reg&#39;</span><span class="p">)</span> <span class="sx">%&gt;&lt;/h2&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>程序中配置你要使用的语言</h3>
+
+<p>application_controller.rb 中添加 set_language 方法：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">before_action</span> <span class="ss">:set_language</span>
+</span><span class='line'>     <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'>     <span class="k">def</span> <span class="nf">set_language</span>
+</span><span class='line'>      <span class="no">I18n</span><span class="o">.</span><span class="n">locale</span> <span class="o">=</span> <span class="ss">:zh</span>
+</span><span class='line'>     <span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
 
 </div>
 
@@ -146,12 +195,12 @@
   
 
 
-<time datetime="2013-09-24T05:34:00+08:00" pubdate data-updated="true">Sep 24<span>th</span>, 2013</time>
+<time datetime="2013-11-05T17:56:00+08:00" pubdate data-updated="true">Nov 5<span>th</span>, 2013</time>
       
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/rails/'>Rails</a>, <a class='category' href='/blog/categories/ruby-on-rails/'>Ruby on Rails</a>, <a class='category' href='/blog/categories/tutorial/'>Tutorial</a>
+    <a class='category' href='/blog/categories/rails,i18n/'>Rails，i18n</a>
   
 </span>
 
@@ -160,7 +209,7 @@
     
       <div class="sharing">
   
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://SteveVallay.github.io/blog/2013/09/24/rails-tutorial-learning/" data-via="zhibin_" data-counturl="http://SteveVallay.github.io/blog/2013/09/24/rails-tutorial-learning/" >Tweet</a>
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://SteveVallay.github.io/blog/2013/11/05/learn-rails-i18n/" data-via="zhibin_" data-counturl="http://SteveVallay.github.io/blog/2013/11/05/learn-rails-i18n/" >Tweet</a>
   
   
   <div class="g-plusone" data-size="medium"></div>
@@ -173,8 +222,6 @@
       
         <a class="basic-alignment left" href="/blog/2013/09/23/sigleton/" title="Previous Post: Crational Pattern - Sigleton">&laquo; Crational Pattern - Sigleton</a>
       
-      
-        <a class="basic-alignment right" href="/blog/2013/10/28/rails-add-alert-in-bootstrap/" title="Next Post: Rails add alert in bootstrap">Rails add alert in bootstrap &raquo;</a>
       
     </p>
   </footer>
@@ -195,11 +242,7 @@
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2013/10/28/rails-add-alert-in-bootstrap/">Rails Add Alert in Bootstrap</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/09/24/rails-tutorial-learning/">Rails Tutorial Learning</a>
+        <a href="/blog/2013/11/05/learn-rails-i18n/">Learn Rails I18n</a>
       </li>
     
       <li class="post">
@@ -212,6 +255,10 @@
     
       <li class="post">
         <a href="/blog/2013/09/04/using-bootstrap-in-rails/">Using Bootstrap in Rails</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/08/29/rails-4-using-jquery/">Rails 4 Using Jquery</a>
       </li>
     
   </ul>
@@ -269,8 +316,8 @@
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://SteveVallay.github.io/blog/2013/09/24/rails-tutorial-learning/';
-        var disqus_url = 'http://SteveVallay.github.io/blog/2013/09/24/rails-tutorial-learning/';
+        var disqus_identifier = 'http://SteveVallay.github.io/blog/2013/11/05/learn-rails-i18n/';
+        var disqus_url = 'http://SteveVallay.github.io/blog/2013/11/05/learn-rails-i18n/';
         var disqus_script = 'embed.js';
       
     (function () {
