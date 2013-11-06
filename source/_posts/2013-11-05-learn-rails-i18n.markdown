@@ -33,7 +33,7 @@ zh:
     password: 密码
 ```
 
-如果内容比较多，你可以分成不同的 namespace , 上面例子中，user 就是 zh 下面的一个 namespace， 你可以船舰更多的层次， 引用的时候以 `.` 来引用就好了， 比如 user.name。
+如果内容比较多，你可以分成不同的 namespace , 上面例子中，user 就是 zh 下面的一个 namespace， 你可以创建更多的层次， 引用的时候以 `.` 来引用就好了， 比如 user.name。
 
 
 
@@ -41,7 +41,7 @@ zh:
 
 支持多国的话，就要把 code 中 引用的字符串，改为字符 id 来引用。I18n 的 api  translate (t) 可以根据字符 id 来找到对应的字符串。
 
-将直接引用字符串，改为使用 api 函数 t 来查找对应的语言的字符串:
+将直接引用字符串，改为使用 api 函数 t 来查找对应语言的字符串:
 
 ```ruby
 <h2><%= Create New User %></h2>
