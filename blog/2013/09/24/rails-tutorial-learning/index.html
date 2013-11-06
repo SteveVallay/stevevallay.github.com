@@ -5,12 +5,12 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>using bootstrap in rails - Zhibin's blog</title>
+  <title>Rails Tutorial Learning - Zhibin's blog</title>
   <meta name="author" content="zhibin">
 
   
-  <meta name="description" content="using bootstrap css framework rails">
-  <meta name="keywords" content="bootstrap,css,rails,framework">
+  <meta name="description" content="Ruby on Rails Tutorial Learning">
+  <meta name="keywords" content="Ruby on Rails, tutorial">
 
   <!-- http://t.co/dKP3o1e -->
   <meta name="HandheldFriendly" content="True">
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://SteveVallay.github.io/blog/2013/09/04/using-bootstrap-in-rails">
+  <link rel="canonical" href="http://SteveVallay.github.io/blog/2013/09/24/rails-tutorial-learning">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="Zhibin's blog" type="application/atom+xml">
@@ -81,7 +81,7 @@
   
   <header>
     
-      <h1 class="entry-title">Using Bootstrap in Rails</h1>
+      <h1 class="entry-title">Rails Tutorial Learning</h1>
     
     
       <p class="meta">
@@ -97,7 +97,7 @@
   
 
 
-<time datetime="2013-09-04T12:41:00+08:00" pubdate data-updated="true">Sep 4<span>th</span>, 2013</time>
+<time datetime="2013-09-24T05:34:00+08:00" pubdate data-updated="true">Sep 24<span>th</span>, 2013</time>
         
          | <a href="#disqus_thread">Comments</a>
         
@@ -106,73 +106,23 @@
   </header>
 
 
-<div class="entry-content"><p>本人 <code>rails</code> 新手，使用 <code>rails 4.0</code> ， 在 <code>rails</code> <code>app</code> 中添加 <a href="http://getbootstrap.com/" title="home page">Bootstrap</a> 支持, 参考 <code>Ruby on Rails tutorial 2nd edition En</code>。</p>
+<div class="entry-content"><p>最近终于读完了 <a href="http://ruby.railstutorial.org/ruby-on-rails-tutorial-book" title="online book">Ruby on Rails Tutorial</a> , 这是一本 <a href="http://rubyonrails.org/" title="official site">Ruby on Rails</a> 的入门书籍，这本书很适合从零开始的初学者。笔者也是最近才开始学习 <a href="http://rubyonrails.org/" title="official site">Ruby on Rails</a> 的，在看过了 <a href="http://guides.rubyonrails.org/" title="online guides">Ruby on Rails Guides</a> 中的 <a href="http://guides.rubyonrails.org/getting_started.html" title="Get started with Rails onlnie">Get Started with Rails</a>之后，开始学习此书的。</p>
 
-<!-- more -->
+<p>本书中的大部分内容在讲述如何一步一步的使用 <a href="http://rubyonrails.org/" title="official site">Ruby on Rails</a> 搭建一个简单版的 <a href="http://twitter.com">Twitter</a>，拥有基本功能：<code>Sign Up</code> , <code>Sign In/Out</code> , <code>发布 tweet</code> , <code>查看 tweet</code> , <code>Follow/unfollow  others</code>。虽然是功能很简单，但足以让你了解使用 <code>Ruby on Rails</code> 搭建一个完整的 <code>App</code> 所需要的东西。如果你也在学习 <a href="http://rubyonrails.org/" title="official site">Ruby on Rails</a> ,而且还没有读过 <a href="http://ruby.railstutorial.org/ruby-on-rails-tutorial-book" title="online book">Ruby on Rails Tutorial</a>，那么强烈推荐<a href="http://ruby.railstutorial.org/ruby-on-rails-tutorial-book" title="online book">这本书</a>给你！(<strong>一定要注意版本哦!</strong>)</p>
 
-
-<h2>Step 1  添加 <a href="https://github.com/thomas-mcdonald/bootstrap-sass" title="github">bootstrap-sass</a> 到 <strong>Gemfile</strong></h2>
-
-<p>打开 <strong>Gemfile</strong> 添加如下内容：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># Use bootstrap</span>
-</span><span class='line'>  <span class="n">gem</span> <span class="s1">&#39;bootstrap-sass&#39;</span><span class="p">,</span><span class="s1">&#39;~&gt;2.3.2&#39;</span> <span class="c1">#tutorial 上用的是2.0.0</span>
-</span></code></pre></td></tr></table></div></figure>
+<!--more-->
 
 
-<h2>Step 2 安装</h2>
+<p>下面来回顾一下每一章的内容，总结一下学到的东西。</p>
 
-<p>直接运行：</p>
+<p>第一章是基础知识介绍：</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bundle</span> <span class="n">install</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>Step 3 创建 <code>custom.css.scss</code></h2>
-
-<p>创建 <code>custom.css.scss</code> 文件：</p>
-
-<p><strong>app/assets/stylesheets/custom.css.scss</strong></p>
-
-<p>在 <strong>app/assets/stylesheets</strong> 下的文件会自动被 <strong>application.css</strong> <code>include</code>进来。</p>
-
-<p>在这个文件中可以添加 bootstrap CSS 进来，在 <code>custom.css.scss</code> 中添加：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='css'><span class='line'><span class="k">@import</span> <span class="s2">&quot;bootstrap&quot;</span><span class="p">;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>当然，还可以在<code>custom.css.sass</code>文件中添加自己的<code>custom</code> 如：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class='css'><span class='line'><span class="k">@import</span> <span class="s2">&quot;bootstrap&quot;</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="c">/*universal*/</span>
-</span><span class='line'>
-</span><span class='line'><span class="nt">html</span> <span class="p">{</span>
-</span><span class='line'>        <span class="k">overflow-y</span><span class="o">:</span><span class="k">scroll</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="nt">body</span> <span class="p">{</span>
-</span><span class='line'>        <span class="k">padding-top</span><span class="o">:</span> <span class="m">10px</span><span class="p">;</span>
-</span><span class='line'>        <span class="k">padding-left</span><span class="o">:</span> <span class="m">10px</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
+<ul>
+<li>开发环境：编辑器，安装 <code>Ruby</code> ， <code>Ruby Gems</code> ， <code>Rails</code> ， <code>Git</code> 。</li>
+<li>创建第一个应用： <code>rails new</code> 创建 <code>app</code>， 介绍 <code>Bundle</code> ，启动 <code>rails server</code>， MVC模式。</li>
+<li><code>Git/Github</code>： 使用 <a href="http://git-scm.com/">Git</a> 进行版本控制，将代码放到 <a href="http://github.coms">GitHub</a> 托管。</li>
+<li><code>Heroku</code>：将 <code>app</code> 发布到 <a href="https://www.heroku.com/">Heroku</a></li>
+</ul>
 
 </div>
 
@@ -196,12 +146,12 @@
   
 
 
-<time datetime="2013-09-04T12:41:00+08:00" pubdate data-updated="true">Sep 4<span>th</span>, 2013</time>
+<time datetime="2013-09-24T05:34:00+08:00" pubdate data-updated="true">Sep 24<span>th</span>, 2013</time>
       
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/bootstrap/'>bootstrap</a>, <a class='category' href='/blog/categories/rails/'>rails</a>
+    <a class='category' href='/blog/categories/rails/'>Rails</a>, <a class='category' href='/blog/categories/ruby-on-rails/'>Ruby on Rails</a>, <a class='category' href='/blog/categories/tutorial/'>Tutorial</a>
   
 </span>
 
@@ -210,7 +160,7 @@
     
       <div class="sharing">
   
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://SteveVallay.github.io/blog/2013/09/04/using-bootstrap-in-rails/" data-via="zhibin_" data-counturl="http://SteveVallay.github.io/blog/2013/09/04/using-bootstrap-in-rails/" >Tweet</a>
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://SteveVallay.github.io/blog/2013/09/24/rails-tutorial-learning/" data-via="zhibin_" data-counturl="http://SteveVallay.github.io/blog/2013/09/24/rails-tutorial-learning/" >Tweet</a>
   
   
   <div class="g-plusone" data-size="medium"></div>
@@ -221,10 +171,10 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2013/08/29/rails-4-using-jquery/" title="Previous Post: rails 4 using jquery">&laquo; rails 4 using jquery</a>
+        <a class="basic-alignment left" href="/blog/2013/09/23/sigleton/" title="Previous Post: Crational Pattern - Sigleton">&laquo; Crational Pattern - Sigleton</a>
       
       
-        <a class="basic-alignment right" href="/blog/2013/09/10/tomato/" title="Next Post: 番茄工作法">番茄工作法 &raquo;</a>
+        <a class="basic-alignment right" href="/blog/2013/10/28/rails-add-alert-in-bootstrap/" title="Next Post: Rails add alert in bootstrap">Rails add alert in bootstrap &raquo;</a>
       
     </p>
   </footer>
@@ -319,8 +269,8 @@
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://SteveVallay.github.io/blog/2013/09/04/using-bootstrap-in-rails/';
-        var disqus_url = 'http://SteveVallay.github.io/blog/2013/09/04/using-bootstrap-in-rails/';
+        var disqus_identifier = 'http://SteveVallay.github.io/blog/2013/09/24/rails-tutorial-learning/';
+        var disqus_url = 'http://SteveVallay.github.io/blog/2013/09/24/rails-tutorial-learning/';
         var disqus_script = 'embed.js';
       
     (function () {

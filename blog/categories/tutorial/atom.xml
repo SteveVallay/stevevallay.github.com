@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Tutorial | Zhibin's blog]]></title>
+  <link href="http://SteveVallay.github.io/blog/categories/tutorial/atom.xml" rel="self"/>
+  <link href="http://SteveVallay.github.io/"/>
+  <updated>2013-11-06T09:42:52+08:00</updated>
+  <id>http://SteveVallay.github.io/</id>
+  <author>
+    <name><![CDATA[zhibin]]></name>
+    <email><![CDATA[zhibinwang.q@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Rails Tutorial Learning]]></title>
+    <link href="http://SteveVallay.github.io/blog/2013/09/24/rails-tutorial-learning/"/>
+    <updated>2013-09-24T05:34:00+08:00</updated>
+    <id>http://SteveVallay.github.io/blog/2013/09/24/rails-tutorial-learning</id>
+    <content type="html"><![CDATA[<p>最近终于读完了 <a href="http://ruby.railstutorial.org/ruby-on-rails-tutorial-book" title="online book">Ruby on Rails Tutorial</a> , 这是一本 <a href="http://rubyonrails.org/" title="official site">Ruby on Rails</a> 的入门书籍，这本书很适合从零开始的初学者。笔者也是最近才开始学习 <a href="http://rubyonrails.org/" title="official site">Ruby on Rails</a> 的，在看过了 <a href="http://guides.rubyonrails.org/" title="online guides">Ruby on Rails Guides</a> 中的 <a href="http://guides.rubyonrails.org/getting_started.html" title="Get started with Rails onlnie">Get Started with Rails</a>之后，开始学习此书的。</p>
+
+<p>本书中的大部分内容在讲述如何一步一步的使用 <a href="http://rubyonrails.org/" title="official site">Ruby on Rails</a> 搭建一个简单版的 <a href="http://twitter.com">Twitter</a>，拥有基本功能：<code>Sign Up</code> , <code>Sign In/Out</code> , <code>发布 tweet</code> , <code>查看 tweet</code> , <code>Follow/unfollow  others</code>。虽然是功能很简单，但足以让你了解使用 <code>Ruby on Rails</code> 搭建一个完整的 <code>App</code> 所需要的东西。如果你也在学习 <a href="http://rubyonrails.org/" title="official site">Ruby on Rails</a> ,而且还没有读过 <a href="http://ruby.railstutorial.org/ruby-on-rails-tutorial-book" title="online book">Ruby on Rails Tutorial</a>，那么强烈推荐<a href="http://ruby.railstutorial.org/ruby-on-rails-tutorial-book" title="online book">这本书</a>给你！(<strong>一定要注意版本哦!</strong>)</p>
+
+<!--more-->
+
+
+<p>下面来回顾一下每一章的内容，总结一下学到的东西。</p>
+
+<p>第一章是基础知识介绍：</p>
+
+<ul>
+<li>开发环境：编辑器，安装 <code>Ruby</code> ， <code>Ruby Gems</code> ， <code>Rails</code> ， <code>Git</code> 。</li>
+<li>创建第一个应用： <code>rails new</code> 创建 <code>app</code>， 介绍 <code>Bundle</code> ，启动 <code>rails server</code>， MVC模式。</li>
+<li><code>Git/Github</code>： 使用 <a href="http://git-scm.com/">Git</a> 进行版本控制，将代码放到 <a href="http://github.coms">GitHub</a> 托管。</li>
+<li><code>Heroku</code>：将 <code>app</code> 发布到 <a href="https://www.heroku.com/">Heroku</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+</feed>
