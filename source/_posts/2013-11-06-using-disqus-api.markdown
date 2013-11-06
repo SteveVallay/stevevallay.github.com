@@ -46,11 +46,9 @@ __Choose your platform__ 界面选择你使用的平台，如果没有对应的�
 这段代码主要使用 `js` 来加载评论。如果你觉得还没有满足你的需求，你也可以考虑下[定制化][6]
 
 
+如下:
 
-
-
-
-
+![my app][disqus]
 
 
 
@@ -69,3 +67,4 @@ __Choose your platform__ 界面选择你使用的平台，如果没有对应的�
 [4]:https://disqus.com/profile/signup/
 [5]:http://disqus.com/admin/create/
 [6]:http://help.disqus.com/customer/portal/articles/565624-tightening-your-disqus-integration
+[disqus]:/images/blog/disqus.png
