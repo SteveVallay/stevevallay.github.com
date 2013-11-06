@@ -43,12 +43,16 @@
         <lastmod>2013-11-06T09:39:51+08:00</lastmod>
     </url>
     <url>
+        <loc>http://SteveVallay.github.io/blog/2013/11/06/using-disqus-api/</loc>
+        <lastmod>2013-11-06T17:48:36+08:00</lastmod>
+    </url>
+    <url>
         <loc>http://SteveVallay.github.io/about/</loc>
         <lastmod>2013-09-04T15:31:49+08:00</lastmod>
     </url>
     <url>
         <loc>http://SteveVallay.github.io/</loc>
-        <lastmod>2013-11-06T09:39:51+08:00</lastmod>
+        <lastmod>2013-11-06T17:48:36+08:00</lastmod>
     </url>
     <url>
         <loc>http://SteveVallay.github.io/robots.txt</loc>
@@ -56,6 +60,6 @@
     </url>
     <url>
         <loc>http://SteveVallay.github.io/blog/archives/</loc>
-        <lastmod>2013-11-06T09:39:51+08:00</lastmod>
+        <lastmod>2013-11-06T17:48:36+08:00</lastmod>
     </url>
 </urlset>
