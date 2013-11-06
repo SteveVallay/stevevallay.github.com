@@ -4,7 +4,7 @@
   <title><![CDATA[Zhibin's blog]]></title>
   <link href="http://SteveVallay.github.io/atom.xml" rel="self"/>
   <link href="http://SteveVallay.github.io/"/>
-  <updated>2013-11-06T17:48:53+08:00</updated>
+  <updated>2013-11-06T17:55:55+08:00</updated>
   <id>http://SteveVallay.github.io/</id>
   <author>
     <name><![CDATA[zhibin]]></name>
@@ -66,6 +66,10 @@
 
 
 <p>这段代码主要使用 <code>js</code> 来加载评论。如果你觉得还没有满足你的需求，你也可以考虑下<a href="http://help.disqus.com/customer/portal/articles/565624-tightening-your-disqus-integration">定制化</a></p>
+
+<p>如下:</p>
+
+<p><img src="http://SteveVallay.github.io/images/blog/disqus.png" alt="my app" /></p>
 ]]></content>
   </entry>
   
