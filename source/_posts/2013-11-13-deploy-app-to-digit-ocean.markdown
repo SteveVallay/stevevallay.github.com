@@ -26,7 +26,7 @@ description: Deploy app to Digital Ocean
 ![digital ocean pre-install application][101]
 
 
-预装的 **Ruby on Rails** 使用的是 [Ngnix][nginx] + [Unicorn][7] ,如果想快速部署的话可能会快一点。
+预装的 **Ruby on Rails** 使用的是 [Ngnix][nginx] + [Unicorn][7] ,如果想快速部署的话可以考虑下。
 
 
 
