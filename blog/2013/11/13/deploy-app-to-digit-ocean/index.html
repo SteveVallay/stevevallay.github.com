@@ -1,0 +1,467 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>deploy app to digit ocean - Zhibin's blog</title>
+  <meta name="author" content="zhibin">
+
+  
+  <meta name="description" content="Deploy app to Digital Ocean">
+  <meta name="keywords" content="Rails,VPS,Digital Ocean">
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://SteveVallay.github.io/blog/2013/11/13/deploy-app-to-digit-ocean">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Zhibin's blog" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/lib/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-39252101-2']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Zhibin's blog</a></h1>
+  
+    <h2>always smile :-)</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:SteveVallay.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Deploy App to Digit Ocean</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-11-13T16:06:00+08:00" pubdate data-updated="true">Nov 13<span>th</span>, 2013</time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>一直想搞个 VPS 来外网测试自己的 <a href="http://192.241.192.134/">Rails 小程序</a>，在 <a href="http://v2ex.com/">V2EX</a> 上 浏览了一圈，发现大家使用的 VPS 比较集中在 <a href="https://www.linode.com/">Linode</a> , <a href="https://www.digitalocean.com/">DigitalOcean</a> 上，遂决定在这两个里面选择一个。</p>
+
+<p>鉴于 <a href="https://www.digitalocean.com/">Digital Ocean</a> 比较便宜， 5$ 一个月，而且新用户可以使用优惠码冲 10$，相当于免费使用两个月了 ;&ndash;), 所以决定试用 <a href="https://www.digitalocean.com/">Digital Ocean</a>。</p>
+
+<!--more -->
+
+
+<h3>选择主机</h3>
+
+<p>登录 <a href="https://www.digitalocean.com/">DigitalOcean</a> 之后，先要 <strong>CREATE</strong> 你的 VPS 主机的类型，选择节点，以及系统的 <em>Image</em>.</p>
+
+<p>我选择的是 5$ 的那个套餐， <strong>512M/1CPU/20G/1TB</strong>, 节点选择 <strong>Sanfrancisco</strong> , 系统的 <em>Image</em> 选择的是 <strong>Ubuntu 12.04</strong>, 然后系统上其他的东西都是自己装的。</p>
+
+<p>不过今天发现，原来在 <strong>Select Image</strong> 的时候还可以选择预装一些 <em>Application</em></p>
+
+<p><img src="/images/blog/digitocean.png" alt="digital ocean pre-install application" /></p>
+
+<p>预装的 <strong>Ruby on Rails</strong> 使用的是 <a href="http://wiki.nginx.org/Main">Ngnix</a> + <a href="http://unicorn.bogomips.org/">Unicorn</a> ,如果想快速部署的话可能会快一点。</p>
+
+<h3>新建用户</h3>
+
+<p>当你创建完成之后，<a href="https://www.digitalocean.com/">DigitalOcean</a> 会 Email 给你 VPS 的 IP, Username 和 Password 。但是 Username 是 root, 用这个超级用户来进行日常操作是不太合适的，所以我们需要新建自己的用户。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>useradd -m -d /home/your_user_name -s /bin/bash your_user_name</span></code></pre></td></tr></table></div></figure>
+
+
+<p>-d 指定 HOME 目录 home/your_user_name</p>
+
+<p>-m 创建 HOME 目录，如果没有的话</p>
+
+<p>-s 指定 shell 类型</p>
+
+<p>为新用户创建密码</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>passwd your_user_name
+</span><span class='line'>##input your password twice</span></code></pre></td></tr></table></div></figure>
+
+
+<p>创建之后，需要将这个用户加到 <strong>sudoer</strong> 里面去</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo adduser your_user_name sudo</span></code></pre></td></tr></table></div></figure>
+
+
+<p>然后切换到 <strong>your_user_name</strong> 登录。</p>
+
+<h3>安装 Ruby on Rails</h3>
+
+<p>安装 Ruby on Rails 常用的有两种方式：  <a href="https://github.com/sstephenson/rbenv">rbenv</a>  和 <a href="https://rvm.io/">rvm</a> 。似乎 <a href="https://github.com/sstephenson/rbenv">rbenv</a>  会更干净一点，但是我觉得 <a href="https://rvm.io/">rvm</a> 更简单一点。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># 安装 curl 和 git 
+</span><span class='line'>sudo apt-get install curl git
+</span><span class='line'>
+</span><span class='line'># 使用 rvm 安装 ruby
+</span><span class='line'>
+</span><span class='line'>curl -L https://get.rvm.io | bash -s stable --ruby
+</span><span class='line'>
+</span><span class='line'>rvm install 2.0.0
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>然后 clone 下你的 project , 安装 gems ( Rails 在里面)</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>#git clone xxxx  
+</span><span class='line'>#cd your project
+</span><span class='line'>
+</span><span class='line'>gem install bundler 
+</span><span class='line'>
+</span><span class='line'>bundle install 
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这个时候，使用 <code>rails s</code> 启动自己的 rails application 应该没问题了，当然别忘了 <code>rake db:migrate</code></p>
+
+<h3><a href="http://www.apache.org/">Apache2</a> + <a href="https://www.phusionpassenger.com/">Passenger</a></h3>
+
+<p>虽然调试的时候可以使用  <a href="http://www.ruby-doc.org/stdlib-2.0/libdoc/webrick/rdoc/WEBrick.html">WEBrick</a> 这个 模块来提供 HTTP 服务，但是，一般发布的时候，我们都会选择性能更好更稳定的 <a href="http://www.apache.org/">Apache</a> 或者 <a href="http://wiki.nginx.org/Main">Nginx</a> , 貌似后者更猛一点。不过我还是选择了 <a href="http://www.apache.org/">Apache</a>。</p>
+
+<p><a href="https://www.phusionpassenger.com/">Passenger</a> 似乎可以单独作为一个服务器，也可以辅助 <a href="http://www.apache.org/">Apache</a>  或者
+<a href="http://wiki.nginx.org/Main">Nginx</a>。使用 <a href="http://www.apache.org/">Apache2</a> + <a href="https://www.phusionpassenger.com/">Passenger</a> 可以让你发布 app 简单的一毛啊。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>#install apache2
+</span><span class='line'>sudo apt-get install apache2 apache2-mpm-prefork apache2-prefork-dev
+</span><span class='line'>
+</span><span class='line'>#install mysql, do not need this if you do not use mysql
+</span><span class='line'>sudo apt-get install mysql-server mysql-client
+</span><span class='line'>sudo apt-get install libmysql-ruby libmysqlclient15-dev
+</span><span class='line'>
+</span><span class='line'>#install passenger
+</span><span class='line'>apt-get install libcurl4-openssl-dev
+</span><span class='line'>gem install passenger
+</span><span class='line'>
+</span><span class='line'>#make swap partision , default no swap in digital ocean.
+</span><span class='line'>dd if=/dev/zero of=/swap bs=1M count=1024
+</span><span class='line'>mkswap /swap
+</span><span class='line'>swapon /swap
+</span><span class='line'>#execute this script to install apache2 module of passenger
+</span><span class='line'>passenger-install-apache2-module
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>执行 <code>passenger-install-apache2-module</code> 的时候，会打印出如下的配置信息(会因环境有所差异)：</p>
+
+<blockquote><p>LoadModule passenger_module /home/goodluck/.rvm/gems/ruby-2.0.0-p247/gems/passenger-4.0.23/buildout/apache2/mod_passenger.so
+PassengerRoot /home/goodluck/.rvm/gems/ruby-2.0.0-p247/gems/passenger-4.0.23
+PassengerDefaultRuby /home/goodluck/.rvm/wrappers/ruby-2.0.0-p247/ruby</p></blockquote>
+
+<p>然后把这段贴到 <code>/etc/apache2/httpd.conf</code> 文件中去，然后添加 apache2 的配置</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;VirtualHost</span> <span class="err">*:80</span><span class="nt">&gt;</span>
+</span><span class='line'>      ServerName localhost
+</span><span class='line'>      # !!! Be sure to point DocumentRoot to &#39;public&#39;!
+</span><span class='line'>      DocumentRoot /home/goodluck/work/rshare/readingbooks/public/
+</span><span class='line'>      RailsEnv development
+</span><span class='line'>      <span class="nt">&lt;Directory</span> <span class="err">/home/goodluck/work/rshare/readingbooks/public</span><span class="nt">/ &gt;</span>
+</span><span class='line'>         # This relaxes Apache security settings.
+</span><span class='line'>         AllowOverride all
+</span><span class='line'>         # MultiViews must be turned off.
+</span><span class='line'>         Options -MultiViews
+</span><span class='line'>      <span class="nt">&lt;/Directory&gt;</span>
+</span><span class='line'> <span class="nt">&lt;/VirtualHost&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>将两个 <code>/home/goodluck/work/rshare/readingbooks/public/</code> 改成自己的，如果是 development 模式需要添加 <code>RailsEnv development</code> ，这行后面不要添加注释。</p>
+
+<p>Done !</p>
+
+<p>Thanks for your reading and welcome your comments. Drop email to <em>zhibinwang.q@gmail.com</em> to contact me.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">zhibin</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-11-13T16:06:00+08:00" pubdate data-updated="true">Nov 13<span>th</span>, 2013</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/digitalocean/'>DigitalOcean</a>, <a class='category' href='/blog/categories/rails/'>Rails</a>, <a class='category' href='/blog/categories/vps/'>VPS</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://SteveVallay.github.io/blog/2013/11/13/deploy-app-to-digit-ocean/" data-via="zhibin_" data-counturl="http://SteveVallay.github.io/blog/2013/11/13/deploy-app-to-digit-ocean/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2013/11/07/sendorderedbroadcast/" title="Previous Post: Android sendOrderedBroadcast">&laquo; Android sendOrderedBroadcast</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2013/11/13/deploy-app-to-digit-ocean/">Deploy App to Digit Ocean</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/11/07/sendorderedbroadcast/">Android sendOrderedBroadcast</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/11/06/using-disqus-api/">使用 Disqus 评论</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/11/05/learn-rails-i18n/">Learn Rails I18n</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/10/28/rails-add-alert-in-bootstrap/">Rails Add Alert in Bootstrap</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/SteveVallay">@SteveVallay</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'SteveVallay',
+            count: 2,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2013 - zhibin -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'zhibin';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://SteveVallay.github.io/blog/2013/11/13/deploy-app-to-digit-ocean/';
+        var disqus_url = 'http://SteveVallay.github.io/blog/2013/11/13/deploy-app-to-digit-ocean/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
