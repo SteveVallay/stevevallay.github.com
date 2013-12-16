@@ -4,70 +4,74 @@
         <loc>
             http://SteveVallay.github.io/blog/2013/08/15/blog-equals-octopress-plus-github-pages/
         </loc>
-        <lastmod>2013-09-09T16:34:33+08:00</lastmod>
+        <lastmod>2013-09-24T04:57:25+08:00</lastmod>
     </url>
     <url>
         <loc>http://SteveVallay.github.io/blog/2013/08/15/markdown/</loc>
-        <lastmod>2013-09-09T16:48:15+08:00</lastmod>
+        <lastmod>2013-09-24T04:57:25+08:00</lastmod>
     </url>
     <url>
         <loc>http://SteveVallay.github.io/blog/2013/08/27/deploy-rails-app-on-heroku/</loc>
-        <lastmod>2013-09-09T14:37:14+08:00</lastmod>
+        <lastmod>2013-09-04T22:57:34+08:00</lastmod>
     </url>
     <url>
         <loc>http://SteveVallay.github.io/blog/2013/08/29/rails-4-using-jquery/</loc>
-        <lastmod>2013-09-09T14:37:14+08:00</lastmod>
+        <lastmod>2013-09-04T22:58:09+08:00</lastmod>
     </url>
     <url>
         <loc>http://SteveVallay.github.io/blog/2013/09/04/using-bootstrap-in-rails/</loc>
-        <lastmod>2013-09-09T14:37:14+08:00</lastmod>
+        <lastmod>2013-09-04T22:56:50+08:00</lastmod>
     </url>
     <url>
         <loc>http://SteveVallay.github.io/blog/2013/09/10/tomato/</loc>
-        <lastmod>2013-09-10T13:30:00+08:00</lastmod>
+        <lastmod>2013-09-24T04:57:25+08:00</lastmod>
     </url>
     <url>
         <loc>http://SteveVallay.github.io/blog/2013/09/23/sigleton/</loc>
-        <lastmod>2013-09-23T17:02:55+08:00</lastmod>
+        <lastmod>2013-09-24T04:57:25+08:00</lastmod>
     </url>
     <url>
         <loc>http://SteveVallay.github.io/blog/2013/09/24/rails-tutorial-learning/</loc>
-        <lastmod>2013-11-05T18:35:14+08:00</lastmod>
+        <lastmod>2013-10-28T23:06:46+08:00</lastmod>
     </url>
     <url>
         <loc>http://SteveVallay.github.io/blog/2013/10/28/rails-add-alert-in-bootstrap/</loc>
-        <lastmod>2013-11-05T18:35:14+08:00</lastmod>
+        <lastmod>2013-10-28T23:30:05+08:00</lastmod>
     </url>
     <url>
         <loc>http://SteveVallay.github.io/blog/2013/11/05/learn-rails-i18n/</loc>
-        <lastmod>2013-11-06T09:39:51+08:00</lastmod>
+        <lastmod>2013-12-13T23:40:34+08:00</lastmod>
     </url>
     <url>
         <loc>http://SteveVallay.github.io/blog/2013/11/06/using-disqus-api/</loc>
-        <lastmod>2013-11-06T17:54:38+08:00</lastmod>
+        <lastmod>2013-12-13T23:40:34+08:00</lastmod>
     </url>
     <url>
         <loc>http://SteveVallay.github.io/blog/2013/11/07/sendorderedbroadcast/</loc>
-        <lastmod>2013-11-12T18:21:01+08:00</lastmod>
+        <lastmod>2013-12-13T23:40:34+08:00</lastmod>
     </url>
     <url>
         <loc>http://SteveVallay.github.io/blog/2013/11/13/deploy-app-to-digit-ocean/</loc>
-        <lastmod>2013-11-15T17:12:51+08:00</lastmod>
+        <lastmod>2013-12-13T23:40:34+08:00</lastmod>
     </url>
     <url>
-        <loc>http://SteveVallay.github.io/about/</loc>
-        <lastmod>2013-11-06T18:11:56+08:00</lastmod>
-    </url>
-    <url>
-        <loc>http://SteveVallay.github.io/</loc>
-        <lastmod>2013-11-15T17:12:51+08:00</lastmod>
-    </url>
-    <url>
-        <loc>http://SteveVallay.github.io/robots.txt</loc>
-        <lastmod>2013-08-09T16:49:03+08:00</lastmod>
+        <loc>http://SteveVallay.github.io/blog/2013/12/13/android-systemproperties/</loc>
+        <lastmod>2013-12-16T23:59:13+08:00</lastmod>
     </url>
     <url>
         <loc>http://SteveVallay.github.io/blog/archives/</loc>
-        <lastmod>2013-11-15T17:12:51+08:00</lastmod>
+        <lastmod>2013-12-16T23:59:13+08:00</lastmod>
+    </url>
+    <url>
+        <loc>http://SteveVallay.github.io/robots.txt</loc>
+        <lastmod>2013-08-15T23:10:34+08:00</lastmod>
+    </url>
+    <url>
+        <loc>http://SteveVallay.github.io/about/</loc>
+        <lastmod>2013-09-04T22:36:27+08:00</lastmod>
+    </url>
+    <url>
+        <loc>http://SteveVallay.github.io/</loc>
+        <lastmod>2013-12-16T23:59:13+08:00</lastmod>
     </url>
 </urlset>
