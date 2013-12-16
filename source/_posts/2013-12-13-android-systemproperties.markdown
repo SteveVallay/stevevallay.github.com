@@ -57,4 +57,280 @@ public static void set(String key, String val)
 ```
 这些 native 方法在哪里定义和实现呢 ？
 
-**frameworks/base/core/jni/android_os_SystemProperties.cpp**
+**frameworks/base/core/jni/android_os_SystemProperties.cpp**(android framework 的 native 实现在 **/frameworks/base/core/jni** 下面可以看到)
+
+从代码可以知道，这一层只是调用底层接口，提供 JNI 支持。
+
+```c++
+static jstring SystemProperties_getSS(JNIEnv *env, jobject clazz,
+                                      jstring keyJ, jstring defJ);
+static void SystemProperties_set(JNIEnv *env, jobject clazz,
+                                      jstring keyJ, jstring valJ);
+...
+```
+
+**get/set** 方法内部调用了两个底层接口：
+
+```c++
+property_set(key,value);
+property_get(key, buf,default);
+```
+这两个接口定义在哪里呢？
+
+```c
+#include "cutils/properties.h"
+```
+
+这个.h 文件在 **system/core/include/cutils/properties.h**
+
+在这个文件中可以看到这两个函数的声明。
+
+```c
+int property_get(const char *key, char *value, const char *default_value);
+int property_set(const char *key, const char *value);
+```
+这两个函数的实现在哪里呢？ 在 **properties.c** 中
+
+**system/core/libcutils/properties.c**
+
+在这个文件中我们可以看到根据不同的宏定义有几种不同的实现。
+
+```c
+#ifdef HAVE_LIBC_SYSTEM_PROPERTIES
+
+#define _REALLY_INCLUDE_SYS__SYSTEM_PROPERTIES_H_
+#include <sys/_system_properties.h>
+...
+#elif defined(HAVE_SYSTEM_PROPERTY_SERVER)
+...
+#else
+
+/* SUPER-cheesy place-holder implementation for Win32 */
+
+#include <cutils/threads.h>
+...
+```
+在实际的手机运行环境中，property system 使用的是第一种的实现，第二种是模拟器环境的实现，第三种嘛? 嘿嘿 ~
+
+我们重点来看第一种好了，因为第一种是实际的手机运行环境。在这种实现中，同样是调用了两个类似的 `api`  **__system_property_set** 和 **__system_property_get** （在 **sys/_system_properties.h** 中声明的).
+
+```c
+#ifdef HAVE_LIBC_SYSTEM_PROPERTIES
+
+#define _REALLY_INCLUDE_SYS__SYSTEM_PROPERTIES_H_
+#include <sys/_system_properties.h>
+
+int property_set(const char *key, const char *value)
+{
+    return __system_property_set(key, value);
+}
+
+int property_get(const char *key, char *value, const char *default_value)
+{
+    int len;
+
+    len = __system_property_get(key, value);
+    if(len > 0) {
+        return len;
+    }
+
+    if(default_value) {
+        len = strlen(default_value);
+        memcpy(value, default_value, len + 1);
+    }
+    return len;
+}
+```
+先看一下 **sys/_system_properties.h** 中定义的几个基本结构.
+**bionic/libc/include/sys/_system_properties.h**
+
+```
+#define PROP_SERVICE_NAME "property_service"
+
+#define TOC_NAME_LEN(toc)       ((toc) >> 24)
+#define TOC_TO_INFO(area, toc)  ((prop_info*) (((char*) area) + ((toc) & 0xFFFFFF)))
+
+
+struct prop_area {
+    unsigned volatile count;
+    unsigned volatile serial;
+    unsigned magic;
+    unsigned version;
+    unsigned reserved[4];
+    unsigned toc[1];
+};
+
+struct prop_info {
+    char name[PROP_NAME_MAX];
+    unsigned volatile serial;
+    char value[PROP_VALUE_MAX];
+};
+
+struct prop_msg 
+{
+    unsigned cmd;
+    char name[PROP_NAME_MAX];
+    char value[PROP_VALUE_MAX];
+};
+
+#define PROP_MSG_SETPROP 1
+
+#define PROP_PATH_RAMDISK_DEFAULT  "/default.prop"
+#define PROP_PATH_SYSTEM_BUILD     "/system/build.prop"
+#define PROP_PATH_SYSTEM_DEFAULT   "/system/default.prop"
+#define PROP_PATH_LOCAL_OVERRIDE   "/data/local.prop"
+
+```
+
+这两个 `api` 又在哪里实现呢？ ^_^ 
+查看 **bionic/libc/bionic/system_properties.c**
+
+```c
+static const char property_service_socket[] = "/dev/socket/" PROP_SERVICE_NAME;
+
+int __system_property_get(const char *name, char *value)
+{
+    const prop_info *pi = __system_property_find(name);
+
+    if(pi != 0) {
+        return __system_property_read(pi, 0, value);
+    } else {
+        value[0] = 0;
+        return 0;
+    }
+}
+
+int __system_property_set(const char *key, const char *value)
+{
+    int err;
+    int tries = 0;
+    int update_seen = 0;
+    prop_msg msg;
+
+    if(key == 0) return -1;
+    if(value == 0) value = "";
+    if(strlen(key) >= PROP_NAME_MAX) return -1;
+    if(strlen(value) >= PROP_VALUE_MAX) return -1;
+
+    memset(&msg, 0, sizeof msg);
+    msg.cmd = PROP_MSG_SETPROP;
+    strlcpy(msg.name, key, sizeof msg.name);
+    strlcpy(msg.value, value, sizeof msg.value);
+
+    err = send_prop_msg(&msg);
+    if(err < 0) {
+        return err;
+    }
+
+    return 0;
+}
+
+```
+
+的确在这里找到了 **__system_property_get** 和 **__system_property_set** ,这两个函数的实现有包含了 **__system_property_find** **__system_property_read** 和 **send_prop_msg**
+```
+const prop_info *__system_property_find(const char *name)
+{
+    prop_area *pa = __system_property_area__;
+    unsigned count = pa->count;
+    unsigned *toc = pa->toc;
+    unsigned len = strlen(name);
+    prop_info *pi;
+
+    while(count--) {
+        unsigned entry = *toc++;
+        if(TOC_NAME_LEN(entry) != len) continue;
+
+        pi = TOC_TO_INFO(pa, entry);
+        if(memcmp(name, pi->name, len)) continue;
+
+        return pi;
+    }
+
+    return 0;
+}
+
+int __system_property_read(const prop_info *pi, char *name, char *value)
+{
+    unsigned serial, len;
+
+    for(;;) {
+        serial = pi->serial;
+        while(SERIAL_DIRTY(serial)) {
+            __futex_wait((volatile void *)&pi->serial, serial, 0);
+            serial = pi->serial;
+        }
+        len = SERIAL_VALUE_LEN(serial);
+        memcpy(value, pi->value, len + 1);
+        if(serial == pi->serial) {
+            if(name != 0) {
+                strcpy(name, pi->name);
+            }
+            return len;
+        }
+    }
+}
+
+static int send_prop_msg(prop_msg *msg)
+{
+    struct pollfd pollfds[1];
+    struct sockaddr_un addr;
+    socklen_t alen;
+    size_t namelen;
+    int s;
+    int r;
+    int result = -1;
+
+    s = socket(AF_LOCAL, SOCK_STREAM, 0);
+    if(s < 0) {
+        return result;
+    }
+
+    memset(&addr, 0, sizeof(addr));
+    namelen = strlen(property_service_socket);
+    strlcpy(addr.sun_path, property_service_socket, sizeof addr.sun_path);
+    addr.sun_family = AF_LOCAL;
+    alen = namelen + offsetof(struct sockaddr_un, sun_path) + 1;
+
+    if(TEMP_FAILURE_RETRY(connect(s, (struct sockaddr *) &addr, alen)) < 0) {
+        close(s);
+        return result;
+    }
+
+    r = TEMP_FAILURE_RETRY(send(s, msg, sizeof(prop_msg), 0));
+    if(r == sizeof(prop_msg)) {
+        // We successfully wrote to the property server but now we
+        // wait for the property server to finish its work.  It
+        // acknowledges its completion by closing the socket so we
+        // poll here (on nothing), waiting for the socket to close.
+        // If you 'adb shell setprop foo bar' you'll see the POLLHUP
+        // once the socket closes.  Out of paranoia we cap our poll
+        // at 250 ms.
+        pollfds[0].fd = s;
+        pollfds[0].events = 0;
+        r = TEMP_FAILURE_RETRY(poll(pollfds, 1, 250 /* ms */));
+        if (r == 1 && (pollfds[0].revents & POLLHUP) != 0) {
+            result = 0;
+        } else {
+            // Ignore the timeout and treat it like a success anyway.
+            // The init process is single-threaded and its property
+            // service is sometimes slow to respond (perhaps it's off
+            // starting a child process or something) and thus this
+            // times out and the caller thinks it failed, even though
+            // it's still getting around to it.  So we fake it here,
+            // mostly for ctl.* properties, but we do try and wait 250
+            // ms so callers who do read-after-write can reliably see
+            // what they've written.  Most of the time.
+            // TODO: fix the system properties design.
+            result = 0;
+        }
+    }
+
+    close(s);
+    return result;
+}
+
+```
+看到这里，我们大概知道 get 是从一个 prop_info 的结构提中读取，而 set 的则是向 **property_service_socket("/dev/socket/property_service")** 发送数据。但不免又有很多疑问，property 存储在哪，数据结构是怎样的？proper_set 发送socket 数据是谁来接收和处理的？ property system 是如何启动的？
+
+
