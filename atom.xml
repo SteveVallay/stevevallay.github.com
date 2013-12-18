@@ -4,7 +4,7 @@
   <title><![CDATA[Zhibin's blog]]></title>
   <link href="http://SteveVallay.github.io/atom.xml" rel="self"/>
   <link href="http://SteveVallay.github.io/"/>
-  <updated>2013-12-16T23:59:44+08:00</updated>
+  <updated>2013-12-19T00:07:58+08:00</updated>
   <id>http://SteveVallay.github.io/</id>
   <author>
     <name><![CDATA[zhibin]]></name>
@@ -581,6 +581,70 @@
 
 
 <p>看到这里，我们大概知道 get 是从一个 prop_info 的结构提中读取，而 set 的则是向 <strong>property_service_socket(&ldquo;/dev/socket/property_service&rdquo;)</strong> 发送数据。但不免又有很多疑问，property 存储在哪，数据结构是怎样的？proper_set 发送socket 数据是谁来接收和处理的？ property system 是如何启动的？</p>
+
+<p>好吧，我们先来总结一下 Android system properties 相关的目录和文件吧。</p>
+
+<p>Java 层：</p>
+
+<ul>
+<li>frameworks/base/core/java/android/os/SystemProperties.java</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="cm">/**</span>
+</span><span class='line'><span class="cm"> * Gives access to the system properties store.  The system properties</span>
+</span><span class='line'><span class="cm"> * store contains a list of string key-value pairs.</span>
+</span><span class='line'><span class="cm"> *</span>
+</span><span class='line'><span class="cm"> * {@hide}</span>
+</span><span class='line'><span class="cm"> */</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>native 层：</p>
+
+<p>Android framework 的 native 实现，或者成为 runtime 都是在 <strong>frameworks/base/core/jni</strong> 目录下。</p>
+
+<p>和 properties 相关的文件：
+&ndash; frameworks/base/core/jni/android_os_SystemProperties.cpp</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="cp">#include &quot;cutils/properties.h&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>cutils:</p>
+
+<p><strong>system</strong> 目录，这个目录有什么用呢 ?</p>
+
+<blockquote><p>System &ndash; source code files for the core Android system. That is the minimal Linux system that is started before the Dalvik VM and any java based services are enabled. This includes the source code for the init process and the default init.rc script that provide the dynamic configuration of the platform.</p></blockquote>
+
+<ul>
+<li>system/core/libcutils/properties.c  //包含了 _system_properties.h</li>
+<li>system/core/include/cutils/properties.h //properties.c 的对外接口 被 jni 包含.</li>
+<li>system/core/init/property_service.h  //property_service 的对外接口</li>
+<li>system/core/init/property_service.c  //</li>
+<li>system/core/init/init.c</li>
+</ul>
+
+
+<p>libc:</p>
+
+<p><strong>Bionic</strong> 这个目录又是干什么的呢？</p>
+
+<blockquote><p>Bionic &ndash; the C-runtime for Android. Note that Android is not using glibc like most Linux distributions. Instead the c-library is called bionic and is based mostly on BSD-derived sources. In this folder you will find the source for the c-library, math and other core runtime libraries.</p></blockquote>
+
+<ul>
+<li>bionic/libc/include/sys/_system_properties.h //包含了下面的 system_properties.h</li>
+<li>bionic/libc/include/sys/system_properties.h //下面的system_properties.c 对外接口声明</li>
+<li>/libc/bionic/system_properties.c</li>
+</ul>
+
 ]]></content>
   </entry>
   
