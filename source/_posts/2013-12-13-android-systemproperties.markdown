@@ -333,4 +333,56 @@ static int send_prop_msg(prop_msg *msg)
 ```
 看到这里，我们大概知道 get 是从一个 prop_info 的结构提中读取，而 set 的则是向 **property_service_socket("/dev/socket/property_service")** 发送数据。但不免又有很多疑问，property 存储在哪，数据结构是怎样的？proper_set 发送socket 数据是谁来接收和处理的？ property system 是如何启动的？
 
+好吧，我们先来总结一下 Android system properties 相关的目录和文件吧。
+
+Java 层：
+
+- frameworks/base/core/java/android/os/SystemProperties.java
+
+```java
+/**
+ * Gives access to the system properties store.  The system properties
+ * store contains a list of string key-value pairs.
+ *
+ * {@hide}
+ */
+```
+
+native 层：
+
+Android framework 的 native 实现，或者成为 runtime 都是在 **frameworks/base/core/jni** 目录下。
+
+和 properties 相关的文件：
+- frameworks/base/core/jni/android_os_SystemProperties.cpp
+
+```c
+#include "cutils/properties.h"
+```
+
+cutils: 
+
+**system** 目录，这个目录有什么用呢 ?
+
+> 
+System - source code files for the core Android system. That is the minimal Linux system that is started before the Dalvik VM and any java based services are enabled. This includes the source code for the init process and the default init.rc script that provide the dynamic configuration of the platform.
+
+- system/core/libcutils/properties.c  //包含了 _system_properties.h 
+- system/core/include/cutils/properties.h //properties.c 的对外接口 被 jni 包含.
+- system/core/init/property_service.h  //property_service 的对外接口
+- system/core/init/property_service.c  //
+- system/core/init/init.c 
+
+libc: 
+
+**Bionic** 这个目录又是干什么的呢？
+> 
+Bionic - the C-runtime for Android. Note that Android is not using glibc like most Linux distributions. Instead the c-library is called bionic and is based mostly on BSD-derived sources. In this folder you will find the source for the c-library, math and other core runtime libraries.
+
+- bionic/libc/include/sys/_system_properties.h //包含了下面的 system_properties.h
+- bionic/libc/include/sys/system_properties.h //下面的system_properties.c 对外接口声明
+- /libc/bionic/system_properties.c
+
+
+
+
 
