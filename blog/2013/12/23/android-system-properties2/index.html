@@ -1,0 +1,1102 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>android_system_properties 2 - Zhibin's blog</title>
+  <meta name="author" content="zhibin">
+
+  
+  <meta name="description" content="android,SystemProperties">
+  <meta name="keywords" content="android,SystemProperties">
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://SteveVallay.github.io/blog/2013/12/23/android-system-properties2">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Zhibin's blog" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/lib/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-39252101-2']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Zhibin's blog</a></h1>
+  
+    <h2>always smile :-)</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:SteveVallay.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Android_system_properties 2</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-12-23T10:17:00+08:00" pubdate data-updated="true">Dec 23<span>rd</span>, 2013</time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>静态的程序代码和程序运行时的状态，有很大的不同。理解代码，要理解其运行时的样子。</p>
+
+<!--more-->
+
+
+<p>这一篇主要说说 android property service 的运行时状态。</p>
+
+<p>先来看看这个图大致理解一下:</p>
+
+<p><img src="/images/blog/android_property.png" alt="android-property" /></p>
+
+<p>Init 进程，创建 <strong>/dev/<strong>properties</strong></strong> 文件，map 到内存，然后从 <strong>/default.prop</strong>等文件中加载 properties, 写入 <strong>/dev/<strong>properties</strong></strong>. 然后启动 property_service , 就是建立一个 <code>property_service</code> 的 socket ，监听这个 socket ，其他进程通过向这个 socket 发送 proper_set 的消息来完成 properties 的设置。</p>
+
+<p>proper_get 是在每个进程在初始化时(libc中) 建立了 <strong>/dev/<strong>properties</strong></strong>到内存的 map ，得到了可以直接访问的 address，可以直接遍历 properties 的存储空间完成查找.</p>
+
+<p>下面细细到来：</p>
+
+<p>Init 进程，Android 用户空间的第一个进程，内核启动之后会执行这个 init 程序。进入到 init 的main 函数。 在 init.c 的 main 函数里面，初始化 property 相关的存储空间。</p>
+
+<p><strong>system/core/init/init.c</strong></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'> <span class="n">property_init</span><span class="p">();</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>property_init</code> 是调用 property_service.c 的方法。</p>
+
+<p><strong>/system/core/init/property_service.c</strong></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'> <span class="kt">void</span> <span class="nf">property_init</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span><span class='line'> <span class="p">{</span>
+</span><span class='line'>     <span class="n">init_property_area</span><span class="p">();</span>
+</span><span class='line'> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">static</span> <span class="kt">int</span> <span class="nf">init_property_area</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="n">property_area_inited</span><span class="p">)</span>
+</span><span class='line'>        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">if</span><span class="p">(</span><span class="n">__system_property_area_init</span><span class="p">())</span> <span class="c1">//关键这个</span>
+</span><span class='line'>        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">if</span><span class="p">(</span><span class="n">init_workspace</span><span class="p">(</span><span class="o">&amp;</span><span class="n">pa_workspace</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+</span><span class='line'>        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">fcntl</span><span class="p">(</span><span class="n">pa_workspace</span><span class="p">.</span><span class="n">fd</span><span class="p">,</span> <span class="n">F_SETFD</span><span class="p">,</span> <span class="n">FD_CLOEXEC</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">property_area_inited</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span><span class='line'>    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>__system_property_area_init</code> 方法在 <strong>bionic/libc/bionic/system_properties.c</strong></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="kt">int</span> <span class="nf">__system_property_area_init</span><span class="p">()</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">map_prop_area_rw</span><span class="p">();</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">static</span> <span class="kt">int</span> <span class="nf">map_prop_area_rw</span><span class="p">()</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="n">prop_area</span> <span class="o">*</span><span class="n">pa</span><span class="p">;</span>
+</span><span class='line'>    <span class="kt">int</span> <span class="n">fd</span><span class="p">;</span>
+</span><span class='line'>    <span class="kt">int</span> <span class="n">ret</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="cm">/* dev is a tmpfs that we can use to carve a shared workspace</span>
+</span><span class='line'><span class="cm">     * out of, so let&#39;s do that...</span>
+</span><span class='line'><span class="cm">     */</span>
+</span><span class='line'>    <span class="n">fd</span> <span class="o">=</span> <span class="n">open</span><span class="p">(</span><span class="n">property_filename</span><span class="p">,</span> <span class="n">O_RDWR</span> <span class="o">|</span> <span class="n">O_CREAT</span> <span class="o">|</span> <span class="n">O_NOFOLLOW</span> <span class="o">|</span> <span class="n">O_CLOEXEC</span> <span class="o">|</span>
+</span><span class='line'>            <span class="n">O_EXCL</span><span class="p">,</span> <span class="mo">0444</span><span class="p">);</span>
+</span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="n">fd</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">if</span> <span class="p">(</span><span class="n">errno</span> <span class="o">==</span> <span class="n">EACCES</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>            <span class="cm">/* for consistency with the case where the process has already</span>
+</span><span class='line'><span class="cm">             * mapped the page in and segfaults when trying to write to it</span>
+</span><span class='line'><span class="cm">             */</span>
+</span><span class='line'>            <span class="n">abort</span><span class="p">();</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">ret</span> <span class="o">=</span> <span class="n">fcntl</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">F_SETFD</span><span class="p">,</span> <span class="n">FD_CLOEXEC</span><span class="p">);</span>
+</span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="n">ret</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span>
+</span><span class='line'>        <span class="k">goto</span> <span class="n">out</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="n">ftruncate</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">PA_SIZE</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span>
+</span><span class='line'>        <span class="k">goto</span> <span class="n">out</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">pa_size</span> <span class="o">=</span> <span class="n">PA_SIZE</span><span class="p">;</span>
+</span><span class='line'>    <span class="n">pa_data_size</span> <span class="o">=</span> <span class="n">pa_size</span> <span class="o">-</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">prop_area</span><span class="p">);</span>
+</span><span class='line'>    <span class="n">compat_mode</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">pa</span> <span class="o">=</span> <span class="n">mmap</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span> <span class="n">pa_size</span><span class="p">,</span> <span class="n">PROT_READ</span> <span class="o">|</span> <span class="n">PROT_WRITE</span><span class="p">,</span> <span class="n">MAP_SHARED</span><span class="p">,</span> <span class="n">fd</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+</span><span class='line'>    <span class="k">if</span><span class="p">(</span><span class="n">pa</span> <span class="o">==</span> <span class="n">MAP_FAILED</span><span class="p">)</span>
+</span><span class='line'>        <span class="k">goto</span> <span class="n">out</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">memset</span><span class="p">(</span><span class="n">pa</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">pa_size</span><span class="p">);</span>
+</span><span class='line'>    <span class="n">pa</span><span class="o">-&gt;</span><span class="n">magic</span> <span class="o">=</span> <span class="n">PROP_AREA_MAGIC</span><span class="p">;</span>
+</span><span class='line'>    <span class="n">pa</span><span class="o">-&gt;</span><span class="n">version</span> <span class="o">=</span> <span class="n">PROP_AREA_VERSION</span><span class="p">;</span>
+</span><span class='line'>    <span class="cm">/* reserve root node */</span>
+</span><span class='line'>    <span class="n">pa</span><span class="o">-&gt;</span><span class="n">bytes_used</span> <span class="o">=</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">prop_bt</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="cm">/* plug into the lib property services */</span>
+</span><span class='line'>    <span class="n">__system_property_area__</span> <span class="o">=</span> <span class="n">pa</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">close</span><span class="p">(</span><span class="n">fd</span><span class="p">);</span>
+</span><span class='line'>    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="nl">out:</span>
+</span><span class='line'>    <span class="n">close</span><span class="p">(</span><span class="n">fd</span><span class="p">);</span>
+</span><span class='line'>    <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>首先创建 <strong>/dev/<strong>properties</strong></strong> ，并且用 <code>mmap</code> 映射到内存.（通过变量<code>__system_property_area__</code> 的共享，完成 property_service 和 libc 中 properties 相关的交互。)</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="cp">#define PROP_FILENAME &quot;/dev/__properties__&quot;</span>
+</span><span class='line'><span class="k">static</span> <span class="kt">char</span> <span class="n">property_filename</span><span class="p">[</span><span class="n">PATH_MAX</span><span class="p">]</span> <span class="o">=</span> <span class="n">PROP_FILENAME</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'> <span class="n">fd</span> <span class="o">=</span> <span class="n">open</span><span class="p">(</span><span class="n">property_filename</span><span class="p">,</span> <span class="n">O_RDWR</span> <span class="o">|</span> <span class="n">O_CREAT</span> <span class="o">|</span> <span class="n">O_NOFOLLOW</span> <span class="o">|</span> <span class="n">O_CLOEXEC</span> <span class="o">|</span>
+</span><span class='line'>            <span class="n">O_EXCL</span><span class="p">,</span> <span class="mo">0444</span><span class="p">);</span>
+</span><span class='line'><span class="p">...</span>
+</span><span class='line'>    <span class="n">pa</span> <span class="o">=</span> <span class="n">mmap</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span> <span class="n">pa_size</span><span class="p">,</span> <span class="n">PROT_READ</span> <span class="o">|</span> <span class="n">PROT_WRITE</span><span class="p">,</span> <span class="n">MAP_SHARED</span><span class="p">,</span> <span class="n">fd</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="cm">/* plug into the lib property services */</span>
+</span><span class='line'>    <span class="n">__system_property_area__</span> <span class="o">=</span> <span class="n">pa</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>回到 init.c , 加载 boot defults properties：</p>
+
+<p>init.c</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'> <span class="n">property_load_boot_defaults</span><span class="p">();</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>property_service.c:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="cp">#define PROP_PATH_RAMDISK_DEFAULT  &quot;/default.prop&quot;</span>
+</span><span class='line'>
+</span><span class='line'> <span class="kt">void</span> <span class="nf">property_load_boot_defaults</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span><span class='line'> <span class="p">{</span>
+</span><span class='line'>     <span class="n">load_properties_from_file</span><span class="p">(</span><span class="n">PROP_PATH_RAMDISK_DEFAULT</span><span class="p">);</span>
+</span><span class='line'> <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>load_properties_from_file</code> 这个里面就是读取文件，然后 <code>set_property</code>。</p>
+
+<p>回到 init.c , 启动 property service :</p>
+
+<p>init.c:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'> <span class="n">queue_builtin_action</span><span class="p">(</span><span class="n">property_service_init_action</span><span class="p">,</span> <span class="s">&quot;property_service_init&quot;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">static</span> <span class="kt">int</span> <span class="nf">property_service_init_action</span><span class="p">(</span><span class="kt">int</span> <span class="n">nargs</span><span class="p">,</span> <span class="kt">char</span> <span class="o">**</span><span class="n">args</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="cm">/* read any property files on system or data and</span>
+</span><span class='line'><span class="cm">     * fire up the property service.  This must happen</span>
+</span><span class='line'><span class="cm">     * after the ro.foo properties are set above so</span>
+</span><span class='line'><span class="cm">     * that /data/local.prop cannot interfere with them.</span>
+</span><span class='line'><span class="cm">     */</span>
+</span><span class='line'>    <span class="n">start_property_service</span><span class="p">();</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="cm">/* update with vendor-specific property runtime</span>
+</span><span class='line'><span class="cm">     * overrides</span>
+</span><span class='line'><span class="cm">     */</span>
+</span><span class='line'>    <span class="n">vendor_load_properties</span><span class="p">();</span>
+</span><span class='line'>    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在 <code>start_property_service</code> 中，加载 properties (/system/build.prop, /system/default.prop, /data/property/xxx)，创建 <strong>/dev/socket/property_service</strong> 这个 socket, 并且监听这个 socket 来接受 set property 的消息。</p>
+
+<p>property_service.c:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="kt">void</span> <span class="nf">start_property_service</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="kt">int</span> <span class="n">fd</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">load_properties_from_file</span><span class="p">(</span><span class="n">PROP_PATH_SYSTEM_BUILD</span><span class="p">);</span>
+</span><span class='line'>    <span class="n">load_properties_from_file</span><span class="p">(</span><span class="n">PROP_PATH_SYSTEM_DEFAULT</span><span class="p">);</span>
+</span><span class='line'>    <span class="n">load_override_properties</span><span class="p">();</span>
+</span><span class='line'>    <span class="cm">/* Read persistent properties after all default values have been loaded. */</span>
+</span><span class='line'>    <span class="n">load_persistent_properties</span><span class="p">();</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">fd</span> <span class="o">=</span> <span class="n">create_socket</span><span class="p">(</span><span class="n">PROP_SERVICE_NAME</span><span class="p">,</span> <span class="n">SOCK_STREAM</span><span class="p">,</span> <span class="mo">0666</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+</span><span class='line'>    <span class="k">if</span><span class="p">(</span><span class="n">fd</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
+</span><span class='line'>    <span class="n">fcntl</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">F_SETFD</span><span class="p">,</span> <span class="n">FD_CLOEXEC</span><span class="p">);</span>
+</span><span class='line'>    <span class="n">fcntl</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">F_SETFL</span><span class="p">,</span> <span class="n">O_NONBLOCK</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">listen</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="mi">8</span><span class="p">);</span>
+</span><span class='line'>    <span class="n">property_set_fd</span> <span class="o">=</span> <span class="n">fd</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>回到 init.c :</p>
+
+<p>init 进程在 main 函数的最后，进入一个无限循环，等待 <strong>/dev/socket/property_service</strong> 和其他 fd 的事件并处理。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'>    <span class="k">for</span><span class="p">(;;)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="kt">int</span> <span class="n">nr</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">timeout</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">execute_one_command</span><span class="p">();</span>
+</span><span class='line'>        <span class="n">restart_processes</span><span class="p">();</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">property_set_fd_init</span> <span class="o">&amp;&amp;</span> <span class="n">get_property_set_fd</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>            <span class="n">ufds</span><span class="p">[</span><span class="n">fd_count</span><span class="p">].</span><span class="n">fd</span> <span class="o">=</span> <span class="n">get_property_set_fd</span><span class="p">();</span>
+</span><span class='line'>            <span class="n">ufds</span><span class="p">[</span><span class="n">fd_count</span><span class="p">].</span><span class="n">events</span> <span class="o">=</span> <span class="n">POLLIN</span><span class="p">;</span>
+</span><span class='line'>            <span class="n">ufds</span><span class="p">[</span><span class="n">fd_count</span><span class="p">].</span><span class="n">revents</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'>            <span class="n">fd_count</span><span class="o">++</span><span class="p">;</span>
+</span><span class='line'>            <span class="n">property_set_fd_init</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">signal_fd_init</span> <span class="o">&amp;&amp;</span> <span class="n">get_signal_fd</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>            <span class="n">ufds</span><span class="p">[</span><span class="n">fd_count</span><span class="p">].</span><span class="n">fd</span> <span class="o">=</span> <span class="n">get_signal_fd</span><span class="p">();</span>
+</span><span class='line'>            <span class="n">ufds</span><span class="p">[</span><span class="n">fd_count</span><span class="p">].</span><span class="n">events</span> <span class="o">=</span> <span class="n">POLLIN</span><span class="p">;</span>
+</span><span class='line'>            <span class="n">ufds</span><span class="p">[</span><span class="n">fd_count</span><span class="p">].</span><span class="n">revents</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'>            <span class="n">fd_count</span><span class="o">++</span><span class="p">;</span>
+</span><span class='line'>            <span class="n">signal_fd_init</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">keychord_fd_init</span> <span class="o">&amp;&amp;</span> <span class="n">get_keychord_fd</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>            <span class="n">ufds</span><span class="p">[</span><span class="n">fd_count</span><span class="p">].</span><span class="n">fd</span> <span class="o">=</span> <span class="n">get_keychord_fd</span><span class="p">();</span>
+</span><span class='line'>            <span class="n">ufds</span><span class="p">[</span><span class="n">fd_count</span><span class="p">].</span><span class="n">events</span> <span class="o">=</span> <span class="n">POLLIN</span><span class="p">;</span>
+</span><span class='line'>            <span class="n">ufds</span><span class="p">[</span><span class="n">fd_count</span><span class="p">].</span><span class="n">revents</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'>            <span class="n">fd_count</span><span class="o">++</span><span class="p">;</span>
+</span><span class='line'>            <span class="n">keychord_fd_init</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>        <span class="k">if</span> <span class="p">(</span><span class="n">process_needs_restart</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>            <span class="n">timeout</span> <span class="o">=</span> <span class="p">(</span><span class="n">process_needs_restart</span> <span class="o">-</span> <span class="n">gettime</span><span class="p">())</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">;</span>
+</span><span class='line'>            <span class="k">if</span> <span class="p">(</span><span class="n">timeout</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span>
+</span><span class='line'>                <span class="n">timeout</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">action_queue_empty</span><span class="p">()</span> <span class="o">||</span> <span class="n">cur_action</span><span class="p">)</span>
+</span><span class='line'>            <span class="n">timeout</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="cp">#if BOOTCHART</span>
+</span><span class='line'>        <span class="k">if</span> <span class="p">(</span><span class="n">bootchart_count</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>            <span class="k">if</span> <span class="p">(</span><span class="n">timeout</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="o">||</span> <span class="n">timeout</span> <span class="o">&gt;</span> <span class="n">BOOTCHART_POLLING_MS</span><span class="p">)</span>
+</span><span class='line'>                <span class="n">timeout</span> <span class="o">=</span> <span class="n">BOOTCHART_POLLING_MS</span><span class="p">;</span>
+</span><span class='line'>            <span class="k">if</span> <span class="p">(</span><span class="n">bootchart_step</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="o">||</span> <span class="o">--</span><span class="n">bootchart_count</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>                <span class="n">bootchart_finish</span><span class="p">();</span>
+</span><span class='line'>                <span class="n">bootchart_count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'><span class="cp">#endif</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">nr</span> <span class="o">=</span> <span class="n">poll</span><span class="p">(</span><span class="n">ufds</span><span class="p">,</span> <span class="n">fd_count</span><span class="p">,</span> <span class="n">timeout</span><span class="p">);</span>
+</span><span class='line'>        <span class="k">if</span> <span class="p">(</span><span class="n">nr</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span>
+</span><span class='line'>            <span class="k">continue</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">fd_count</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>            <span class="k">if</span> <span class="p">(</span><span class="n">ufds</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">revents</span> <span class="o">==</span> <span class="n">POLLIN</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>                <span class="k">if</span> <span class="p">(</span><span class="n">ufds</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">fd</span> <span class="o">==</span> <span class="n">get_property_set_fd</span><span class="p">())</span>
+</span><span class='line'>                    <span class="n">handle_property_set_fd</span><span class="p">();</span>                 <span class="c1">//关键这里</span>
+</span><span class='line'>                <span class="k">else</span> <span class="nf">if</span> <span class="p">(</span><span class="n">ufds</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">fd</span> <span class="o">==</span> <span class="n">get_keychord_fd</span><span class="p">())</span>
+</span><span class='line'>                    <span class="n">handle_keychord</span><span class="p">();</span>
+</span><span class='line'>                <span class="k">else</span> <span class="nf">if</span> <span class="p">(</span><span class="n">ufds</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">fd</span> <span class="o">==</span> <span class="n">get_signal_fd</span><span class="p">())</span>
+</span><span class='line'>                    <span class="n">handle_signal</span><span class="p">();</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>handler_property_set_fd</code> 里面接收 <code>/dev/socket/property_service</code> 的消息并处理。</p>
+
+<p>property_service.c:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="kt">void</span> <span class="nf">handle_property_set_fd</span><span class="p">()</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="n">prop_msg</span> <span class="n">msg</span><span class="p">;</span>
+</span><span class='line'>    <span class="kt">int</span> <span class="n">s</span><span class="p">;</span>
+</span><span class='line'>    <span class="kt">int</span> <span class="n">r</span><span class="p">;</span>
+</span><span class='line'>    <span class="kt">int</span> <span class="n">res</span><span class="p">;</span>
+</span><span class='line'>    <span class="k">struct</span> <span class="n">ucred</span> <span class="n">cr</span><span class="p">;</span>
+</span><span class='line'>    <span class="k">struct</span> <span class="n">sockaddr_un</span> <span class="n">addr</span><span class="p">;</span>
+</span><span class='line'>    <span class="n">socklen_t</span> <span class="n">addr_size</span> <span class="o">=</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">addr</span><span class="p">);</span>
+</span><span class='line'>    <span class="n">socklen_t</span> <span class="n">cr_size</span> <span class="o">=</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">cr</span><span class="p">);</span>
+</span><span class='line'>    <span class="kt">char</span> <span class="o">*</span> <span class="n">source_ctx</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">if</span> <span class="p">((</span><span class="n">s</span> <span class="o">=</span> <span class="n">accept</span><span class="p">(</span><span class="n">property_set_fd</span><span class="p">,</span> <span class="p">(</span><span class="k">struct</span> <span class="n">sockaddr</span> <span class="o">*</span><span class="p">)</span> <span class="o">&amp;</span><span class="n">addr</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">addr_size</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">return</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="cm">/* Check socket options here */</span>
+</span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="n">getsockopt</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">SOL_SOCKET</span><span class="p">,</span> <span class="n">SO_PEERCRED</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">cr</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">cr_size</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="n">close</span><span class="p">(</span><span class="n">s</span><span class="p">);</span>
+</span><span class='line'>        <span class="n">ERROR</span><span class="p">(</span><span class="s">&quot;Unable to receive socket options</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+</span><span class='line'>        <span class="k">return</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">r</span> <span class="o">=</span> <span class="n">TEMP_FAILURE_RETRY</span><span class="p">(</span><span class="n">recv</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">msg</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">msg</span><span class="p">),</span> <span class="mi">0</span><span class="p">));</span>
+</span><span class='line'>    <span class="k">if</span><span class="p">(</span><span class="n">r</span> <span class="o">!=</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">prop_msg</span><span class="p">))</span> <span class="p">{</span>
+</span><span class='line'>        <span class="n">ERROR</span><span class="p">(</span><span class="s">&quot;sys_prop: mis-match msg size received: %d expected: %d errno: %d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span>
+</span><span class='line'>              <span class="n">r</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">prop_msg</span><span class="p">),</span> <span class="n">errno</span><span class="p">);</span>
+</span><span class='line'>        <span class="n">close</span><span class="p">(</span><span class="n">s</span><span class="p">);</span>
+</span><span class='line'>        <span class="k">return</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="k">switch</span><span class="p">(</span><span class="n">msg</span><span class="p">.</span><span class="n">cmd</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">case</span> <span class="n">PROP_MSG_SETPROP</span>:                              <span class="c1">//处理 set proper 请求</span>
+</span><span class='line'>        <span class="n">msg</span><span class="p">.</span><span class="n">name</span><span class="p">[</span><span class="n">PROP_NAME_MAX</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'>        <span class="n">msg</span><span class="p">.</span><span class="n">value</span><span class="p">[</span><span class="n">PROP_VALUE_MAX</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">is_legal_property_name</span><span class="p">(</span><span class="n">msg</span><span class="p">.</span><span class="n">name</span><span class="p">,</span> <span class="n">strlen</span><span class="p">(</span><span class="n">msg</span><span class="p">.</span><span class="n">name</span><span class="p">)))</span> <span class="p">{</span>
+</span><span class='line'>            <span class="n">ERROR</span><span class="p">(</span><span class="s">&quot;sys_prop: illegal property name. Got: </span><span class="se">\&quot;</span><span class="s">%s</span><span class="se">\&quot;\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">msg</span><span class="p">.</span><span class="n">name</span><span class="p">);</span>
+</span><span class='line'>            <span class="n">close</span><span class="p">(</span><span class="n">s</span><span class="p">);</span>
+</span><span class='line'>            <span class="k">return</span><span class="p">;</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">getpeercon</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">source_ctx</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">if</span><span class="p">(</span><span class="n">memcmp</span><span class="p">(</span><span class="n">msg</span><span class="p">.</span><span class="n">name</span><span class="p">,</span><span class="s">&quot;ctl.&quot;</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>            <span class="c1">// Keep the old close-socket-early behavior when handling</span>
+</span><span class='line'>            <span class="c1">// ctl.* properties.</span>
+</span><span class='line'>            <span class="n">close</span><span class="p">(</span><span class="n">s</span><span class="p">);</span>
+</span><span class='line'>            <span class="k">if</span> <span class="p">(</span><span class="n">check_control_perms</span><span class="p">(</span><span class="n">msg</span><span class="p">.</span><span class="n">value</span><span class="p">,</span> <span class="n">cr</span><span class="p">.</span><span class="n">uid</span><span class="p">,</span> <span class="n">cr</span><span class="p">.</span><span class="n">gid</span><span class="p">,</span> <span class="n">source_ctx</span><span class="p">))</span> <span class="p">{</span>
+</span><span class='line'>                <span class="n">handle_control_message</span><span class="p">((</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span> <span class="n">msg</span><span class="p">.</span><span class="n">name</span> <span class="o">+</span> <span class="mi">4</span><span class="p">,</span> <span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span> <span class="n">msg</span><span class="p">.</span><span class="n">value</span><span class="p">);</span>
+</span><span class='line'>            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span><span class='line'>                <span class="n">ERROR</span><span class="p">(</span><span class="s">&quot;sys_prop: Unable to %s service ctl [%s] uid:%d gid:%d pid:%d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span>
+</span><span class='line'>                        <span class="n">msg</span><span class="p">.</span><span class="n">name</span> <span class="o">+</span> <span class="mi">4</span><span class="p">,</span> <span class="n">msg</span><span class="p">.</span><span class="n">value</span><span class="p">,</span> <span class="n">cr</span><span class="p">.</span><span class="n">uid</span><span class="p">,</span> <span class="n">cr</span><span class="p">.</span><span class="n">gid</span><span class="p">,</span> <span class="n">cr</span><span class="p">.</span><span class="n">pid</span><span class="p">);</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span><span class='line'>            <span class="k">if</span> <span class="p">(</span><span class="n">check_perms</span><span class="p">(</span><span class="n">msg</span><span class="p">.</span><span class="n">name</span><span class="p">,</span> <span class="n">cr</span><span class="p">.</span><span class="n">uid</span><span class="p">,</span> <span class="n">cr</span><span class="p">.</span><span class="n">gid</span><span class="p">,</span> <span class="n">source_ctx</span><span class="p">))</span> <span class="p">{</span>
+</span><span class='line'>                <span class="n">property_set</span><span class="p">((</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span> <span class="n">msg</span><span class="p">.</span><span class="n">name</span><span class="p">,</span> <span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span> <span class="n">msg</span><span class="p">.</span><span class="n">value</span><span class="p">);</span>    <span class="c1">//设置 prop</span>
+</span><span class='line'>            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span><span class='line'>                <span class="n">ERROR</span><span class="p">(</span><span class="s">&quot;sys_prop: permission denied uid:%d  name:%s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span>
+</span><span class='line'>                      <span class="n">cr</span><span class="p">.</span><span class="n">uid</span><span class="p">,</span> <span class="n">msg</span><span class="p">.</span><span class="n">name</span><span class="p">);</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="c1">// Note: bionic&#39;s property client code assumes that the</span>
+</span><span class='line'>            <span class="c1">// property server will not close the socket until *AFTER*</span>
+</span><span class='line'>            <span class="c1">// the property is written to memory.</span>
+</span><span class='line'>            <span class="n">close</span><span class="p">(</span><span class="n">s</span><span class="p">);</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>        <span class="n">freecon</span><span class="p">(</span><span class="n">source_ctx</span><span class="p">);</span>
+</span><span class='line'>        <span class="k">break</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nl">default:</span>
+</span><span class='line'>        <span class="n">close</span><span class="p">(</span><span class="n">s</span><span class="p">);</span>
+</span><span class='line'>        <span class="k">break</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在 <code>property_set</code> 之前会 <code>check_perms</code>, 不同的 property_set 需要什么权限呢?</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="cm">/* White list of permissions for setting property services. */</span>
+</span><span class='line'><span class="k">struct</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">prefix</span><span class="p">;</span>
+</span><span class='line'>    <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">uid</span><span class="p">;</span>
+</span><span class='line'>    <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">gid</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span> <span class="n">property_perms</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class='line'>    <span class="p">{</span> <span class="s">&quot;net.rmnet0.&quot;</span><span class="p">,</span>      <span class="n">AID_RADIO</span><span class="p">,</span>    <span class="mi">0</span> <span class="p">},</span>
+</span><span class='line'>    <span class="p">{</span> <span class="s">&quot;net.gprs.&quot;</span><span class="p">,</span>        <span class="n">AID_RADIO</span><span class="p">,</span>    <span class="mi">0</span> <span class="p">},</span>
+</span><span class='line'>    <span class="p">{</span> <span class="s">&quot;net.ppp&quot;</span><span class="p">,</span>          <span class="n">AID_RADIO</span><span class="p">,</span>    <span class="mi">0</span> <span class="p">},</span>
+</span><span class='line'>    <span class="p">{</span> <span class="s">&quot;net.qmi&quot;</span><span class="p">,</span>          <span class="n">AID_RADIO</span><span class="p">,</span>    <span class="mi">0</span> <span class="p">},</span>
+</span><span class='line'>    <span class="p">{</span> <span class="s">&quot;net.lte&quot;</span><span class="p">,</span>          <span class="n">AID_RADIO</span><span class="p">,</span>    <span class="mi">0</span> <span class="p">},</span>
+</span><span class='line'>    <span class="p">{</span> <span class="s">&quot;net.cdma&quot;</span><span class="p">,</span>         <span class="n">AID_RADIO</span><span class="p">,</span>    <span class="mi">0</span> <span class="p">},</span>
+</span><span class='line'>    <span class="p">{</span> <span class="s">&quot;ril.&quot;</span><span class="p">,</span>             <span class="n">AID_RADIO</span><span class="p">,</span>    <span class="mi">0</span> <span class="p">},</span>
+</span><span class='line'>    <span class="p">{</span> <span class="s">&quot;gsm.&quot;</span><span class="p">,</span>             <span class="n">AID_RADIO</span><span class="p">,</span>    <span class="mi">0</span> <span class="p">},</span>
+</span><span class='line'>    <span class="p">{</span> <span class="s">&quot;persist.radio&quot;</span><span class="p">,</span>    <span class="n">AID_RADIO</span><span class="p">,</span>    <span class="mi">0</span> <span class="p">},</span>
+</span><span class='line'>    <span class="p">{</span> <span class="s">&quot;net.dns&quot;</span><span class="p">,</span>          <span class="n">AID_RADIO</span><span class="p">,</span>    <span class="mi">0</span> <span class="p">},</span>
+</span><span class='line'>    <span class="p">{</span> <span class="s">&quot;sys.usb.config&quot;</span><span class="p">,</span>   <span class="n">AID_RADIO</span><span class="p">,</span>    <span class="mi">0</span> <span class="p">},</span>
+</span><span class='line'>    <span class="p">{</span> <span class="s">&quot;net.&quot;</span><span class="p">,</span>             <span class="n">AID_SYSTEM</span><span class="p">,</span>   <span class="mi">0</span> <span class="p">},</span>
+</span><span class='line'>    <span class="p">{</span> <span class="s">&quot;dev.&quot;</span><span class="p">,</span>             <span class="n">AID_SYSTEM</span><span class="p">,</span>   <span class="mi">0</span> <span class="p">},</span>
+</span><span class='line'>    <span class="p">{</span> <span class="s">&quot;runtime.&quot;</span><span class="p">,</span>         <span class="n">AID_SYSTEM</span><span class="p">,</span>   <span class="mi">0</span> <span class="p">},</span>
+</span><span class='line'>    <span class="p">{</span> <span class="s">&quot;hw.&quot;</span><span class="p">,</span>              <span class="n">AID_SYSTEM</span><span class="p">,</span>   <span class="mi">0</span> <span class="p">},</span>
+</span><span class='line'>    <span class="p">{</span> <span class="s">&quot;sys.&quot;</span><span class="p">,</span>             <span class="n">AID_SYSTEM</span><span class="p">,</span>   <span class="mi">0</span> <span class="p">},</span>
+</span><span class='line'>    <span class="p">{</span> <span class="s">&quot;sys.powerctl&quot;</span><span class="p">,</span>     <span class="n">AID_SHELL</span><span class="p">,</span>    <span class="mi">0</span> <span class="p">},</span>
+</span><span class='line'>    <span class="p">{</span> <span class="s">&quot;service.&quot;</span><span class="p">,</span>         <span class="n">AID_SYSTEM</span><span class="p">,</span>   <span class="mi">0</span> <span class="p">},</span>
+</span><span class='line'>    <span class="p">{</span> <span class="s">&quot;wlan.&quot;</span><span class="p">,</span>            <span class="n">AID_SYSTEM</span><span class="p">,</span>   <span class="mi">0</span> <span class="p">},</span>
+</span><span class='line'>    <span class="p">{</span> <span class="s">&quot;bluetooth.&quot;</span><span class="p">,</span>       <span class="n">AID_BLUETOOTH</span><span class="p">,</span>   <span class="n">AID_SYSTEM</span> <span class="p">},</span>
+</span><span class='line'>    <span class="p">{</span> <span class="s">&quot;dhcp.&quot;</span><span class="p">,</span>            <span class="n">AID_SYSTEM</span><span class="p">,</span>   <span class="mi">0</span> <span class="p">},</span>
+</span><span class='line'>    <span class="p">{</span> <span class="s">&quot;dhcp.&quot;</span><span class="p">,</span>            <span class="n">AID_DHCP</span><span class="p">,</span>     <span class="mi">0</span> <span class="p">},</span>
+</span><span class='line'>    <span class="p">{</span> <span class="s">&quot;debug.&quot;</span><span class="p">,</span>           <span class="n">AID_SYSTEM</span><span class="p">,</span>   <span class="mi">0</span> <span class="p">},</span>
+</span><span class='line'>    <span class="p">{</span> <span class="s">&quot;debug.&quot;</span><span class="p">,</span>           <span class="n">AID_SHELL</span><span class="p">,</span>    <span class="mi">0</span> <span class="p">},</span>
+</span><span class='line'>    <span class="p">{</span> <span class="s">&quot;log.&quot;</span><span class="p">,</span>             <span class="n">AID_SHELL</span><span class="p">,</span>    <span class="mi">0</span> <span class="p">},</span>
+</span><span class='line'>    <span class="p">{</span> <span class="s">&quot;service.adb.root&quot;</span><span class="p">,</span> <span class="n">AID_SHELL</span><span class="p">,</span>    <span class="mi">0</span> <span class="p">},</span>
+</span><span class='line'>    <span class="p">{</span> <span class="s">&quot;service.adb.tcp.port&quot;</span><span class="p">,</span> <span class="n">AID_SHELL</span><span class="p">,</span>    <span class="mi">0</span> <span class="p">},</span>
+</span><span class='line'>    <span class="p">{</span> <span class="s">&quot;persist.sys.&quot;</span><span class="p">,</span>     <span class="n">AID_SYSTEM</span><span class="p">,</span>   <span class="mi">0</span> <span class="p">},</span>
+</span><span class='line'>    <span class="p">{</span> <span class="s">&quot;persist.service.&quot;</span><span class="p">,</span> <span class="n">AID_SYSTEM</span><span class="p">,</span>   <span class="mi">0</span> <span class="p">},</span>
+</span><span class='line'>    <span class="p">{</span> <span class="s">&quot;persist.security.&quot;</span><span class="p">,</span> <span class="n">AID_SYSTEM</span><span class="p">,</span>   <span class="mi">0</span> <span class="p">},</span>
+</span><span class='line'>    <span class="p">{</span> <span class="s">&quot;persist.service.bdroid.&quot;</span><span class="p">,</span> <span class="n">AID_BLUETOOTH</span><span class="p">,</span>   <span class="mi">0</span> <span class="p">},</span>
+</span><span class='line'>    <span class="p">{</span> <span class="s">&quot;selinux.&quot;</span>         <span class="p">,</span> <span class="n">AID_SYSTEM</span><span class="p">,</span>   <span class="mi">0</span> <span class="p">},</span>
+</span><span class='line'>    <span class="p">{</span> <span class="nb">NULL</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span> <span class="p">}</span>
+</span><span class='line'><span class="p">};</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>接着就 <code>property_set</code>:</p>
+
+<p>先查询有的话，就 <code>__system_property_update</code> , 没有就 <code>__system_property_add</code> ,如果是 <code>persist.</code>的话，要 <code>write_persistent_property</code> 写入到 <strong>/data/property/xxx</strong></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="kt">int</span> <span class="nf">property_set</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">name</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">value</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="n">prop_info</span> <span class="o">*</span><span class="n">pi</span><span class="p">;</span>
+</span><span class='line'>    <span class="kt">int</span> <span class="n">ret</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kt">size_t</span> <span class="n">namelen</span> <span class="o">=</span> <span class="n">strlen</span><span class="p">(</span><span class="n">name</span><span class="p">);</span>
+</span><span class='line'>    <span class="kt">size_t</span> <span class="n">valuelen</span> <span class="o">=</span> <span class="n">strlen</span><span class="p">(</span><span class="n">value</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">is_legal_property_name</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">namelen</span><span class="p">))</span> <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+</span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="n">valuelen</span> <span class="o">&gt;=</span> <span class="n">PROP_VALUE_MAX</span><span class="p">)</span> <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">pi</span> <span class="o">=</span> <span class="p">(</span><span class="n">prop_info</span><span class="o">*</span><span class="p">)</span> <span class="n">__system_property_find</span><span class="p">(</span><span class="n">name</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">if</span><span class="p">(</span><span class="n">pi</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="cm">/* ro.* properties may NEVER be modified once set */</span>
+</span><span class='line'>        <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">strncmp</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s">&quot;ro.&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span> <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">__system_property_update</span><span class="p">(</span><span class="n">pi</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">valuelen</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span><span class='line'>        <span class="n">ret</span> <span class="o">=</span> <span class="n">__system_property_add</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">namelen</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">valuelen</span><span class="p">);</span>
+</span><span class='line'>        <span class="k">if</span> <span class="p">(</span><span class="n">ret</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>            <span class="n">ERROR</span><span class="p">(</span><span class="s">&quot;Failed to set &#39;%s&#39;=&#39;%s&#39;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">);</span>
+</span><span class='line'>            <span class="k">return</span> <span class="n">ret</span><span class="p">;</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="cm">/* If name starts with &quot;net.&quot; treat as a DNS property. */</span>
+</span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="n">strncmp</span><span class="p">(</span><span class="s">&quot;net.&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">strlen</span><span class="p">(</span><span class="s">&quot;net.&quot;</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>  <span class="p">{</span>
+</span><span class='line'>        <span class="k">if</span> <span class="p">(</span><span class="n">strcmp</span><span class="p">(</span><span class="s">&quot;net.change&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>            <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>       <span class="cm">/*  </span>
+</span><span class='line'><span class="cm">        * The &#39;net.change&#39; property is a special property used track when any</span>
+</span><span class='line'><span class="cm">        * &#39;net.*&#39; property name is updated. It is _ONLY_ updated here. Its value</span>
+</span><span class='line'><span class="cm">        * contains the last updated &#39;net.*&#39; property.</span>
+</span><span class='line'><span class="cm">        */</span>
+</span><span class='line'>        <span class="n">property_set</span><span class="p">(</span><span class="s">&quot;net.change&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">persistent_properties_loaded</span> <span class="o">&amp;&amp;</span>
+</span><span class='line'>            <span class="n">strncmp</span><span class="p">(</span><span class="s">&quot;persist.&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">strlen</span><span class="p">(</span><span class="s">&quot;persist.&quot;</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="cm">/*  </span>
+</span><span class='line'><span class="cm">         * Don&#39;t write properties to disk until after we have read all default properties</span>
+</span><span class='line'><span class="cm">         * to prevent them from being overwritten by default values.</span>
+</span><span class='line'><span class="cm">         */</span>
+</span><span class='line'>        <span class="n">write_persistent_property</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">strcmp</span><span class="p">(</span><span class="s">&quot;selinux.reload_policy&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span>
+</span><span class='line'>               <span class="n">strcmp</span><span class="p">(</span><span class="s">&quot;1&quot;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="n">selinux_reload_policy</span><span class="p">();</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="n">property_changed</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">);</span>
+</span><span class='line'>    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">zhibin</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-12-23T10:17:00+08:00" pubdate data-updated="true">Dec 23<span>rd</span>, 2013</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/systemproperties/'>SystemProperties</a>, <a class='category' href='/blog/categories/android/'>android</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://SteveVallay.github.io/blog/2013/12/23/android-system-properties2/" data-via="zhibin_" data-counturl="http://SteveVallay.github.io/blog/2013/12/23/android-system-properties2/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2013/12/13/android-systemproperties/" title="Previous Post: android_System_Properties">&laquo; android_System_Properties</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2013/12/23/android-system-properties2/">Android_system_properties 2</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/12/13/android-systemproperties/">android_System_Properties</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/11/13/deploy-app-to-digit-ocean/">Deploy App to Digit Ocean</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/11/07/sendorderedbroadcast/">Android sendOrderedBroadcast</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/11/06/using-disqus-api/">使用 Disqus 评论</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/SteveVallay">@SteveVallay</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'SteveVallay',
+            count: 2,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2013 - zhibin -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'zhibin';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://SteveVallay.github.io/blog/2013/12/23/android-system-properties2/';
+        var disqus_url = 'http://SteveVallay.github.io/blog/2013/12/23/android-system-properties2/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
