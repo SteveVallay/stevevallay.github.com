@@ -476,8 +476,108 @@ int property_set(const char *name, const char *value)
 ```
 
 
+OK， `proper_set` 流程先到这里，下面来看看 `proper_get` . `proper_get` 直接向下到 libc 的 `__system_property_get` 的 api.
+
+**/bionic/libc/bionic/system_properties.c**
+
+```c
+int __system_property_get(const char *name, char *value)
+{
+    const prop_info *pi = __system_property_find(name);
+
+    if(pi != 0) {
+        return __system_property_read(pi, 0, value);
+    } else {
+        value[0] = 0;
+        return 0;
+    }   
+}
+```
+
+这里是调用了 `__system_property_find` 来查找这个值。在往下看：
+```
+const prop_info *__system_property_find(const char *name)
+{
+    if (__predict_false(compat_mode)) {  //貌似没打开 compat_mode 
+        return __system_property_find_compat(name);
+    }
+    return find_property(root_node(), name, strlen(name), NULL, 0, false); //看这里
+}
+```
+
+这里调用 `find_property` 来访问 `root_node()`, 什么是 `root_node()`?
+
+```c
+static prop_bt *root_node()
+{
+    return to_prop_obj(0);
+}
+
+static void *to_prop_obj(prop_off_t off)
+{
+    if (off > pa_data_size)
+        return NULL;
+
+    return __system_property_area__->data + off;
+}
+```
+
+实际上获取 `__system_property_area__->data `的地址开始访问。OK, `__system_property_area__` 是哪里？ 正是 **/dev/__properties__** map 到内存的地址。
+
+init.c 进程调用了 system_properties.c 的 `__system_property_area_init` -> `map_prop_area_rw` 在这里：
+
+创建 `property_filename`(/dev/_-properties__), `mmap` 到内存， 将地址赋值给 `__system_property_area__` 。
+
+```c
+static int map_prop_area_rw()
+{
+...
+fd = open(property_filename, O_RDWR | O_CREAT | O_NOFOLLOW | O_CLOEXEC |
+            O_EXCL, 0444);
+...
+ pa = mmap(NULL, pa_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+
+...
+/* plug into the lib property services */
+    __system_property_area__ = pa;
+...
+}
+```
+
+但是，慢着！ 这些都是在 init 进程里面执行的，其他进程调用 `__system_property_find` 怎么可以直接访问 `__system_property_area__` ? 难道 其他进程和 init 共享了这个地址，这是不可能的，这个变量怎会传递到 init 的子进程？就算传递了，它们怎么可能访问相同的地址呢？它们可是不同进程啊，各自使用自己独享的内存空间啊！
+
+所以，呵呵！ 其他进程肯定也对 `__system_property_area__` 进行初始化了！ 在哪里 ？
+**/bionic/libc/bionic/libc_init_common.cpp** 中 调用了 `__system_properties_init()`
+```c
+void __libc_init_common(KernelArgumentBlock& args) {
+...
+ __system_properties_init();
+}
+```
+
+**/bionic/libc/bionic/system_properties.c**
+```c
+int __system_properties_init()
+{
+    return map_prop_area();
+}
+
+static int map_prop_area()
+{
+ ...
+ fd = open(property_filename, O_RDONLY | O_NOFOLLOW | O_CLOEXEC);
+ ...
+prop_area *pa = mmap(NULL, pa_size, PROT_READ, MAP_SHARED, fd, 0);
+...
+ __system_property_area__ = pa;
+...
+}
+```
+
+以 RDONLY 模式打开了 `/dev/__properties__` 文件，并且 mmap 到内存，将地址赋值给 `__system_property_area__` ！ 所以，其他进程可以直接访问 ``__system_property_area__`` 不过这个肯定和 init 进程里那个是不同的！！
 
 
+OK！ 结束，下一篇讲讲 property 存储区的数据结构 ！ 
 
 
 
