@@ -4,7 +4,7 @@
   <title><![CDATA[Category: android | Zhibin's blog]]></title>
   <link href="http://SteveVallay.github.io/blog/categories/android/atom.xml" rel="self"/>
   <link href="http://SteveVallay.github.io/"/>
-  <updated>2013-12-23T18:22:44+08:00</updated>
+  <updated>2013-12-24T09:41:22+08:00</updated>
   <id>http://SteveVallay.github.io/</id>
   <author>
     <name><![CDATA[zhibin]]></name>
@@ -28,6 +28,15 @@
 <p>先来看看这个图大致理解一下:</p>
 
 <p><img src="/images/blog/android_property.png" alt="android-property" /></p>
+
+<p>可以查看下手机的 /dev/<strong>properties</strong> 文件(Kitkat 4.4) ：</p>
+
+<p>```</p>
+
+<h1>ls -al /dev/<em>*__proper</em></h1>
+
+<p>-rw-r&mdash;r&mdash; root     root        65536 1970-01-12 05:24 <strong>properties</strong>
+```</p>
 
 <p>Init 进程，创建 <strong>/dev/<strong>properties</strong></strong> 文件，map 到内存，然后从 <strong>/default.prop</strong>等文件中加载 properties, 写入 <strong>/dev/<strong>properties</strong></strong>. 然后启动 property_service , 就是建立一个 <code>property_service</code> 的 socket ，监听这个 socket ，其他进程通过向这个 socket 发送 proper_set 的消息来完成 properties 的设置。</p>
 
@@ -536,7 +545,7 @@ return 0;
 
 <p>因此，system properties 经常作为一些特定 Feature 的控制开关，运行时根据 properties 的值来区分打开/关闭某个 Feature.由于在所有进程都可以访问，也可以用来在 Android 的不同进程间进行简单信息协调，Java 和 native 都不受限制。</p>
 
-<p>下面我们就按自上而下的顺序看看 Android 的这个 Properties system 的实现。</p>
+<p>下面我们就按自上而下的顺序看看 Android 的这个 Properties system 的实现（Kitkat 4.4)。</p>
 
 <!--more-->
 

@@ -117,6 +117,14 @@
 
 <p><img src="/images/blog/android_property.png" alt="android-property" /></p>
 
+<p>可以查看下手机的 /dev/<strong>properties</strong> 文件(Kitkat 4.4) ：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># ls -al /dev/**__proper*
+</span><span class='line'>-rw-r--r-- root     root        65536 1970-01-12 05:24 __properties__</span></code></pre></td></tr></table></div></figure>
+
+
 <p>Init 进程，创建 <strong>/dev/<strong>properties</strong></strong> 文件，map 到内存，然后从 <strong>/default.prop</strong>等文件中加载 properties, 写入 <strong>/dev/<strong>properties</strong></strong>. 然后启动 property_service , 就是建立一个 <code>property_service</code> 的 socket ，监听这个 socket ，其他进程通过向这个 socket 发送 proper_set 的消息来完成 properties 的设置。</p>
 
 <p>proper_get 是在每个进程在初始化时(libc中) 建立了 <strong>/dev/<strong>properties</strong></strong>到内存的 map ，得到了可以直接访问的 address，可以直接遍历 properties 的存储空间完成查找.</p>
