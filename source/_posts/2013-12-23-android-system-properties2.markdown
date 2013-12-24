@@ -20,6 +20,13 @@ description: android,SystemProperties
 
 ![android-property][101]
 
+可以查看下手机的 /dev/__properties__ 文件(Kitkat 4.4) ：
+
+```
+# ls -al /dev/**__proper*
+-rw-r--r-- root     root        65536 1970-01-12 05:24 __properties__
+```
+
 
 Init 进程，创建 **/dev/__properties__** 文件，map 到内存，然后从 **/default.prop**等文件中加载 properties, 写入 **/dev/__properties__**. 然后启动 property_service , 就是建立一个 `property_service` 的 socket ，监听这个 socket ，其他进程通过向这个 socket 发送 proper_set 的消息来完成 properties 的设置。
 

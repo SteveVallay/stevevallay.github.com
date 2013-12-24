@@ -19,7 +19,7 @@ Property system 是 Android 系统中一个重要的 Feature，它以一个 serv
 
 因此，system properties 经常作为一些特定 Feature 的控制开关，运行时根据 properties 的值来区分打开/关闭某个 Feature.由于在所有进程都可以访问，也可以用来在 Android 的不同进程间进行简单信息协调，Java 和 native 都不受限制。
 
-下面我们就按自上而下的顺序看看 Android 的这个 Properties system 的实现。
+下面我们就按自上而下的顺序看看 Android 的这个 Properties system 的实现（Kitkat 4.4)。
 
 <!--more-->
 
