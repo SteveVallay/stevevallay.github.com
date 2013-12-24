@@ -4,7 +4,7 @@
   <title><![CDATA[Zhibin's blog]]></title>
   <link href="http://SteveVallay.github.io/atom.xml" rel="self"/>
   <link href="http://SteveVallay.github.io/"/>
-  <updated>2013-12-24T09:41:22+08:00</updated>
+  <updated>2013-12-24T12:56:01+08:00</updated>
   <id>http://SteveVallay.github.io/</id>
   <author>
     <name><![CDATA[zhibin]]></name>
@@ -835,7 +835,172 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
+<p>OK， <code>proper_set</code> 流程先到这里，下面来看看 <code>proper_get</code> . <code>proper_get</code> 直接向下到 libc 的 <code>__system_property_get</code> 的 api.</p>
 
+<p><strong>/bionic/libc/bionic/system_properties.c</strong></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="kt">int</span> <span class="nf">__system_property_get</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">name</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="n">value</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="k">const</span> <span class="n">prop_info</span> <span class="o">*</span><span class="n">pi</span> <span class="o">=</span> <span class="n">__system_property_find</span><span class="p">(</span><span class="n">name</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">if</span><span class="p">(</span><span class="n">pi</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">__system_property_read</span><span class="p">(</span><span class="n">pi</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">value</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span><span class='line'>        <span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'>        <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这里是调用了 <code>__system_property_find</code> 来查找这个值。在往下看：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="k">const</span> <span class="n">prop_info</span> <span class="o">*</span><span class="nf">__system_property_find</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">name</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="n">__predict_false</span><span class="p">(</span><span class="n">compat_mode</span><span class="p">))</span> <span class="p">{</span>  <span class="c1">//貌似没打开 compat_mode </span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">__system_property_find_compat</span><span class="p">(</span><span class="n">name</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">find_property</span><span class="p">(</span><span class="n">root_node</span><span class="p">(),</span> <span class="n">name</span><span class="p">,</span> <span class="n">strlen</span><span class="p">(</span><span class="n">name</span><span class="p">),</span> <span class="nb">NULL</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">false</span><span class="p">);</span> <span class="c1">//看这里</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这里调用 <code>find_property</code> 来访问 <code>root_node()</code>, 什么是 <code>root_node()</code>?</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="k">static</span> <span class="n">prop_bt</span> <span class="o">*</span><span class="nf">root_node</span><span class="p">()</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">to_prop_obj</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">static</span> <span class="kt">void</span> <span class="o">*</span><span class="nf">to_prop_obj</span><span class="p">(</span><span class="n">prop_off_t</span> <span class="n">off</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="n">off</span> <span class="o">&gt;</span> <span class="n">pa_data_size</span><span class="p">)</span>
+</span><span class='line'>        <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">return</span> <span class="n">__system_property_area__</span><span class="o">-&gt;</span><span class="n">data</span> <span class="o">+</span> <span class="n">off</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>实际上获取 <code>__system_property_area__-&gt;data</code>的地址开始访问。OK, <code>__system_property_area__</code> 是哪里？ 正是 <strong>/dev/<strong>properties</strong></strong> map 到内存的地址。</p>
+
+<p>init.c 进程调用了 system_properties.c 的 <code>__system_property_area_init</code> &ndash;> <code>map_prop_area_rw</code> 在这里：</p>
+
+<p>创建 <code>property_filename</code>(/dev/_-properties__), <code>mmap</code> 到内存， 将地址赋值给 <code>__system_property_area__</code> 。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="k">static</span> <span class="kt">int</span> <span class="nf">map_prop_area_rw</span><span class="p">()</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'><span class="p">...</span>
+</span><span class='line'><span class="n">fd</span> <span class="o">=</span> <span class="n">open</span><span class="p">(</span><span class="n">property_filename</span><span class="p">,</span> <span class="n">O_RDWR</span> <span class="o">|</span> <span class="n">O_CREAT</span> <span class="o">|</span> <span class="n">O_NOFOLLOW</span> <span class="o">|</span> <span class="n">O_CLOEXEC</span> <span class="o">|</span>
+</span><span class='line'>            <span class="n">O_EXCL</span><span class="p">,</span> <span class="mo">0444</span><span class="p">);</span>
+</span><span class='line'><span class="p">...</span>
+</span><span class='line'> <span class="n">pa</span> <span class="o">=</span> <span class="n">mmap</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span> <span class="n">pa_size</span><span class="p">,</span> <span class="n">PROT_READ</span> <span class="o">|</span> <span class="n">PROT_WRITE</span><span class="p">,</span> <span class="n">MAP_SHARED</span><span class="p">,</span> <span class="n">fd</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">...</span>
+</span><span class='line'><span class="cm">/* plug into the lib property services */</span>
+</span><span class='line'>    <span class="n">__system_property_area__</span> <span class="o">=</span> <span class="n">pa</span><span class="p">;</span>
+</span><span class='line'><span class="p">...</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>但是，慢着！ 这些都是在 init 进程里面执行的，其他进程调用 <code>__system_property_find</code> 怎么可以直接访问 <code>__system_property_area__</code> ? 难道 其他进程和 init 共享了这个地址，这是不可能的，这个变量怎会传递到 init 的子进程？就算传递了，它们怎么可能访问相同的地址呢？它们可是不同进程啊，各自使用自己独享的内存空间啊！</p>
+
+<p>所以，呵呵！ 其他进程肯定也对 <code>__system_property_area__</code> 进行初始化了！ 在哪里 ？
+<strong>/bionic/libc/bionic/libc_init_common.cpp</strong> 中 调用了 <code>__system_properties_init()</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="kt">void</span> <span class="nf">__libc_init_common</span><span class="p">(</span><span class="n">KernelArgumentBlock</span><span class="o">&amp;</span> <span class="n">args</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'><span class="p">...</span>
+</span><span class='line'> <span class="n">__system_properties_init</span><span class="p">();</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>/bionic/libc/bionic/system_properties.c</strong></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="kt">int</span> <span class="nf">__system_properties_init</span><span class="p">()</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">map_prop_area</span><span class="p">();</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">static</span> <span class="kt">int</span> <span class="nf">map_prop_area</span><span class="p">()</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'> <span class="p">...</span>
+</span><span class='line'> <span class="n">fd</span> <span class="o">=</span> <span class="n">open</span><span class="p">(</span><span class="n">property_filename</span><span class="p">,</span> <span class="n">O_RDONLY</span> <span class="o">|</span> <span class="n">O_NOFOLLOW</span> <span class="o">|</span> <span class="n">O_CLOEXEC</span><span class="p">);</span>
+</span><span class='line'> <span class="p">...</span>
+</span><span class='line'><span class="n">prop_area</span> <span class="o">*</span><span class="n">pa</span> <span class="o">=</span> <span class="n">mmap</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span> <span class="n">pa_size</span><span class="p">,</span> <span class="n">PROT_READ</span><span class="p">,</span> <span class="n">MAP_SHARED</span><span class="p">,</span> <span class="n">fd</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+</span><span class='line'><span class="p">...</span>
+</span><span class='line'> <span class="n">__system_property_area__</span> <span class="o">=</span> <span class="n">pa</span><span class="p">;</span>
+</span><span class='line'><span class="p">...</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>以 RDONLY 模式打开了 <code>/dev/__properties__</code> 文件，并且 mmap 到内存，将地址赋值给 <code>__system_property_area__</code> ！ 所以，其他进程可以直接访问 <code>__system_property_area__</code> 不过这个肯定和 init 进程里那个是不同的！！</p>
+
+<p>OK！ 结束，下一篇讲讲 property 存储区的数据结构 ！</p>
 ]]></content>
   </entry>
   
