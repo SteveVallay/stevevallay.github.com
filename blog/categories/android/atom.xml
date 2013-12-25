@@ -4,7 +4,7 @@
   <title><![CDATA[Category: android | Zhibin's blog]]></title>
   <link href="http://SteveVallay.github.io/blog/categories/android/atom.xml" rel="self"/>
   <link href="http://SteveVallay.github.io/"/>
-  <updated>2013-12-24T12:56:01+08:00</updated>
+  <updated>2013-12-25T20:00:32+08:00</updated>
   <id>http://SteveVallay.github.io/</id>
   <author>
     <name><![CDATA[zhibin]]></name>
@@ -12,6 +12,161 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[android properties data structure]]></title>
+    <link href="http://SteveVallay.github.io/blog/2013/12/24/android-properties-data-structure/"/>
+    <updated>2013-12-24T13:04:00+08:00</updated>
+    <id>http://SteveVallay.github.io/blog/2013/12/24/android-properties-data-structure</id>
+    <content type="html"><![CDATA[<p>突然发觉，写文章不应太多拘泥于细节：
+&ndash; 言简意赅
+&ndash; 图胜于文
+&ndash; 图文并茂
+&ndash; 点到为止。</p>
+
+<!-- more -->
+
+
+<p>从 Jelly Bean 到 KitKat 版本， <code>properties</code> 的存储的数据结构还是有些变化的.</p>
+
+<p>实际存储位置： <strong>/dev/__properties__</strong> 文件 (root RW， 其他只能 R)
+<code>bash
+ls -al /dev/__proper*
+-rw-r--r-- root     root        65536 1970-01-14 05:26 __properties__
+</code></p>
+
+<p>关于 Jelly Bean（或者以前的)， 直接上张图，比较明了：</p>
+
+<p><img src="/images/blog/prop_struct_jb.png" alt="jb proper data structure" /></p>
+
+<p>先看下相关结构的定义:</p>
+
+<p>```c  system/core/init/property_service.c
+typedef struct {</p>
+
+<pre><code>void *data;
+size_t size;
+int fd; 
+</code></pre>
+
+<p>} workspace;</p>
+
+<p>```</p>
+
+<p>```c bionic/libc/bionic/system_properties.c
+struct prop_area {</p>
+
+<pre><code>unsigned volatile count;
+unsigned volatile serial;  //不知道这个是干什么的?
+unsigned magic;
+unsigned version;
+unsigned reserved[4];
+unsigned toc[1];
+</code></pre>
+
+<p>};</p>
+
+<p>struct prop_info {</p>
+
+<pre><code>char name[PROP_NAME_MAX];
+unsigned volatile serial;
+char value[PROP_VALUE_MAX];
+</code></pre>
+
+<p>};
+```
+toc[i] 里面存放的是 property name 的长度 (前 8 位) 和对应 proper_info 对应的地址 (后 24位)。
+proper_info 的 serial (前 8 位) 保存的是 property value 的 length。</p>
+
+<p>但是有几个问题:</p>
+
+<ul>
+<li>大小是不对的 , Jelly Bean 上大小是 65536, 可以放 495 个 properties.</li>
+</ul>
+
+
+<p>```c system/core/init/properties_service.c
+/<em> (8 header words + 495 toc words) = 2012 bytes </em>/
+/<em> 2016 bytes header and toc + 495 prop_infos @ 128 bytes = 65376 bytes </em>/</p>
+
+<h1>define PA_COUNT_MAX  495</h1>
+
+<h1>define PA_INFO_START 2016</h1>
+
+<h1>define PA_SIZE       65536</h1>
+
+<p>```</p>
+
+<ul>
+<li>share memory 是不对的, 这个图在 init 进程里面没什么问题。但是其他进程访问（读取的时候) 其实是将同样的文件(<strong>/dev/__properties__</strong>) map 了一份到自己的内存空间。所以每个进程的这个结构是自己的，不是共享的。</li>
+</ul>
+
+
+<p>KitKat ：</p>
+
+<p>KK 上总大小是  128*1024</p>
+
+<p>数据结构:
+```c bionic/libc/bionic/system_properties.c
+struct prop_area {</p>
+
+<pre><code>unsigned bytes_used;
+unsigned volatile serial;
+unsigned magic;
+unsigned version;
+unsigned reserved[28];
+char data[0];
+</code></pre>
+
+<p>};</p>
+
+<p>struct prop_info {</p>
+
+<pre><code>unsigned volatile serial;
+char value[PROP_VALUE_MAX];
+char name[0];
+</code></pre>
+
+<p>};</p>
+
+<p>struct prop_bt {</p>
+
+<pre><code>uint8_t namelen;
+uint8_t reserved[3];
+
+prop_off_t prop;
+
+prop_off_t left;
+prop_off_t right;
+
+prop_off_t children;
+
+char name[0];
+</code></pre>
+
+<p>};</p>
+
+<p>```</p>
+
+<p>Kitkat 上 proper info 的存储已经改为 bTree 了，bytes_used 用来记录存储这些信息所使用的空间。</p>
+
+<p><code>c bionic/libc/bionic/system_properties.c
+ * +-----+   children    +----+   children    +--------+
+ * |     |--------------&gt;| ro |--------------&gt;| secure |
+ * +-----+               +----+               +--------+
+ *                       /    \                /   |
+ *                 left /      \ right   left /    |  prop   +===========+
+ *                     v        v            v     +--------&gt;| ro.secure |
+ *                  +-----+   +-----+     +-----+            +-----------+
+ *                  | net |   | sys |     | com |            |     1     |
+ *                  +-----+   +-----+     +-----+            +===========+
+</code></p>
+
+<p>好了， 就到这里吧! 感谢 ～</p>
+
+<p>参考文档: <a href="http://rxwen.blogspot.com/2010/01/android-property-system.html">http://rxwen.blogspot.com/2010/01/android-property-system.html</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[android_system_properties 2]]></title>
