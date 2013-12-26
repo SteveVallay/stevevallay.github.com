@@ -4,7 +4,7 @@
   <title><![CDATA[Zhibin's blog]]></title>
   <link href="http://SteveVallay.github.io/atom.xml" rel="self"/>
   <link href="http://SteveVallay.github.io/"/>
-  <updated>2013-12-25T20:00:32+08:00</updated>
+  <updated>2013-12-26T17:20:25+08:00</updated>
   <id>http://SteveVallay.github.io/</id>
   <author>
     <name><![CDATA[zhibin]]></name>
@@ -18,11 +18,15 @@
     <link href="http://SteveVallay.github.io/blog/2013/12/24/android-properties-data-structure/"/>
     <updated>2013-12-24T13:04:00+08:00</updated>
     <id>http://SteveVallay.github.io/blog/2013/12/24/android-properties-data-structure</id>
-    <content type="html"><![CDATA[<p>突然发觉，写文章不应太多拘泥于细节：
-&ndash; 言简意赅
-&ndash; 图胜于文
-&ndash; 图文并茂
-&ndash; 点到为止。</p>
+    <content type="html"><![CDATA[<p>写文章不应太多拘泥于细节：</p>
+
+<ul>
+<li>言简意赅</li>
+<li>图胜于文</li>
+<li>图文并茂</li>
+<li>点到为止</li>
+</ul>
+
 
 <!-- more -->
 
@@ -215,7 +219,7 @@ proper_info 的 serial (前 8 位) 保存的是 property value 的 length。</p>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[android_system_properties 2]]></title>
+    <title type="html"><![CDATA[android system properties dynamic]]></title>
     <link href="http://SteveVallay.github.io/blog/2013/12/23/android-system-properties2/"/>
     <updated>2013-12-23T10:17:00+08:00</updated>
     <id>http://SteveVallay.github.io/blog/2013/12/23/android-system-properties2</id>
@@ -230,7 +234,7 @@ proper_info 的 serial (前 8 位) 保存的是 property value 的 length。</p>
 
 <p><img src="http://SteveVallay.github.io/images/blog/android_property.png" alt="android-property" /></p>
 
-<p>可以查看下手机的 /dev/<strong>properties</strong> 文件(Kitkat 4.4) ：</p>
+<p>可以查看下手机的 /dev/__properties__ 文件(Kitkat 4.4) ：</p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -238,9 +242,9 @@ proper_info 的 serial (前 8 位) 保存的是 property value 的 length。</p>
 </span><span class='line'>-rw-r--r-- root     root        65536 1970-01-12 05:24 __properties__</span></code></pre></td></tr></table></div></figure>
 
 
-<p>Init 进程，创建 <strong>/dev/<strong>properties</strong></strong> 文件，map 到内存，然后从 <strong>/default.prop</strong>等文件中加载 properties, 写入 <strong>/dev/<strong>properties</strong></strong>. 然后启动 property_service , 就是建立一个 <code>property_service</code> 的 socket ，监听这个 socket ，其他进程通过向这个 socket 发送 proper_set 的消息来完成 properties 的设置。</p>
+<p>Init 进程，创建 <strong>/dev/__properties__</strong> 文件，map 到内存，然后从 <strong>/default.prop</strong>等文件中加载 properties, 写入 <strong>/dev/__properties__</strong>. 然后启动 property_service , 就是建立一个 <code>property_service</code> 的 socket ，监听这个 socket ，其他进程通过向这个 socket 发送 proper_set 的消息来完成 properties 的设置。</p>
 
-<p>proper_get 是在每个进程在初始化时(libc中) 建立了 <strong>/dev/<strong>properties</strong></strong>到内存的 map ，得到了可以直接访问的 address，可以直接遍历 properties 的存储空间完成查找.</p>
+<p>proper_get 是在每个进程在初始化时(libc中) 建立了 <strong>/dev/__properties__</strong>到内存的 map ，得到了可以直接访问的 address，可以直接遍历 properties 的存储空间完成查找.</p>
 
 <p>下面细细到来：</p>
 
@@ -421,7 +425,7 @@ proper_info 的 serial (前 8 位) 保存的是 property value 的 length。</p>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>首先创建 <strong>/dev/<strong>properties</strong></strong> ，并且用 <code>mmap</code> 映射到内存.（通过变量<code>__system_property_area__</code> 的共享，完成 property_service 和 libc 中 properties 相关的交互。)</p>
+<p>首先创建 <strong>/dev/__properties__</strong> ，并且用 <code>mmap</code> 映射到内存.（通过变量<code>__system_property_area__</code> 的共享，完成 property_service 和 libc 中 properties 相关的交互。)</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -1206,13 +1210,11 @@ proper_info 的 serial (前 8 位) 保存的是 property value 的 length。</p>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[android_System_Properties]]></title>
+    <title type="html"><![CDATA[Android System Properties]]></title>
     <link href="http://SteveVallay.github.io/blog/2013/12/13/android-systemproperties/"/>
     <updated>2013-12-13T23:41:00+08:00</updated>
     <id>http://SteveVallay.github.io/blog/2013/12/13/android-systemproperties</id>
     <content type="html"><![CDATA[<p>&mdash;直朝那个方向走，或许真的能到达那个地方。o(∩∩)o&hellip;哈哈</p>
-
-<h3>Android SystemProperties</h3>
 
 <p>Property system 是 Android 系统中一个重要的 Feature，它以一个 service 的形式来管理系统的配置和状态，每个 property 都是一个 key/value 组，key 和 value 都是字符串。</p>
 
@@ -1224,6 +1226,8 @@ proper_info 的 serial (前 8 位) 保存的是 property value 的 length。</p>
 
 <!--more-->
 
+
+<p><img src="http://SteveVallay.github.io/images/blog/property-call-stack.png" alt="properties call stack" /></p>
 
 <h4>Java 层</h4>
 

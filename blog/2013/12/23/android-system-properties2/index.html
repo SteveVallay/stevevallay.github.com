@@ -5,7 +5,7 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>android_system_properties 2 - Zhibin's blog</title>
+  <title>android system properties dynamic - Zhibin's blog</title>
   <meta name="author" content="zhibin">
 
   
@@ -81,7 +81,7 @@
   
   <header>
     
-      <h1 class="entry-title">Android_system_properties 2</h1>
+      <h1 class="entry-title">Android System Properties Dynamic</h1>
     
     
       <p class="meta">
@@ -117,7 +117,7 @@
 
 <p><img src="/images/blog/android_property.png" alt="android-property" /></p>
 
-<p>可以查看下手机的 /dev/<strong>properties</strong> 文件(Kitkat 4.4) ：</p>
+<p>可以查看下手机的 /dev/__properties__ 文件(Kitkat 4.4) ：</p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -125,9 +125,9 @@
 </span><span class='line'>-rw-r--r-- root     root        65536 1970-01-12 05:24 __properties__</span></code></pre></td></tr></table></div></figure>
 
 
-<p>Init 进程，创建 <strong>/dev/<strong>properties</strong></strong> 文件，map 到内存，然后从 <strong>/default.prop</strong>等文件中加载 properties, 写入 <strong>/dev/<strong>properties</strong></strong>. 然后启动 property_service , 就是建立一个 <code>property_service</code> 的 socket ，监听这个 socket ，其他进程通过向这个 socket 发送 proper_set 的消息来完成 properties 的设置。</p>
+<p>Init 进程，创建 <strong>/dev/__properties__</strong> 文件，map 到内存，然后从 <strong>/default.prop</strong>等文件中加载 properties, 写入 <strong>/dev/__properties__</strong>. 然后启动 property_service , 就是建立一个 <code>property_service</code> 的 socket ，监听这个 socket ，其他进程通过向这个 socket 发送 proper_set 的消息来完成 properties 的设置。</p>
 
-<p>proper_get 是在每个进程在初始化时(libc中) 建立了 <strong>/dev/<strong>properties</strong></strong>到内存的 map ，得到了可以直接访问的 address，可以直接遍历 properties 的存储空间完成查找.</p>
+<p>proper_get 是在每个进程在初始化时(libc中) 建立了 <strong>/dev/__properties__</strong>到内存的 map ，得到了可以直接访问的 address，可以直接遍历 properties 的存储空间完成查找.</p>
 
 <p>下面细细到来：</p>
 
@@ -308,7 +308,7 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>首先创建 <strong>/dev/<strong>properties</strong></strong> ，并且用 <code>mmap</code> 映射到内存.（通过变量<code>__system_property_area__</code> 的共享，完成 property_service 和 libc 中 properties 相关的交互。)</p>
+<p>首先创建 <strong>/dev/__properties__</strong> ，并且用 <code>mmap</code> 映射到内存.（通过变量<code>__system_property_area__</code> 的共享，完成 property_service 和 libc 中 properties 相关的交互。)</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -1136,7 +1136,7 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2013/12/13/android-systemproperties/" title="Previous Post: android_System_Properties">&laquo; android_System_Properties</a>
+        <a class="basic-alignment left" href="/blog/2013/12/13/android-systemproperties/" title="Previous Post: Android System Properties">&laquo; Android System Properties</a>
       
       
         <a class="basic-alignment right" href="/blog/2013/12/24/android-properties-data-structure/" title="Next Post: android properties data structure">android properties data structure &raquo;</a>
@@ -1164,11 +1164,11 @@
       </li>
     
       <li class="post">
-        <a href="/blog/2013/12/23/android-system-properties2/">Android_system_properties 2</a>
+        <a href="/blog/2013/12/23/android-system-properties2/">Android System Properties Dynamic</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2013/12/13/android-systemproperties/">android_System_Properties</a>
+        <a href="/blog/2013/12/13/android-systemproperties/">Android System Properties</a>
       </li>
     
       <li class="post">
