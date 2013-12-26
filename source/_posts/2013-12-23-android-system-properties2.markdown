@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "android_system_properties 2"
+title: "android system properties dynamic"
 date: 2013-12-23 10:17
 comments: true
 categories:
@@ -20,7 +20,7 @@ description: android,SystemProperties
 
 ![android-property][101]
 
-可以查看下手机的 /dev/__properties__ 文件(Kitkat 4.4) ：
+可以查看下手机的 /dev/\_\_properties\_\_ 文件(Kitkat 4.4) ：
 
 ```
 # ls -al /dev/**__proper*
@@ -28,9 +28,9 @@ description: android,SystemProperties
 ```
 
 
-Init 进程，创建 **/dev/__properties__** 文件，map 到内存，然后从 **/default.prop**等文件中加载 properties, 写入 **/dev/__properties__**. 然后启动 property_service , 就是建立一个 `property_service` 的 socket ，监听这个 socket ，其他进程通过向这个 socket 发送 proper_set 的消息来完成 properties 的设置。
+Init 进程，创建 **/dev/\_\_properties\_\_** 文件，map 到内存，然后从 **/default.prop**等文件中加载 properties, 写入 **/dev/\_\_properties\_\_**. 然后启动 property_service , 就是建立一个 `property_service` 的 socket ，监听这个 socket ，其他进程通过向这个 socket 发送 proper_set 的消息来完成 properties 的设置。
 
-proper_get 是在每个进程在初始化时(libc中) 建立了 **/dev/__properties__**到内存的 map ，得到了可以直接访问的 address，可以直接遍历 properties 的存储空间完成查找.
+proper_get 是在每个进程在初始化时(libc中) 建立了 **/dev/\_\_properties\_\_**到内存的 map ，得到了可以直接访问的 address，可以直接遍历 properties 的存储空间完成查找.
 
 
 下面细细到来：
@@ -135,7 +135,7 @@ out:
 
 ```
 
-首先创建 **/dev/__properties__** ，并且用 `mmap` 映射到内存.（通过变量`__system_property_area__` 的共享，完成 property_service 和 libc 中 properties 相关的交互。)
+首先创建 **/dev/\_\_properties\_\_** ，并且用 `mmap` 映射到内存.（通过变量`__system_property_area__` 的共享，完成 property_service 和 libc 中 properties 相关的交互。)
 
 ```c
 #define PROP_FILENAME "/dev/__properties__"

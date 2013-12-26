@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "android_System_Properties"
+title: "Android System Properties"
 date: 2013-12-13 23:41
 comments: true
 categories:
@@ -11,7 +11,8 @@ description: android,SystemProperties
 ---
 
 --直朝那个方向走，或许真的能到达那个地方。o(∩∩)o...哈哈
-### Android SystemProperties
+
+
 
 Property system 是 Android 系统中一个重要的 Feature，它以一个 service 的形式来管理系统的配置和状态，每个 property 都是一个 key/value 组，key 和 value 都是字符串。
 
@@ -22,6 +23,10 @@ Property system 是 Android 系统中一个重要的 Feature，它以一个 serv
 下面我们就按自上而下的顺序看看 Android 的这个 Properties system 的实现（Kitkat 4.4)。
 
 <!--more-->
+
+
+![properties call stack][101]
+
 
 #### Java 层 
 
@@ -385,4 +390,4 @@ Bionic - the C-runtime for Android. Note that Android is not using glibc like mo
 
 
 
-
+[101]:/images/blog/property-call-stack.png

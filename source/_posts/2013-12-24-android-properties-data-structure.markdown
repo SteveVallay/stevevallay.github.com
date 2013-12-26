@@ -10,11 +10,13 @@ keywords: android,SystemProperties，data structure
 description: android,SystemProperties
 ---
 
-突然发觉，写文章不应太多拘泥于细节：
+写文章不应太多拘泥于细节：
+
+
 - 言简意赅
 - 图胜于文
 - 图文并茂
-- 点到为止。
+- 点到为止
 
 <!-- more -->
 
