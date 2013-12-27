@@ -1,0 +1,75 @@
+---
+layout: post
+title: "alarm"
+date: 2013-12-27 14:40
+comments: true
+categories:
+- android
+- alarm
+keywords: android,Alarm，
+description: android, alarm,clock
+---
+
+关于时间，我们还知之甚少。 
+
+<!-- more -->
+
+不知道是谁发现了时间这个 NB 的概念! 有了时间，使得我们可以知道从一个事件到另外一个时间，中间经历了多久。时间参考系的建立，使得我们可以即使在不同的地点也可以取得同步，完成协作。
+
+每个系统都要维持一个时钟系统，一方面维持自身的秩序，另一方面和外界取得一致。
+
+Linux 和 Android 都不例外。在手机上我们需要时间系统提供什么样的服务呢？
+
+- 允许我设置时间/同步时间。
+- 告诉我现在是什么时间。
+- 告诉我系统运行了多长时间。
+- 允许我设置特定时间提醒。
+- 允许我计量某个事情花费了多长时间。
+
+先来看看设置特定时间提醒这个功能。
+
+这个特定时间，有两个参考系:
+
+- RTC
+- ELAPSED_REALTIME
+
+`RTC` 指得就是当前时间,UTC时间，java api `System.currentTimeMillis()` 返回的时间，通过这个时间我们知道现在是几年几月几日几时几分几秒。
+
+`ELAPSED_REALTIME` 指的是过去的时间，从开机开始过去了多久， java api `SystemClock.elapsedRealtime()` 返回的时间， 通过这个时间我们知道系统运行了多久。
+
+由于手机系统会有 "休眠" 状态，特定时间提醒这个服务在 "休眠" 状态可以有两种选择，唤醒手机提醒，或者不唤醒手机，等待手机被其他原因唤醒后再提醒。针对这个特性，又添加了两种类型:
+
+- RTC_WAKEUP
+- ELAPSED_REALTIME_WAKEUP
+
+`RTC_WAKEUP` 基于 UTC 时间，唤醒手机进行提醒，`RTC` 默认不会唤醒手机。
+
+`ELAPSED_REALTIME_WAKEUP` 类似的，基于开机过去时间，唤醒手机进行提醒。`ELAPSED_REALTIME` 不会。
+
+先看下在 app layer 如何设置特定时间提醒:
+
+```java packages/apps/DeskClock/src/com/android/deskclock/alarms/AlarmStateManager.java
+ AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+ am.set(AlarmManager.RTC_WAKEUP, timeInMillis, pendingIntent);
+```
+
+获取 AlarmManager ，设置在 RTC 时间  `timeInMillis` 唤醒并触发 `pendingIntent` 提醒。
+
+我们知道 AlarmManager 是 AlarmManagerService 的代理，它最后会 IPC到 AlarmManagerService 调用相关的接口。
+
+``` java framework/base/core/java/android/app/AlarmManager.java
+     public void setExact(int type, long triggerAtMillis, PendingIntent operation) {
+         setImpl(type, triggerAtMillis, WINDOW_EXACT, 0, operation, null);
+     }
+
+     private void setImpl(int type, long triggerAtMillis, long windowMillis, long intervalMillis,
+             PendingIntent operation, WorkSource workSource) {
+...
+  try {
+             mService.set(type, triggerAtMillis, windowMillis, intervalMillis, operation,
+                     workSource);
+         } catch (RemoteException ex) {
+         }
+}
+
+```
