@@ -73,3 +73,255 @@ Linux 和 Android 都不例外。在手机上我们需要时间系统提供什�
 }
 
 ```
+
+到 AlarmManagerService : 
+
+```
+ @Override
+    public void set(int type, long triggerAtTime, long windowLength, long interval,
+            PendingIntent operation, WorkSource workSource) {
+        if (workSource != null) {
+            mContext.enforceCallingPermission(
+                    android.Manifest.permission.UPDATE_DEVICE_STATS,
+                    "AlarmManager.set");
+        }    
+
+        set(type, triggerAtTime, windowLength, interval, operation, false, workSource);
+    }
+->
+ public void set(int type, long triggerAtTime, long windowLength, long interval,
+            PendingIntent operation, boolean isStandalone, WorkSource workSource) {
+...
+ setImplLocked(type, triggerAtTime, triggerElapsed, windowLength, maxElapsed,
+                    interval, operation, isStandalone, true, workSource);
+}
+
+->
+
+ private void setImplLocked(int type, long when, long whenElapsed, long windowLength,
+            long maxWhen, long interval, PendingIntent operation, boolean isStandalone,
+            boolean doValidate, WorkSource workSource) {
+...
+rescheduleKernelAlarmsLocked();
+}
+
+->
+
+  private void rescheduleKernelAlarmsLocked() {
+        // Schedule the next upcoming wakeup alarm.  If there is a deliverable batch
+        // prior to that which contains no wakeups, we schedule that as well.
+        if (mAlarmBatches.size() > 0) {
+            final Batch firstWakeup = findFirstWakeupBatchLocked();
+            final Batch firstBatch = mAlarmBatches.get(0);
+            if (firstWakeup != null && mNextWakeup != firstWakeup.start) {
+                mNextWakeup = firstWakeup.start;
+                setLocked(ELAPSED_REALTIME_WAKEUP, firstWakeup.start);
+            }
+            if (firstBatch != firstWakeup && mNextNonWakeup != firstBatch.start) {
+                mNextNonWakeup = firstBatch.start;
+                setLocked(ELAPSED_REALTIME, firstBatch.start);
+            }
+        }
+    }
+
+->
+
+ private void setLocked(int type, long when)
+    {
+          if (mDescriptor != -1)
+        {
+            // The kernel never triggers alarms with negative wakeup times
+            // so we ensure they are positive.
+            long alarmSeconds, alarmNanoseconds;
+            if (when < 0) {
+                alarmSeconds = 0;
+                alarmNanoseconds = 0;
+            } else {
+                alarmSeconds = when / 1000;
+                alarmNanoseconds = (when % 1000) * 1000 * 1000;
+            }
+
+            set(mDescriptor, type, alarmSeconds, alarmNanoseconds);
+    }
+
+-> 
+private native void set(int fd, int type, long seconds, long nanoseconds);
+```
+
+native 方法:
+
+```cpp frameworks/base/services/jni/com_android_server_AlarmManagerService.cpp
+
+
+static void android_server_AlarmManagerService_set(JNIEnv* env, jobject obj, jint fd, jint type, jlong seconds, jlong nanoseconds)
+{
+    struct timespec ts; 
+    ts.tv_sec = seconds;
+    ts.tv_nsec = nanoseconds;
+
+    int result = ioctl(fd, ANDROID_ALARM_SET(type), &ts);
+    if (result < 0)
+    {   
+        ALOGE("Unable to set alarm to %lld.%09lld: %s\n", seconds, nanoseconds, strerror(errno));
+    }   
+}
+
+```
+fd 从哪里来的？AlarmManagerService 初始化来的:
+
+``` java frameworks/services/java/com/android/server/AlarmManagerService.java
+ public AlarmManagerService(Context context) {
+        mContext = context;
+        mDescriptor = init();
+        mNextWakeup = mNextNonWakeup = 0;
+        ...
+    }
+```
+
+init 是 native 方法:
+
+```cpp frameworks/base/services/jni/com_android_server_AlarmManagerService.cpp
+static jint android_server_AlarmManagerService_init(JNIEnv* env, jobject obj)
+{
+    return open("/dev/alarm", O_RDWR);
+}
+```
+
+在设下 alarm 之后， AlarmManagerService 启动了一个 AlarmThread 来等待 alarm 的事件。
+
+```java frameworks/services/java/com/android/server/AlarmManagerService.java
+
+ private final AlarmThread mWaitThread = new AlarmThread();
+
+ public AlarmManagerService(Context context) {
+         ...
+         if (mDescriptor != -1) {
+            mWaitThread.start();
+        } else {
+            Slog.w(TAG, "Failed to open alarm driver. Falling back to a handler.");
+        }
+    }
+
+```
+
+这个 AlarmThread 就会循环等待 alarm 事件！
+
+```java frameworks/services/java/com/android/server/AlarmManagerService.java
+  private class AlarmThread extends Thread
+    {
+        public AlarmThread()
+        {
+            super("AlarmManager");
+        }
+
+        public void run()
+        {
+            ArrayList<Alarm> triggerList = new ArrayList<Alarm>();
+
+            while (true)
+            {
+                int result = waitForAlarm(mDescriptor);
+                ...
+            }
+        }
+    }
+```
+
+等到设定的时间到了的时候， AlarmManagerService 就会收到消息，发送当初设定的 PendingIntent. 
+
+这样就满足了设定特定时间提醒的功能。
+
+
+对于像钟表这样的程序，就需要一种机制，几乎是时时的告诉，当前是什么时间，而且要每一秒都要更新。这个需求怎么满足呢？
+
+Android 的设计中有一个 Intent 是标识这种时间改变的，但是不是每秒，是每分钟啊 ！！
+```java Intent.java
+    /**  
+     * Broadcast Action: The current time has changed.  Sent every
+     * minute.  You can <em>not</em> receive this through components declared
+     * in manifests, only by explicitly registering for it with
+     * {@link Context#registerReceiver(BroadcastReceiver, IntentFilter)
+     * Context.registerReceiver()}.
+     *
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_TIME_TICK = "android.intent.action.TIME_TICK";
+```
+
+你只要注册了这个 Intent , 每分钟开始的时候都会受到这个 Intent。AlarmManagerService 是如何提供这个服务的呢？
+
+在 AlarmManagerService 的构造函数中会创建一个 ClockReceiver， 并在 scheduleTimeTickEvent 中调用native `set` 方法设置一个一分钟后的时间提醒，设置的 PendingIntent 就是 ACTION_TIME_TICK 这个 Intent。
+
+而且，这个 ClockReceiver 还注册了ACTION_TIME_TICK 的监听。一分钟后它自己也会收到 ACTION_TIME_TICK，收到之后，它又调用了一次 scheduleTimeTickEvent，设定了下一分钟的提醒。如是，每分钟都会可以收到这个提醒了！
+
+```java frameworks/services/java/com/android/server/AlarmManagerService.java
+  public AlarmManagerService(Context context) {
+        ...
+
+        mTimeTickSender = PendingIntent.getBroadcastAsUser(context, 0,
+                new Intent(Intent.ACTION_TIME_TICK).addFlags(
+                        Intent.FLAG_RECEIVER_REGISTERED_ONLY
+                        | Intent.FLAG_RECEIVER_FOREGROUND), 0,
+                        UserHandle.ALL);
+        // now that we have initied the driver schedule the alarm
+        mClockReceiver= new ClockReceiver();
+        mClockReceiver.scheduleTimeTickEvent();
+        ...
+    
+    }
+
+   class ClockReceiver extends BroadcastReceiver {
+        public ClockReceiver() {
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(Intent.ACTION_TIME_TICK);
+            filter.addAction(Intent.ACTION_DATE_CHANGED);
+            mContext.registerReceiver(this, filter);
+        }
+       public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(Intent.ACTION_TIME_TICK)) {
+                scheduleTimeTickEvent();
+        }
+
+      public void scheduleTimeTickEvent() {
+            final long currentTime = System.currentTimeMillis();
+            final long nextTime = 60000 * ((currentTime / 60000) + 1);
+
+            // Schedule this event for the amount of time that it would take to get to
+            // the top of the next minute.
+            final long tickEventDelay = nextTime - currentTime;
+
+            final WorkSource workSource = null; // Let system take blame for time tick events.
+            set(ELAPSED_REALTIME, SystemClock.elapsedRealtime() + tickEventDelay, 0,
+                    0, mTimeTickSender, true, workSource);
+        }
+    }
+```
+
+可是这样的话，每秒钟的提醒它肯定满足不了，那么时钟是如何实现秒针的现实的呢？
+
+```java packages/apps/DeskClock/src/com/android/deskclock/AnalogClock.java
+
+    protected void onAttachedToWindow() {
+     ...
+     // tick the seconds
+     post(mClockTick);
+     ...
+    }
+
+    private final Runnable mClockTick = new Runnable () {
+
+        @Override
+        public void run() {
+            onTimeChanged();
+            invalidate();
+            AnalogClock.this.postDelayed(mClockTick, 1000);
+        }   
+    }; 
+```
+
+在创建的时候 post 一个 Runnable， 在 Runnable 中的 run 方法中 又设定了在一秒钟之后，再 post 这个 Runnable。这样每秒钟都会执行 Runnable 一次，进行重新绘制。
+
+
+
