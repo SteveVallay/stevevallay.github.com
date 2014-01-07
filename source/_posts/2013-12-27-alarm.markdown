@@ -324,4 +324,55 @@ Android 的设计中有一个 Intent 是标识这种时间改变的，但是不�
 在创建的时候 post 一个 Runnable， 在 Runnable 中的 run 方法中 又设定了在一秒钟之后，再 post 这个 Runnable。这样每秒钟都会执行 Runnable 一次，进行重新绘制。
 
 
+DeskClock 中的 widget 插件和应用里面第二个 TAB 中的数字时钟都是使用 `TextClock`， `TextClock` 也是监听 `ACTION_TIME_TICK` 来完成每分钟的更新的。参考代码： 
+
+- frameworks/base/core/java/android/widget/TextClock.java
+
+
+
+
+Statusbar 上的 Clock 也是监听 `ACTION_TIME_TICK` 来完成每分钟的更新的。参考代码:
+
+- frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/policy/Clock.java 
+
+
+
+Keyguard 上的 Clock 显示也是使用的 `TextClock` 同上 。
+
+
+对于分钟这个精度的时间显示都可以使用监听 `ACTION_TIME_TICK` 的方式来完成。但是收到这个 Intent 的时候并没有将当前的时间传递过来，所以还是需要另外的接口来完成获取当前准确时间的需求。
+
+
+获取当前 RTC 时间是通过 `System.currentTimeMillis() ` 来完成的。
+
+```java libcore/luni/src/main/java/java/lang/System.java
+    /** 
+     * Returns the current time in milliseconds since January 1, 1970 00:00:00.0 UTC.
+     *
+     * <p>This method always returns UTC times, regardless of the system's time zone.
+     * This is often called "Unix time" or "epoch time".
+     * Use a {@link java.text.DateFormat} instance to format this time for display to a human.
+     *
+     * <p>This method shouldn't be used for measuring timeouts or
+     * other elapsed time measurements, as changing the system time can affect
+     * the results. Use {@link #nanoTime} for that.
+     */
+    public static native long currentTimeMillis();
+```
+
+为什么定义 1970.1.1 开始呢？因为那大概是Unix诞生的时间。
+
+这个 native 方法调用 `gettimeofday` 来完成的:
+
+```cpp libcore/luni/src/main/native/java_lang_System.cpp
+static jlong System_currentTimeMillis(JNIEnv*, jclass) {
+    timeval now;
+    gettimeofday(&now, NULL);
+    jlong when = now.tv_sec * 1000LL + now.tv_usec / 1000;
+    return when;
+}
+```
+
+
+
 
