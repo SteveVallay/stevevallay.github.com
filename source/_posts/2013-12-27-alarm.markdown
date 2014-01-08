@@ -24,7 +24,6 @@ Linux 和 Android 都不例外。在手机上我们需要时间系统提供什�
 - 告诉我现在是什么时间。
 - 告诉我系统运行了多长时间。
 - 允许我设置特定时间提醒。
-- 允许我计量某个事情花费了多长时间。
 
 先来看看设置特定时间提醒这个功能。
 
@@ -343,7 +342,7 @@ Keyguard 上的 Clock 显示也是使用的 `TextClock` 同上 。
 对于分钟这个精度的时间显示都可以使用监听 `ACTION_TIME_TICK` 的方式来完成。但是收到这个 Intent 的时候并没有将当前的时间传递过来，所以还是需要另外的接口来完成获取当前准确时间的需求。
 
 
-获取当前 RTC 时间是通过 `System.currentTimeMillis() ` 来完成的。
+获取当前 UTC 时间是通过 `System.currentTimeMillis() ` 来完成的。
 
 ```java libcore/luni/src/main/java/java/lang/System.java
     /** 
@@ -373,6 +372,184 @@ static jlong System_currentTimeMillis(JNIEnv*, jclass) {
 }
 ```
 
+在 Linux shell 环境下输入 `man gettimeofday` 获取更多信息：
+
+```
+GETTIMEOFDAY(2)                                      Linux Programmer's Manual                                     GETTIMEOFDAY(2)
+
+NAME
+       gettimeofday, settimeofday - get / set time
+
+SYNOPSIS
+       #include <sys/time.h>
+
+       int gettimeofday(struct timeval *tv, struct timezone *tz);
+       int settimeofday(const struct timeval *tv, const struct timezone *tz);
+
+   Feature Test Macro Requirements for glibc (see feature_test_macros(7)):
+
+       settimeofday(): _BSD_SOURCE
+
+DESCRIPTION
+       The  functions  gettimeofday()  and  settimeofday()  can  get and set the time as well as a timezone.  The tv argument is a
+       struct timeval (as specified in <sys/time.h>):
+
+           struct timeval {
+               time_t      tv_sec;     /* seconds */
+               suseconds_t tv_usec;    /* microseconds */
+           };
+
+       and gives the number of seconds and microseconds since the Epoch (see time(2)).  The tz argument is a struct timezone:
+
+           struct timezone {
+               int tz_minuteswest;     /* minutes west of Greenwich */
+               int tz_dsttime;         /* type of DST correction */
+           };
+
+       If either tv or tz is NULL, the corresponding structure is not set or returned.
+```
+
+timeval 带有两个成员， `tv_sec` 保存秒数，`tv_usec` 保存微秒(1/1000000 秒).可以看到上面 timeval 到毫秒的转化 :
+
+```
+jlong when = now.tv_sec * 1000LL + now.tv_usec / 1000;
+```
+
+gettimeofday的实现是经 libc 进入内核，实际上是一个 system call 。详情参考 kernel 的代码。
+
+关于 libc 和 内核的实现关系，我需要学习后再来讨论，可以参考下 [user space and libc interface] [101]
 
 
+获取系统已经运行的时间有几个不同的 API , 都在 SystemClock.java 中:
 
+- elapsedRealtime ()                //Returns milliseconds since boot, including time spent in sleep.
+- elapsedRealtimeNanos ()          //Returns nanoseconds since boot, including time spent in sleep.
+- uptimeMillis ()                  //Returns milliseconds since boot, not counting time spent in deep sleep.
+
+
+`elapsedRealtime()` 和 `elapsedRealtimeNanos()` 包含系统 sleep 的时间，而 `uptimeMillis()` 不包含 sleep 的时间。参考 [SystemClock][102]
+
+`elapsedRealtime()` api 用的比较多，Android 系统里面 Settings->About phone->Status->Uptime 显示的就是这个时间。Settings->Battery 显示的时间也是用这个时间计算出来的（减去上一次 unplug 的时间）。
+
+来看下 `elapsedRealtime` 的底层实现：
+
+```java SystemClock.java
+ native public static long elapsedRealtime();
+```
+在 SystemClock 里用的是 native 的方法。
+
+```cpp frameworks/base/core/jni/android_os_SystemClock.cpp 
+/*
+ * native public static long elapsedRealtime();
+ */
+static jlong android_os_SystemClock_elapsedRealtime(JNIEnv* env,
+        jobject clazz)
+{
+    return (jlong)elapsedRealtime();
+}
+
+```
+
+cpp 中调用了libutils 中的方法 `elapsedRealtime()`.
+
+```cpp system/core/libutils/SystemClock.cpp
+/*
+ * native public static long elapsedRealtime();
+ */
+int64_t elapsedRealtime()
+{
+    return nanoseconds_to_milliseconds(elapsedRealtimeNano());
+}
+
+->
+
+/*
+ * native public static long elapsedRealtimeNano();
+ */
+int64_t elapsedRealtimeNano()
+{
+...
+    static int s_fd = -1;
+
+    if (s_fd == -1) {
+        int fd = open("/dev/alarm", O_RDONLY);
+        if (android_atomic_cmpxchg(-1, fd, &s_fd)) {
+            close(fd);
+        }
+    }
+
+    result = ioctl(s_fd,
+            ANDROID_ALARM_GET_TIME(ANDROID_ALARM_ELAPSED_REALTIME), &ts);
+
+    if (result == 0) {
+        timestamp = seconds_to_nanoseconds(ts.tv_sec) + ts.tv_nsec;
+        checkTimeStamps(timestamp, &prevTimestamp, &prevMethod, METHOD_IOCTL);
+        return timestamp;
+    }
+...
+}
+```
+
+和闹钟的提醒功能相似，`elapsedRealtimeNano()` 也是通过 `/dev/alarm` 的 ioctl 来完成的，具体的实现要参看 driver 的代码了。
+
+好了，获取当前时间(UTC)通过 kernel system call 完成， 获取系统运行时间通过 ioctl 
+`/dev/alarm` 来完成。
+
+Alarm/Clock 系统还需要提供的一个功能是设置/同步时间。由于手机芯片中缺少一个断电之后能继续维持时间的模块，所以，拔掉电池之后再开机之后时间会出现偏差（如果没有同步或手动设置时间)。
+
+在 Android 系统中， Settings-> Date & Time  -> 提供了设置时间和同步时间的UI 接口。
+Date 和 Time 的设置都是使用 AlarmManagerService 提供的 `setTime` 接口。
+
+```java AlarmManagerService.java
+    public void setTime(long millis) {
+        mContext.enforceCallingOrSelfPermission(
+                "android.permission.SET_TIME",
+                "setTime");  //检查 permission
+
+        SystemClock.setCurrentTimeMillis(millis);
+    }
+```
+
+AlarmManagerService 调用了 SystemClock 的 api `setCurrentTimeMillis`.
+
+```java SystemClock.java
+    /** 
+     * Sets the current wall time, in milliseconds.  Requires the calling
+     * process to have appropriate permissions.
+     *
+     * @return if the clock was successfully set to the specified time.
+     */
+    native public static boolean setCurrentTimeMillis(long millis);
+```
+
+SystemClock.java 调用了 native 方法
+
+```cpp android_os_SystemClock.cpp
+/*
+ * Set the current time.  This only works when running as root.
+ */
+static int setCurrentTimeMillis(int64_t millis)
+{
+
+...
+    fd = open("/dev/alarm", O_RDWR);
+...
+    res = ioctl(fd, ANDROID_ALARM_SET_RTC, &ts);
+...
+}
+```
+android_os_SystemClock.cpp 是直接利用 ioctl `/dev/alarm` 调用到 driver 的 alarm 来完成。
+
+同步时间的功能是定期的从 Google 的服务器 2.android.pool.ntp.org (默认配置) 获取时间,刷新的时间间隔有两种，一种长的是 24 h，一种短的是 60s。
+
+参考代码:
+
+- frameworks/base/services/java/com/android/server/NetworkTimeUpdateService.java
+- frameworks/base/core/java/android/util/NtpTrustedTime.java
+- frameworks/base/core/res/res/values/config.xml
+
+通过 ioctl `/dev/alarm` 操组 driver 的 alarm 模块来完成设置时间，通过定期和 Google 服务器 2.android.pool.ntp.org 同步来完成时间的同步。
+
+
+[101]:http://www.win.tue.nl/~aeb/linux/lk/lk-3.html
+[102]:http://developer.android.com/reference/android/os/SystemClock.html
