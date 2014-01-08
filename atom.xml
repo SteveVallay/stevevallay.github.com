@@ -4,7 +4,7 @@
   <title><![CDATA[Zhibin's blog]]></title>
   <link href="http://SteveVallay.github.io/atom.xml" rel="self"/>
   <link href="http://SteveVallay.github.io/"/>
-  <updated>2014-01-08T17:02:34+08:00</updated>
+  <updated>2014-01-08T17:06:38+08:00</updated>
   <id>http://SteveVallay.github.io/</id>
   <author>
     <name><![CDATA[zhibin]]></name>
@@ -23,7 +23,7 @@
 <!-- more -->
 
 
-<p>不知道是谁发现了时间这个 NB 的概念! 有了时间，使得我们可以知道从一个事件到另外一个时间，中间经历了多久。时间参考系的建立，使得我们可以即使在不同的地点也可以取得同步，完成协作。</p>
+<p>不知道是谁发现了时间这个 NB 的概念! 有了时间，使得我们可以知道从一个事件到另外一个事件，中间经历了多久。时间参考系的建立，使得我们可以即使在不同的地点也可以取得同步，完成协作。</p>
 
 <p>每个系统都要维持一个时钟系统，一方面维持自身的秩序，另一方面和外界取得一致。</p>
 
