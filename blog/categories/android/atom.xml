@@ -4,7 +4,7 @@
   <title><![CDATA[Category: android | Zhibin's blog]]></title>
   <link href="http://SteveVallay.github.io/blog/categories/android/atom.xml" rel="self"/>
   <link href="http://SteveVallay.github.io/"/>
-  <updated>2013-12-26T17:20:25+08:00</updated>
+  <updated>2014-01-08T17:02:34+08:00</updated>
   <id>http://SteveVallay.github.io/</id>
   <author>
     <name><![CDATA[zhibin]]></name>
@@ -12,6 +12,647 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[alarm]]></title>
+    <link href="http://SteveVallay.github.io/blog/2013/12/27/alarm/"/>
+    <updated>2013-12-27T14:40:00+08:00</updated>
+    <id>http://SteveVallay.github.io/blog/2013/12/27/alarm</id>
+    <content type="html"><![CDATA[<p>关于时间，我们还知之甚少。</p>
+
+<!-- more -->
+
+
+<p>不知道是谁发现了时间这个 NB 的概念! 有了时间，使得我们可以知道从一个事件到另外一个时间，中间经历了多久。时间参考系的建立，使得我们可以即使在不同的地点也可以取得同步，完成协作。</p>
+
+<p>每个系统都要维持一个时钟系统，一方面维持自身的秩序，另一方面和外界取得一致。</p>
+
+<p>Linux 和 Android 都不例外。在手机上我们需要时间系统提供什么样的服务呢？</p>
+
+<ul>
+<li>允许我设置时间/同步时间。</li>
+<li>告诉我现在是什么时间。</li>
+<li>告诉我系统运行了多长时间。</li>
+<li>允许我设置特定时间提醒。</li>
+</ul>
+
+
+<p>先来看看设置特定时间提醒这个功能。</p>
+
+<p>这个特定时间，有两个参考系:</p>
+
+<ul>
+<li>RTC</li>
+<li>ELAPSED_REALTIME</li>
+</ul>
+
+
+<p><code>RTC</code> 指得就是当前时间,UTC时间，java api <code>System.currentTimeMillis()</code> 返回的时间，通过这个时间我们知道现在是几年几月几日几时几分几秒。</p>
+
+<p><code>ELAPSED_REALTIME</code> 指的是过去的时间，从开机开始过去了多久， java api <code>SystemClock.elapsedRealtime()</code> 返回的时间， 通过这个时间我们知道系统运行了多久。</p>
+
+<p>由于手机系统会有 &ldquo;休眠&rdquo; 状态，特定时间提醒这个服务在 &ldquo;休眠&rdquo; 状态可以有两种选择，唤醒手机提醒，或者不唤醒手机，等待手机被其他原因唤醒后再提醒。针对这个特性，又添加了两种类型:</p>
+
+<ul>
+<li>RTC_WAKEUP</li>
+<li>ELAPSED_REALTIME_WAKEUP</li>
+</ul>
+
+
+<p><code>RTC_WAKEUP</code> 基于 UTC 时间，唤醒手机进行提醒，<code>RTC</code> 默认不会唤醒手机。</p>
+
+<p><code>ELAPSED_REALTIME_WAKEUP</code> 类似的，基于开机过去时间，唤醒手机进行提醒。<code>ELAPSED_REALTIME</code> 不会。</p>
+
+<p>先看下在 app layer 如何设置特定时间提醒:</p>
+
+<p><code>java packages/apps/DeskClock/src/com/android/deskclock/alarms/AlarmStateManager.java
+ AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+ am.set(AlarmManager.RTC_WAKEUP, timeInMillis, pendingIntent);
+</code></p>
+
+<p>获取 AlarmManager ，设置在 RTC 时间  <code>timeInMillis</code> 唤醒并触发 <code>pendingIntent</code> 提醒。</p>
+
+<p>我们知道 AlarmManager 是 AlarmManagerService 的代理，它最后会 IPC到 AlarmManagerService 调用相关的接口。</p>
+
+<p>``` java framework/base/core/java/android/app/AlarmManager.java</p>
+
+<pre><code> public void setExact(int type, long triggerAtMillis, PendingIntent operation) {
+     setImpl(type, triggerAtMillis, WINDOW_EXACT, 0, operation, null);
+ }
+
+ private void setImpl(int type, long triggerAtMillis, long windowMillis, long intervalMillis,
+         PendingIntent operation, WorkSource workSource) {
+</code></pre>
+
+<p>&hellip;
+  try {</p>
+
+<pre><code>         mService.set(type, triggerAtMillis, windowMillis, intervalMillis, operation,
+                 workSource);
+     } catch (RemoteException ex) {
+     }
+</code></pre>
+
+<p>}</p>
+
+<p>```</p>
+
+<p>到 AlarmManagerService :</p>
+
+<p>```
+ @Override</p>
+
+<pre><code>public void set(int type, long triggerAtTime, long windowLength, long interval,
+        PendingIntent operation, WorkSource workSource) {
+    if (workSource != null) {
+        mContext.enforceCallingPermission(
+                android.Manifest.permission.UPDATE_DEVICE_STATS,
+                "AlarmManager.set");
+    }    
+
+    set(type, triggerAtTime, windowLength, interval, operation, false, workSource);
+}
+</code></pre>
+
+<p>&ndash;>
+ public void set(int type, long triggerAtTime, long windowLength, long interval,</p>
+
+<pre><code>        PendingIntent operation, boolean isStandalone, WorkSource workSource) {
+</code></pre>
+
+<p>&hellip;
+ setImplLocked(type, triggerAtTime, triggerElapsed, windowLength, maxElapsed,</p>
+
+<pre><code>                interval, operation, isStandalone, true, workSource);
+</code></pre>
+
+<p>}</p>
+
+<p>&ndash;></p>
+
+<p> private void setImplLocked(int type, long when, long whenElapsed, long windowLength,</p>
+
+<pre><code>        long maxWhen, long interval, PendingIntent operation, boolean isStandalone,
+        boolean doValidate, WorkSource workSource) {
+</code></pre>
+
+<p>&hellip;
+rescheduleKernelAlarmsLocked();
+}</p>
+
+<p>&ndash;></p>
+
+<p>  private void rescheduleKernelAlarmsLocked() {</p>
+
+<pre><code>    // Schedule the next upcoming wakeup alarm.  If there is a deliverable batch
+    // prior to that which contains no wakeups, we schedule that as well.
+    if (mAlarmBatches.size() &gt; 0) {
+        final Batch firstWakeup = findFirstWakeupBatchLocked();
+        final Batch firstBatch = mAlarmBatches.get(0);
+        if (firstWakeup != null &amp;&amp; mNextWakeup != firstWakeup.start) {
+            mNextWakeup = firstWakeup.start;
+            setLocked(ELAPSED_REALTIME_WAKEUP, firstWakeup.start);
+        }
+        if (firstBatch != firstWakeup &amp;&amp; mNextNonWakeup != firstBatch.start) {
+            mNextNonWakeup = firstBatch.start;
+            setLocked(ELAPSED_REALTIME, firstBatch.start);
+        }
+    }
+}
+</code></pre>
+
+<p>&ndash;></p>
+
+<p> private void setLocked(int type, long when)</p>
+
+<pre><code>{
+      if (mDescriptor != -1)
+    {
+        // The kernel never triggers alarms with negative wakeup times
+        // so we ensure they are positive.
+        long alarmSeconds, alarmNanoseconds;
+        if (when &lt; 0) {
+            alarmSeconds = 0;
+            alarmNanoseconds = 0;
+        } else {
+            alarmSeconds = when / 1000;
+            alarmNanoseconds = (when % 1000) * 1000 * 1000;
+        }
+
+        set(mDescriptor, type, alarmSeconds, alarmNanoseconds);
+}
+</code></pre>
+
+<p>&ndash;>
+private native void set(int fd, int type, long seconds, long nanoseconds);
+```</p>
+
+<p>native 方法:</p>
+
+<p>```cpp frameworks/base/services/jni/com_android_server_AlarmManagerService.cpp</p>
+
+<p>static void android_server_AlarmManagerService_set(JNIEnv* env, jobject obj, jint fd, jint type, jlong seconds, jlong nanoseconds)
+{</p>
+
+<pre><code>struct timespec ts; 
+ts.tv_sec = seconds;
+ts.tv_nsec = nanoseconds;
+
+int result = ioctl(fd, ANDROID_ALARM_SET(type), &amp;ts);
+if (result &lt; 0)
+{   
+    ALOGE("Unable to set alarm to %lld.%09lld: %s\n", seconds, nanoseconds, strerror(errno));
+}   
+</code></pre>
+
+<p>}</p>
+
+<p>```
+fd 从哪里来的？AlarmManagerService 初始化来的:</p>
+
+<p>``` java frameworks/services/java/com/android/server/AlarmManagerService.java
+ public AlarmManagerService(Context context) {</p>
+
+<pre><code>    mContext = context;
+    mDescriptor = init();
+    mNextWakeup = mNextNonWakeup = 0;
+    ...
+}
+</code></pre>
+
+<p>```</p>
+
+<p>init 是 native 方法:</p>
+
+<p>```cpp frameworks/base/services/jni/com_android_server_AlarmManagerService.cpp
+static jint android_server_AlarmManagerService_init(JNIEnv* env, jobject obj)
+{</p>
+
+<pre><code>return open("/dev/alarm", O_RDWR);
+</code></pre>
+
+<p>}
+```</p>
+
+<p>在设下 alarm 之后， AlarmManagerService 启动了一个 AlarmThread 来等待 alarm 的事件。</p>
+
+<p>```java frameworks/services/java/com/android/server/AlarmManagerService.java</p>
+
+<p> private final AlarmThread mWaitThread = new AlarmThread();</p>
+
+<p> public AlarmManagerService(Context context) {</p>
+
+<pre><code>     ...
+     if (mDescriptor != -1) {
+        mWaitThread.start();
+    } else {
+        Slog.w(TAG, "Failed to open alarm driver. Falling back to a handler.");
+    }
+}
+</code></pre>
+
+<p>```</p>
+
+<p>这个 AlarmThread 就会循环等待 alarm 事件！</p>
+
+<p>```java frameworks/services/java/com/android/server/AlarmManagerService.java
+  private class AlarmThread extends Thread</p>
+
+<pre><code>{
+    public AlarmThread()
+    {
+        super("AlarmManager");
+    }
+
+    public void run()
+    {
+        ArrayList&lt;Alarm&gt; triggerList = new ArrayList&lt;Alarm&gt;();
+
+        while (true)
+        {
+            int result = waitForAlarm(mDescriptor);
+            ...
+        }
+    }
+}
+</code></pre>
+
+<p>```</p>
+
+<p>等到设定的时间到了的时候， AlarmManagerService 就会收到消息，发送当初设定的 PendingIntent.</p>
+
+<p>这样就满足了设定特定时间提醒的功能。</p>
+
+<p>对于像钟表这样的程序，就需要一种机制，几乎是时时的告诉，当前是什么时间，而且要每一秒都要更新。这个需求怎么满足呢？</p>
+
+<p>Android 的设计中有一个 Intent 是标识这种时间改变的，但是不是每秒，是每分钟啊 ！！
+```java Intent.java</p>
+
+<pre><code>/**  
+ * Broadcast Action: The current time has changed.  Sent every
+ * minute.  You can &lt;em&gt;not&lt;/em&gt; receive this through components declared
+ * in manifests, only by explicitly registering for it with
+ * {@link Context#registerReceiver(BroadcastReceiver, IntentFilter)
+ * Context.registerReceiver()}.
+ *
+ * &lt;p class="note"&gt;This is a protected intent that can only be sent
+ * by the system.
+ */
+@SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+public static final String ACTION_TIME_TICK = "android.intent.action.TIME_TICK";
+</code></pre>
+
+<p>```</p>
+
+<p>你只要注册了这个 Intent , 每分钟开始的时候都会受到这个 Intent。AlarmManagerService 是如何提供这个服务的呢？</p>
+
+<p>在 AlarmManagerService 的构造函数中会创建一个 ClockReceiver， 并在 scheduleTimeTickEvent 中调用native <code>set</code> 方法设置一个一分钟后的时间提醒，设置的 PendingIntent 就是 ACTION_TIME_TICK 这个 Intent。</p>
+
+<p>而且，这个 ClockReceiver 还注册了ACTION_TIME_TICK 的监听。一分钟后它自己也会收到 ACTION_TIME_TICK，收到之后，它又调用了一次 scheduleTimeTickEvent，设定了下一分钟的提醒。如是，每分钟都会可以收到这个提醒了！</p>
+
+<p>```java frameworks/services/java/com/android/server/AlarmManagerService.java
+  public AlarmManagerService(Context context) {</p>
+
+<pre><code>    ...
+
+    mTimeTickSender = PendingIntent.getBroadcastAsUser(context, 0,
+            new Intent(Intent.ACTION_TIME_TICK).addFlags(
+                    Intent.FLAG_RECEIVER_REGISTERED_ONLY
+                    | Intent.FLAG_RECEIVER_FOREGROUND), 0,
+                    UserHandle.ALL);
+    // now that we have initied the driver schedule the alarm
+    mClockReceiver= new ClockReceiver();
+    mClockReceiver.scheduleTimeTickEvent();
+    ...
+
+}
+</code></pre>
+
+<p>   class ClockReceiver extends BroadcastReceiver {</p>
+
+<pre><code>    public ClockReceiver() {
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_TIME_TICK);
+        filter.addAction(Intent.ACTION_DATE_CHANGED);
+        mContext.registerReceiver(this, filter);
+    }
+   public void onReceive(Context context, Intent intent) {
+        if (intent.getAction().equals(Intent.ACTION_TIME_TICK)) {
+            scheduleTimeTickEvent();
+    }
+
+  public void scheduleTimeTickEvent() {
+        final long currentTime = System.currentTimeMillis();
+        final long nextTime = 60000 * ((currentTime / 60000) + 1);
+
+        // Schedule this event for the amount of time that it would take to get to
+        // the top of the next minute.
+        final long tickEventDelay = nextTime - currentTime;
+
+        final WorkSource workSource = null; // Let system take blame for time tick events.
+        set(ELAPSED_REALTIME, SystemClock.elapsedRealtime() + tickEventDelay, 0,
+                0, mTimeTickSender, true, workSource);
+    }
+}
+</code></pre>
+
+<p>```</p>
+
+<p>可是这样的话，每秒钟的提醒它肯定满足不了，那么时钟是如何实现秒针的现实的呢？</p>
+
+<p>```java packages/apps/DeskClock/src/com/android/deskclock/AnalogClock.java</p>
+
+<pre><code>protected void onAttachedToWindow() {
+ ...
+ // tick the seconds
+ post(mClockTick);
+ ...
+}
+
+private final Runnable mClockTick = new Runnable () {
+
+    @Override
+    public void run() {
+        onTimeChanged();
+        invalidate();
+        AnalogClock.this.postDelayed(mClockTick, 1000);
+    }   
+}; 
+</code></pre>
+
+<p>```</p>
+
+<p>在创建的时候 post 一个 Runnable， 在 Runnable 中的 run 方法中 又设定了在一秒钟之后，再 post 这个 Runnable。这样每秒钟都会执行 Runnable 一次，进行重新绘制。</p>
+
+<p>DeskClock 中的 widget 插件和应用里面第二个 TAB 中的数字时钟都是使用 <code>TextClock</code>， <code>TextClock</code> 也是监听 <code>ACTION_TIME_TICK</code> 来完成每分钟的更新的。参考代码：</p>
+
+<ul>
+<li>frameworks/base/core/java/android/widget/TextClock.java</li>
+</ul>
+
+
+<p>Statusbar 上的 Clock 也是监听 <code>ACTION_TIME_TICK</code> 来完成每分钟的更新的。参考代码:</p>
+
+<ul>
+<li>frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/policy/Clock.java</li>
+</ul>
+
+
+<p>Keyguard 上的 Clock 显示也是使用的 <code>TextClock</code> 同上 。</p>
+
+<p>对于分钟这个精度的时间显示都可以使用监听 <code>ACTION_TIME_TICK</code> 的方式来完成。但是收到这个 Intent 的时候并没有将当前的时间传递过来，所以还是需要另外的接口来完成获取当前准确时间的需求。</p>
+
+<p>获取当前 UTC 时间是通过 <code>System.currentTimeMillis()</code> 来完成的。</p>
+
+<p>```java libcore/luni/src/main/java/java/lang/System.java</p>
+
+<pre><code>/** 
+ * Returns the current time in milliseconds since January 1, 1970 00:00:00.0 UTC.
+ *
+ * &lt;p&gt;This method always returns UTC times, regardless of the system's time zone.
+ * This is often called "Unix time" or "epoch time".
+ * Use a {@link java.text.DateFormat} instance to format this time for display to a human.
+ *
+ * &lt;p&gt;This method shouldn't be used for measuring timeouts or
+ * other elapsed time measurements, as changing the system time can affect
+ * the results. Use {@link #nanoTime} for that.
+ */
+public static native long currentTimeMillis();
+</code></pre>
+
+<p>```</p>
+
+<p>为什么定义 1970.1.1 开始呢？因为那大概是Unix诞生的时间。</p>
+
+<p>这个 native 方法调用 <code>gettimeofday</code> 来完成的:</p>
+
+<p>```cpp libcore/luni/src/main/native/java_lang_System.cpp
+static jlong System_currentTimeMillis(JNIEnv*, jclass) {</p>
+
+<pre><code>timeval now;
+gettimeofday(&amp;now, NULL);
+jlong when = now.tv_sec * 1000LL + now.tv_usec / 1000;
+return when;
+</code></pre>
+
+<p>}
+```</p>
+
+<p>在 Linux shell 环境下输入 <code>man gettimeofday</code> 获取更多信息：</p>
+
+<p>```
+GETTIMEOFDAY(2)                                      Linux Programmer&rsquo;s Manual                                     GETTIMEOFDAY(2)</p>
+
+<p>NAME</p>
+
+<pre><code>   gettimeofday, settimeofday - get / set time
+</code></pre>
+
+<p>SYNOPSIS</p>
+
+<pre><code>   #include &lt;sys/time.h&gt;
+
+   int gettimeofday(struct timeval *tv, struct timezone *tz);
+   int settimeofday(const struct timeval *tv, const struct timezone *tz);
+</code></pre>
+
+<p>   Feature Test Macro Requirements for glibc (see feature_test_macros(7)):</p>
+
+<pre><code>   settimeofday(): _BSD_SOURCE
+</code></pre>
+
+<p>DESCRIPTION</p>
+
+<pre><code>   The  functions  gettimeofday()  and  settimeofday()  can  get and set the time as well as a timezone.  The tv argument is a
+   struct timeval (as specified in &lt;sys/time.h&gt;):
+
+       struct timeval {
+           time_t      tv_sec;     /* seconds */
+           suseconds_t tv_usec;    /* microseconds */
+       };
+
+   and gives the number of seconds and microseconds since the Epoch (see time(2)).  The tz argument is a struct timezone:
+
+       struct timezone {
+           int tz_minuteswest;     /* minutes west of Greenwich */
+           int tz_dsttime;         /* type of DST correction */
+       };
+
+   If either tv or tz is NULL, the corresponding structure is not set or returned.
+</code></pre>
+
+<p>```</p>
+
+<p>timeval 带有两个成员， <code>tv_sec</code> 保存秒数，<code>tv_usec</code> 保存微秒(1/1000000 秒).可以看到上面 timeval 到毫秒的转化 :</p>
+
+<p><code>
+jlong when = now.tv_sec * 1000LL + now.tv_usec / 1000;
+</code></p>
+
+<p>gettimeofday的实现是经 libc 进入内核，实际上是一个 system call 。详情参考 kernel 的代码。</p>
+
+<p>关于 libc 和 内核的实现关系，我需要学习后再来讨论，可以参考下 <a href="http://www.win.tue.nl/~aeb/linux/lk/lk-3.html">user space and libc interface</a></p>
+
+<p>获取系统已经运行的时间有几个不同的 API , 都在 SystemClock.java 中:</p>
+
+<ul>
+<li>elapsedRealtime ()                //Returns milliseconds since boot, including time spent in sleep.</li>
+<li>elapsedRealtimeNanos ()          //Returns nanoseconds since boot, including time spent in sleep.</li>
+<li>uptimeMillis ()                  //Returns milliseconds since boot, not counting time spent in deep sleep.</li>
+</ul>
+
+
+<p><code>elapsedRealtime()</code> 和 <code>elapsedRealtimeNanos()</code> 包含系统 sleep 的时间，而 <code>uptimeMillis()</code> 不包含 sleep 的时间。参考 <a href="http://developer.android.com/reference/android/os/SystemClock.html">SystemClock</a></p>
+
+<p><code>elapsedRealtime()</code> api 用的比较多，Android 系统里面 Settings->About phone->Status->Uptime 显示的就是这个时间。Settings->Battery 显示的时间也是用这个时间计算出来的（减去上一次 unplug 的时间）。</p>
+
+<p>来看下 <code>elapsedRealtime</code> 的底层实现：</p>
+
+<p><code>java SystemClock.java
+ native public static long elapsedRealtime();
+</code>
+在 SystemClock 里用的是 native 的方法。</p>
+
+<p>```cpp frameworks/base/core/jni/android_os_SystemClock.cpp
+/<em>
+ * native public static long elapsedRealtime();
+ </em>/
+static jlong android_os_SystemClock_elapsedRealtime(JNIEnv* env,</p>
+
+<pre><code>    jobject clazz)
+</code></pre>
+
+<p>{</p>
+
+<pre><code>return (jlong)elapsedRealtime();
+</code></pre>
+
+<p>}</p>
+
+<p>```</p>
+
+<p>cpp 中调用了libutils 中的方法 <code>elapsedRealtime()</code>.</p>
+
+<p>```cpp system/core/libutils/SystemClock.cpp
+/<em>
+ * native public static long elapsedRealtime();
+ </em>/
+int64_t elapsedRealtime()
+{</p>
+
+<pre><code>return nanoseconds_to_milliseconds(elapsedRealtimeNano());
+</code></pre>
+
+<p>}</p>
+
+<p>&ndash;></p>
+
+<p>/<em>
+ * native public static long elapsedRealtimeNano();
+ </em>/
+int64_t elapsedRealtimeNano()
+{
+&hellip;</p>
+
+<pre><code>static int s_fd = -1;
+
+if (s_fd == -1) {
+    int fd = open("/dev/alarm", O_RDONLY);
+    if (android_atomic_cmpxchg(-1, fd, &amp;s_fd)) {
+        close(fd);
+    }
+}
+
+result = ioctl(s_fd,
+        ANDROID_ALARM_GET_TIME(ANDROID_ALARM_ELAPSED_REALTIME), &amp;ts);
+
+if (result == 0) {
+    timestamp = seconds_to_nanoseconds(ts.tv_sec) + ts.tv_nsec;
+    checkTimeStamps(timestamp, &amp;prevTimestamp, &amp;prevMethod, METHOD_IOCTL);
+    return timestamp;
+}
+</code></pre>
+
+<p>&hellip;
+}
+```</p>
+
+<p>和闹钟的提醒功能相似，<code>elapsedRealtimeNano()</code> 也是通过 <code>/dev/alarm</code> 的 ioctl 来完成的，具体的实现要参看 driver 的代码了。</p>
+
+<p>好了，获取当前时间(UTC)通过 kernel system call 完成， 获取系统运行时间通过 ioctl
+<code>/dev/alarm</code> 来完成。</p>
+
+<p>Alarm/Clock 系统还需要提供的一个功能是设置/同步时间。由于手机芯片中缺少一个断电之后能继续维持时间的模块，所以，拔掉电池之后再开机之后时间会出现偏差（如果没有同步或手动设置时间)。</p>
+
+<p>在 Android 系统中， Settings-> Date &amp; Time  &ndash;> 提供了设置时间和同步时间的UI 接口。
+Date 和 Time 的设置都是使用 AlarmManagerService 提供的 <code>setTime</code> 接口。</p>
+
+<p>```java AlarmManagerService.java</p>
+
+<pre><code>public void setTime(long millis) {
+    mContext.enforceCallingOrSelfPermission(
+            "android.permission.SET_TIME",
+            "setTime");  //检查 permission
+
+    SystemClock.setCurrentTimeMillis(millis);
+}
+</code></pre>
+
+<p>```</p>
+
+<p>AlarmManagerService 调用了 SystemClock 的 api <code>setCurrentTimeMillis</code>.</p>
+
+<p>```java SystemClock.java</p>
+
+<pre><code>/** 
+ * Sets the current wall time, in milliseconds.  Requires the calling
+ * process to have appropriate permissions.
+ *
+ * @return if the clock was successfully set to the specified time.
+ */
+native public static boolean setCurrentTimeMillis(long millis);
+</code></pre>
+
+<p>```</p>
+
+<p>SystemClock.java 调用了 native 方法</p>
+
+<p>```cpp android_os_SystemClock.cpp
+/<em>
+ * Set the current time.  This only works when running as root.
+ </em>/
+static int setCurrentTimeMillis(int64_t millis)
+{</p>
+
+<p>&hellip;</p>
+
+<pre><code>fd = open("/dev/alarm", O_RDWR);
+</code></pre>
+
+<p>&hellip;</p>
+
+<pre><code>res = ioctl(fd, ANDROID_ALARM_SET_RTC, &amp;ts);
+</code></pre>
+
+<p>&hellip;
+}
+<code>``
+android_os_SystemClock.cpp 是直接利用 ioctl</code>/dev/alarm` 调用到 driver 的 alarm 来完成。</p>
+
+<p>同步时间的功能是定期的从 Google 的服务器 2.android.pool.ntp.org (默认配置) 获取时间,刷新的时间间隔有两种，一种长的是 24 h，一种短的是 60s。</p>
+
+<p>参考代码:</p>
+
+<ul>
+<li>frameworks/base/services/java/com/android/server/NetworkTimeUpdateService.java</li>
+<li>frameworks/base/core/java/android/util/NtpTrustedTime.java</li>
+<li>frameworks/base/core/res/res/values/config.xml</li>
+</ul>
+
+
+<p>通过 ioctl <code>/dev/alarm</code> 操组 driver 的 alarm 模块来完成设置时间，通过定期和 Google 服务器 2.android.pool.ntp.org 同步来完成时间的同步。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[android properties data structure]]></title>

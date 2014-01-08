@@ -1,0 +1,1161 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>alarm - Zhibin's blog</title>
+  <meta name="author" content="zhibin">
+
+  
+  <meta name="description" content="android, alarm,clock">
+  <meta name="keywords" content="android,Alarm，">
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://SteveVallay.github.io/blog/2013/12/27/alarm">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Zhibin's blog" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/lib/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-39252101-2']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Zhibin's blog</a></h1>
+  
+    <h2>always smile :-)</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:SteveVallay.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Alarm</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-12-27T14:40:00+08:00" pubdate data-updated="true">Dec 27<span>th</span>, 2013</time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>关于时间，我们还知之甚少。</p>
+
+<!-- more -->
+
+
+<p>不知道是谁发现了时间这个 NB 的概念! 有了时间，使得我们可以知道从一个事件到另外一个时间，中间经历了多久。时间参考系的建立，使得我们可以即使在不同的地点也可以取得同步，完成协作。</p>
+
+<p>每个系统都要维持一个时钟系统，一方面维持自身的秩序，另一方面和外界取得一致。</p>
+
+<p>Linux 和 Android 都不例外。在手机上我们需要时间系统提供什么样的服务呢？</p>
+
+<ul>
+<li>允许我设置时间/同步时间。</li>
+<li>告诉我现在是什么时间。</li>
+<li>告诉我系统运行了多长时间。</li>
+<li>允许我设置特定时间提醒。</li>
+</ul>
+
+
+<p>先来看看设置特定时间提醒这个功能。</p>
+
+<p>这个特定时间，有两个参考系:</p>
+
+<ul>
+<li>RTC</li>
+<li>ELAPSED_REALTIME</li>
+</ul>
+
+
+<p><code>RTC</code> 指得就是当前时间,UTC时间，java api <code>System.currentTimeMillis()</code> 返回的时间，通过这个时间我们知道现在是几年几月几日几时几分几秒。</p>
+
+<p><code>ELAPSED_REALTIME</code> 指的是过去的时间，从开机开始过去了多久， java api <code>SystemClock.elapsedRealtime()</code> 返回的时间， 通过这个时间我们知道系统运行了多久。</p>
+
+<p>由于手机系统会有 &ldquo;休眠&rdquo; 状态，特定时间提醒这个服务在 &ldquo;休眠&rdquo; 状态可以有两种选择，唤醒手机提醒，或者不唤醒手机，等待手机被其他原因唤醒后再提醒。针对这个特性，又添加了两种类型:</p>
+
+<ul>
+<li>RTC_WAKEUP</li>
+<li>ELAPSED_REALTIME_WAKEUP</li>
+</ul>
+
+
+<p><code>RTC_WAKEUP</code> 基于 UTC 时间，唤醒手机进行提醒，<code>RTC</code> 默认不会唤醒手机。</p>
+
+<p><code>ELAPSED_REALTIME_WAKEUP</code> 类似的，基于开机过去时间，唤醒手机进行提醒。<code>ELAPSED_REALTIME</code> 不会。</p>
+
+<p>先看下在 app layer 如何设置特定时间提醒:</p>
+
+<figure class='code'><figcaption><span>packages/apps/DeskClock/src/com/android/deskclock/alarms/AlarmStateManager.java</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'> <span class="n">AlarmManager</span> <span class="n">am</span> <span class="o">=</span> <span class="o">(</span><span class="n">AlarmManager</span><span class="o">)</span> <span class="n">context</span><span class="o">.</span><span class="na">getSystemService</span><span class="o">(</span><span class="n">Context</span><span class="o">.</span><span class="na">ALARM_SERVICE</span><span class="o">);</span>
+</span><span class='line'> <span class="n">am</span><span class="o">.</span><span class="na">set</span><span class="o">(</span><span class="n">AlarmManager</span><span class="o">.</span><span class="na">RTC_WAKEUP</span><span class="o">,</span> <span class="n">timeInMillis</span><span class="o">,</span> <span class="n">pendingIntent</span><span class="o">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>获取 AlarmManager ，设置在 RTC 时间  <code>timeInMillis</code> 唤醒并触发 <code>pendingIntent</code> 提醒。</p>
+
+<p>我们知道 AlarmManager 是 AlarmManagerService 的代理，它最后会 IPC到 AlarmManagerService 调用相关的接口。</p>
+
+<figure class='code'><figcaption><span>framework/base/core/java/android/app/AlarmManager.java</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'> <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setExact</span><span class="o">(</span><span class="kt">int</span> <span class="n">type</span><span class="o">,</span> <span class="kt">long</span> <span class="n">triggerAtMillis</span><span class="o">,</span> <span class="n">PendingIntent</span> <span class="n">operation</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>     <span class="n">setImpl</span><span class="o">(</span><span class="n">type</span><span class="o">,</span> <span class="n">triggerAtMillis</span><span class="o">,</span> <span class="n">WINDOW_EXACT</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="n">operation</span><span class="o">,</span> <span class="kc">null</span><span class="o">);</span>
+</span><span class='line'> <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'> <span class="kd">private</span> <span class="kt">void</span> <span class="nf">setImpl</span><span class="o">(</span><span class="kt">int</span> <span class="n">type</span><span class="o">,</span> <span class="kt">long</span> <span class="n">triggerAtMillis</span><span class="o">,</span> <span class="kt">long</span> <span class="n">windowMillis</span><span class="o">,</span> <span class="kt">long</span> <span class="n">intervalMillis</span><span class="o">,</span>
+</span><span class='line'>         <span class="n">PendingIntent</span> <span class="n">operation</span><span class="o">,</span> <span class="n">WorkSource</span> <span class="n">workSource</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'><span class="o">...</span>
+</span><span class='line'>  <span class="k">try</span> <span class="o">{</span>
+</span><span class='line'>         <span class="n">mService</span><span class="o">.</span><span class="na">set</span><span class="o">(</span><span class="n">type</span><span class="o">,</span> <span class="n">triggerAtMillis</span><span class="o">,</span> <span class="n">windowMillis</span><span class="o">,</span> <span class="n">intervalMillis</span><span class="o">,</span> <span class="n">operation</span><span class="o">,</span>
+</span><span class='line'>                 <span class="n">workSource</span><span class="o">);</span>
+</span><span class='line'>     <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">RemoteException</span> <span class="n">ex</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>     <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>到 AlarmManagerService :</p>
+
+<figure class='code'><figcaption><span>framework/base/core/java/android/app/AlarmManager.java</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'> <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">set</span><span class="o">(</span><span class="kt">int</span> <span class="n">type</span><span class="o">,</span> <span class="kt">long</span> <span class="n">triggerAtTime</span><span class="o">,</span> <span class="kt">long</span> <span class="n">windowLength</span><span class="o">,</span> <span class="kt">long</span> <span class="n">interval</span><span class="o">,</span>
+</span><span class='line'>            <span class="n">PendingIntent</span> <span class="n">operation</span><span class="o">,</span> <span class="n">WorkSource</span> <span class="n">workSource</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">workSource</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">mContext</span><span class="o">.</span><span class="na">enforceCallingPermission</span><span class="o">(</span>
+</span><span class='line'>                    <span class="n">android</span><span class="o">.</span><span class="na">Manifest</span><span class="o">.</span><span class="na">permission</span><span class="o">.</span><span class="na">UPDATE_DEVICE_STATS</span><span class="o">,</span>
+</span><span class='line'>                    <span class="s">&quot;AlarmManager.set&quot;</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">set</span><span class="o">(</span><span class="n">type</span><span class="o">,</span> <span class="n">triggerAtTime</span><span class="o">,</span> <span class="n">windowLength</span><span class="o">,</span> <span class="n">interval</span><span class="o">,</span> <span class="n">operation</span><span class="o">,</span> <span class="kc">false</span><span class="o">,</span> <span class="n">workSource</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">-&gt;</span>
+</span><span class='line'> <span class="kd">public</span> <span class="kt">void</span> <span class="nf">set</span><span class="o">(</span><span class="kt">int</span> <span class="n">type</span><span class="o">,</span> <span class="kt">long</span> <span class="n">triggerAtTime</span><span class="o">,</span> <span class="kt">long</span> <span class="n">windowLength</span><span class="o">,</span> <span class="kt">long</span> <span class="n">interval</span><span class="o">,</span>
+</span><span class='line'>            <span class="n">PendingIntent</span> <span class="n">operation</span><span class="o">,</span> <span class="kt">boolean</span> <span class="n">isStandalone</span><span class="o">,</span> <span class="n">WorkSource</span> <span class="n">workSource</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'><span class="o">...</span>
+</span><span class='line'> <span class="n">setImplLocked</span><span class="o">(</span><span class="n">type</span><span class="o">,</span> <span class="n">triggerAtTime</span><span class="o">,</span> <span class="n">triggerElapsed</span><span class="o">,</span> <span class="n">windowLength</span><span class="o">,</span> <span class="n">maxElapsed</span><span class="o">,</span>
+</span><span class='line'>                    <span class="n">interval</span><span class="o">,</span> <span class="n">operation</span><span class="o">,</span> <span class="n">isStandalone</span><span class="o">,</span> <span class="kc">true</span><span class="o">,</span> <span class="n">workSource</span><span class="o">);</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">-&gt;</span>
+</span><span class='line'>
+</span><span class='line'> <span class="kd">private</span> <span class="kt">void</span> <span class="nf">setImplLocked</span><span class="o">(</span><span class="kt">int</span> <span class="n">type</span><span class="o">,</span> <span class="kt">long</span> <span class="n">when</span><span class="o">,</span> <span class="kt">long</span> <span class="n">whenElapsed</span><span class="o">,</span> <span class="kt">long</span> <span class="n">windowLength</span><span class="o">,</span>
+</span><span class='line'>            <span class="kt">long</span> <span class="n">maxWhen</span><span class="o">,</span> <span class="kt">long</span> <span class="n">interval</span><span class="o">,</span> <span class="n">PendingIntent</span> <span class="n">operation</span><span class="o">,</span> <span class="kt">boolean</span> <span class="n">isStandalone</span><span class="o">,</span>
+</span><span class='line'>            <span class="kt">boolean</span> <span class="n">doValidate</span><span class="o">,</span> <span class="n">WorkSource</span> <span class="n">workSource</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'><span class="o">...</span>
+</span><span class='line'><span class="n">rescheduleKernelAlarmsLocked</span><span class="o">();</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">-&gt;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kd">private</span> <span class="kt">void</span> <span class="nf">rescheduleKernelAlarmsLocked</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="c1">// Schedule the next upcoming wakeup alarm.  If there is a deliverable batch</span>
+</span><span class='line'>        <span class="c1">// prior to that which contains no wakeups, we schedule that as well.</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">mAlarmBatches</span><span class="o">.</span><span class="na">size</span><span class="o">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="kd">final</span> <span class="n">Batch</span> <span class="n">firstWakeup</span> <span class="o">=</span> <span class="n">findFirstWakeupBatchLocked</span><span class="o">();</span>
+</span><span class='line'>            <span class="kd">final</span> <span class="n">Batch</span> <span class="n">firstBatch</span> <span class="o">=</span> <span class="n">mAlarmBatches</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="mi">0</span><span class="o">);</span>
+</span><span class='line'>            <span class="k">if</span> <span class="o">(</span><span class="n">firstWakeup</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="n">mNextWakeup</span> <span class="o">!=</span> <span class="n">firstWakeup</span><span class="o">.</span><span class="na">start</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                <span class="n">mNextWakeup</span> <span class="o">=</span> <span class="n">firstWakeup</span><span class="o">.</span><span class="na">start</span><span class="o">;</span>
+</span><span class='line'>                <span class="n">setLocked</span><span class="o">(</span><span class="n">ELAPSED_REALTIME_WAKEUP</span><span class="o">,</span> <span class="n">firstWakeup</span><span class="o">.</span><span class="na">start</span><span class="o">);</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>            <span class="k">if</span> <span class="o">(</span><span class="n">firstBatch</span> <span class="o">!=</span> <span class="n">firstWakeup</span> <span class="o">&amp;&amp;</span> <span class="n">mNextNonWakeup</span> <span class="o">!=</span> <span class="n">firstBatch</span><span class="o">.</span><span class="na">start</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                <span class="n">mNextNonWakeup</span> <span class="o">=</span> <span class="n">firstBatch</span><span class="o">.</span><span class="na">start</span><span class="o">;</span>
+</span><span class='line'>                <span class="n">setLocked</span><span class="o">(</span><span class="n">ELAPSED_REALTIME</span><span class="o">,</span> <span class="n">firstBatch</span><span class="o">.</span><span class="na">start</span><span class="o">);</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">-&gt;</span>
+</span><span class='line'>
+</span><span class='line'> <span class="kd">private</span> <span class="kt">void</span> <span class="nf">setLocked</span><span class="o">(</span><span class="kt">int</span> <span class="n">type</span><span class="o">,</span> <span class="kt">long</span> <span class="n">when</span><span class="o">)</span>
+</span><span class='line'>    <span class="o">{</span>
+</span><span class='line'>          <span class="k">if</span> <span class="o">(</span><span class="n">mDescriptor</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="o">)</span>
+</span><span class='line'>        <span class="o">{</span>
+</span><span class='line'>            <span class="c1">// The kernel never triggers alarms with negative wakeup times</span>
+</span><span class='line'>            <span class="c1">// so we ensure they are positive.</span>
+</span><span class='line'>            <span class="kt">long</span> <span class="n">alarmSeconds</span><span class="o">,</span> <span class="n">alarmNanoseconds</span><span class="o">;</span>
+</span><span class='line'>            <span class="k">if</span> <span class="o">(</span><span class="n">when</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                <span class="n">alarmSeconds</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+</span><span class='line'>                <span class="n">alarmNanoseconds</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+</span><span class='line'>            <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+</span><span class='line'>                <span class="n">alarmSeconds</span> <span class="o">=</span> <span class="n">when</span> <span class="o">/</span> <span class="mi">1000</span><span class="o">;</span>
+</span><span class='line'>                <span class="n">alarmNanoseconds</span> <span class="o">=</span> <span class="o">(</span><span class="n">when</span> <span class="o">%</span> <span class="mi">1000</span><span class="o">)</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">*</span> <span class="mi">1000</span><span class="o">;</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="n">set</span><span class="o">(</span><span class="n">mDescriptor</span><span class="o">,</span> <span class="n">type</span><span class="o">,</span> <span class="n">alarmSeconds</span><span class="o">,</span> <span class="n">alarmNanoseconds</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">-&gt;</span>
+</span><span class='line'><span class="kd">private</span> <span class="kd">native</span> <span class="kt">void</span> <span class="nf">set</span><span class="o">(</span><span class="kt">int</span> <span class="n">fd</span><span class="o">,</span> <span class="kt">int</span> <span class="n">type</span><span class="o">,</span> <span class="kt">long</span> <span class="n">seconds</span><span class="o">,</span> <span class="kt">long</span> <span class="n">nanoseconds</span><span class="o">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>native 方法:</p>
+
+<figure class='code'><figcaption><span>frameworks/base/services/jni/com_android_server_AlarmManagerService.cpp</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">static</span> <span class="kt">void</span> <span class="n">android_server_AlarmManagerService_set</span><span class="p">(</span><span class="n">JNIEnv</span><span class="o">*</span> <span class="n">env</span><span class="p">,</span> <span class="n">jobject</span> <span class="n">obj</span><span class="p">,</span> <span class="n">jint</span> <span class="n">fd</span><span class="p">,</span> <span class="n">jint</span> <span class="n">type</span><span class="p">,</span> <span class="n">jlong</span> <span class="n">seconds</span><span class="p">,</span> <span class="n">jlong</span> <span class="n">nanoseconds</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="k">struct</span> <span class="n">timespec</span> <span class="n">ts</span><span class="p">;</span>
+</span><span class='line'>    <span class="n">ts</span><span class="p">.</span><span class="n">tv_sec</span> <span class="o">=</span> <span class="n">seconds</span><span class="p">;</span>
+</span><span class='line'>    <span class="n">ts</span><span class="p">.</span><span class="n">tv_nsec</span> <span class="o">=</span> <span class="n">nanoseconds</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kt">int</span> <span class="n">result</span> <span class="o">=</span> <span class="n">ioctl</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">ANDROID_ALARM_SET</span><span class="p">(</span><span class="n">type</span><span class="p">),</span> <span class="o">&amp;</span><span class="n">ts</span><span class="p">);</span>
+</span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="n">result</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>        <span class="n">ALOGE</span><span class="p">(</span><span class="s">&quot;Unable to set alarm to %lld.%09lld: %s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">seconds</span><span class="p">,</span> <span class="n">nanoseconds</span><span class="p">,</span> <span class="n">strerror</span><span class="p">(</span><span class="n">errno</span><span class="p">));</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>fd 从哪里来的？AlarmManagerService 初始化来的:</p>
+
+<figure class='code'><figcaption><span>frameworks/services/java/com/android/server/AlarmManagerService.java</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'> <span class="kd">public</span> <span class="nf">AlarmManagerService</span><span class="o">(</span><span class="n">Context</span> <span class="n">context</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">mContext</span> <span class="o">=</span> <span class="n">context</span><span class="o">;</span>
+</span><span class='line'>        <span class="n">mDescriptor</span> <span class="o">=</span> <span class="n">init</span><span class="o">();</span>
+</span><span class='line'>        <span class="n">mNextWakeup</span> <span class="o">=</span> <span class="n">mNextNonWakeup</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">...</span>
+</span><span class='line'>    <span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>init 是 native 方法:</p>
+
+<figure class='code'><figcaption><span>frameworks/base/services/jni/com_android_server_AlarmManagerService.cpp</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">static</span> <span class="n">jint</span> <span class="n">android_server_AlarmManagerService_init</span><span class="p">(</span><span class="n">JNIEnv</span><span class="o">*</span> <span class="n">env</span><span class="p">,</span> <span class="n">jobject</span> <span class="n">obj</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">open</span><span class="p">(</span><span class="s">&quot;/dev/alarm&quot;</span><span class="p">,</span> <span class="n">O_RDWR</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在设下 alarm 之后， AlarmManagerService 启动了一个 AlarmThread 来等待 alarm 的事件。</p>
+
+<figure class='code'><figcaption><span>frameworks/services/java/com/android/server/AlarmManagerService.java</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'> <span class="kd">private</span> <span class="kd">final</span> <span class="n">AlarmThread</span> <span class="n">mWaitThread</span> <span class="o">=</span> <span class="k">new</span> <span class="n">AlarmThread</span><span class="o">();</span>
+</span><span class='line'>
+</span><span class='line'> <span class="kd">public</span> <span class="nf">AlarmManagerService</span><span class="o">(</span><span class="n">Context</span> <span class="n">context</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>         <span class="o">...</span>
+</span><span class='line'>         <span class="k">if</span> <span class="o">(</span><span class="n">mDescriptor</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">mWaitThread</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+</span><span class='line'>        <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">Slog</span><span class="o">.</span><span class="na">w</span><span class="o">(</span><span class="n">TAG</span><span class="o">,</span> <span class="s">&quot;Failed to open alarm driver. Falling back to a handler.&quot;</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这个 AlarmThread 就会循环等待 alarm 事件！</p>
+
+<figure class='code'><figcaption><span>frameworks/services/java/com/android/server/AlarmManagerService.java</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'>  <span class="kd">private</span> <span class="kd">class</span> <span class="nc">AlarmThread</span> <span class="kd">extends</span> <span class="n">Thread</span>
+</span><span class='line'>    <span class="o">{</span>
+</span><span class='line'>        <span class="kd">public</span> <span class="nf">AlarmThread</span><span class="o">()</span>
+</span><span class='line'>        <span class="o">{</span>
+</span><span class='line'>            <span class="kd">super</span><span class="o">(</span><span class="s">&quot;AlarmManager&quot;</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">()</span>
+</span><span class='line'>        <span class="o">{</span>
+</span><span class='line'>            <span class="n">ArrayList</span><span class="o">&lt;</span><span class="n">Alarm</span><span class="o">&gt;</span> <span class="n">triggerList</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ArrayList</span><span class="o">&lt;</span><span class="n">Alarm</span><span class="o">&gt;();</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="k">while</span> <span class="o">(</span><span class="kc">true</span><span class="o">)</span>
+</span><span class='line'>            <span class="o">{</span>
+</span><span class='line'>                <span class="kt">int</span> <span class="n">result</span> <span class="o">=</span> <span class="n">waitForAlarm</span><span class="o">(</span><span class="n">mDescriptor</span><span class="o">);</span>
+</span><span class='line'>                <span class="o">...</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>等到设定的时间到了的时候， AlarmManagerService 就会收到消息，发送当初设定的 PendingIntent.</p>
+
+<p>这样就满足了设定特定时间提醒的功能。</p>
+
+<p>对于像钟表这样的程序，就需要一种机制，几乎是时时的告诉，当前是什么时间，而且要每一秒都要更新。这个需求怎么满足呢？</p>
+
+<p>Android 的设计中有一个 Intent 是标识这种时间改变的，但是不是每秒，是每分钟啊 ！！</p>
+
+<figure class='code'><figcaption><span>Intent.java</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="cm">/**  </span>
+</span><span class='line'><span class="cm"> * Broadcast Action: The current time has changed.  Sent every</span>
+</span><span class='line'><span class="cm"> * minute.  You can &lt;em&gt;not&lt;/em&gt; receive this through components declared</span>
+</span><span class='line'><span class="cm"> * in manifests, only by explicitly registering for it with</span>
+</span><span class='line'><span class="cm"> * {@link Context#registerReceiver(BroadcastReceiver, IntentFilter)</span>
+</span><span class='line'><span class="cm"> * Context.registerReceiver()}.</span>
+</span><span class='line'><span class="cm"> *</span>
+</span><span class='line'><span class="cm"> * &lt;p class=&quot;note&quot;&gt;This is a protected intent that can only be sent</span>
+</span><span class='line'><span class="cm"> * by the system.</span>
+</span><span class='line'><span class="cm"> */</span>
+</span><span class='line'><span class="nd">@SdkConstant</span><span class="o">(</span><span class="n">SdkConstantType</span><span class="o">.</span><span class="na">BROADCAST_INTENT_ACTION</span><span class="o">)</span>
+</span><span class='line'><span class="kd">public</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">ACTION_TIME_TICK</span> <span class="o">=</span> <span class="s">&quot;android.intent.action.TIME_TICK&quot;</span><span class="o">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>你只要注册了这个 Intent , 每分钟开始的时候都会受到这个 Intent。AlarmManagerService 是如何提供这个服务的呢？</p>
+
+<p>在 AlarmManagerService 的构造函数中会创建一个 ClockReceiver， 并在 scheduleTimeTickEvent 中调用native <code>set</code> 方法设置一个一分钟后的时间提醒，设置的 PendingIntent 就是 ACTION_TIME_TICK 这个 Intent。</p>
+
+<p>而且，这个 ClockReceiver 还注册了ACTION_TIME_TICK 的监听。一分钟后它自己也会收到 ACTION_TIME_TICK，收到之后，它又调用了一次 scheduleTimeTickEvent，设定了下一分钟的提醒。如是，每分钟都会可以收到这个提醒了！</p>
+
+<figure class='code'><figcaption><span>frameworks/services/java/com/android/server/AlarmManagerService.java</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'>  <span class="kd">public</span> <span class="nf">AlarmManagerService</span><span class="o">(</span><span class="n">Context</span> <span class="n">context</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="o">...</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">mTimeTickSender</span> <span class="o">=</span> <span class="n">PendingIntent</span><span class="o">.</span><span class="na">getBroadcastAsUser</span><span class="o">(</span><span class="n">context</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span>
+</span><span class='line'>                <span class="k">new</span> <span class="nf">Intent</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">ACTION_TIME_TICK</span><span class="o">).</span><span class="na">addFlags</span><span class="o">(</span>
+</span><span class='line'>                        <span class="n">Intent</span><span class="o">.</span><span class="na">FLAG_RECEIVER_REGISTERED_ONLY</span>
+</span><span class='line'>                        <span class="o">|</span> <span class="n">Intent</span><span class="o">.</span><span class="na">FLAG_RECEIVER_FOREGROUND</span><span class="o">),</span> <span class="mi">0</span><span class="o">,</span>
+</span><span class='line'>                        <span class="n">UserHandle</span><span class="o">.</span><span class="na">ALL</span><span class="o">);</span>
+</span><span class='line'>        <span class="c1">// now that we have initied the driver schedule the alarm</span>
+</span><span class='line'>        <span class="n">mClockReceiver</span><span class="o">=</span> <span class="k">new</span> <span class="n">ClockReceiver</span><span class="o">();</span>
+</span><span class='line'>        <span class="n">mClockReceiver</span><span class="o">.</span><span class="na">scheduleTimeTickEvent</span><span class="o">();</span>
+</span><span class='line'>        <span class="o">...</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>   <span class="kd">class</span> <span class="nc">ClockReceiver</span> <span class="kd">extends</span> <span class="n">BroadcastReceiver</span> <span class="o">{</span>
+</span><span class='line'>        <span class="kd">public</span> <span class="nf">ClockReceiver</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">IntentFilter</span> <span class="n">filter</span> <span class="o">=</span> <span class="k">new</span> <span class="n">IntentFilter</span><span class="o">();</span>
+</span><span class='line'>            <span class="n">filter</span><span class="o">.</span><span class="na">addAction</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">ACTION_TIME_TICK</span><span class="o">);</span>
+</span><span class='line'>            <span class="n">filter</span><span class="o">.</span><span class="na">addAction</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">ACTION_DATE_CHANGED</span><span class="o">);</span>
+</span><span class='line'>            <span class="n">mContext</span><span class="o">.</span><span class="na">registerReceiver</span><span class="o">(</span><span class="k">this</span><span class="o">,</span> <span class="n">filter</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>       <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onReceive</span><span class="o">(</span><span class="n">Context</span> <span class="n">context</span><span class="o">,</span> <span class="n">Intent</span> <span class="n">intent</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="k">if</span> <span class="o">(</span><span class="n">intent</span><span class="o">.</span><span class="na">getAction</span><span class="o">().</span><span class="na">equals</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">ACTION_TIME_TICK</span><span class="o">))</span> <span class="o">{</span>
+</span><span class='line'>                <span class="n">scheduleTimeTickEvent</span><span class="o">();</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="kd">public</span> <span class="kt">void</span> <span class="nf">scheduleTimeTickEvent</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>            <span class="kd">final</span> <span class="kt">long</span> <span class="n">currentTime</span> <span class="o">=</span> <span class="n">System</span><span class="o">.</span><span class="na">currentTimeMillis</span><span class="o">();</span>
+</span><span class='line'>            <span class="kd">final</span> <span class="kt">long</span> <span class="n">nextTime</span> <span class="o">=</span> <span class="mi">60000</span> <span class="o">*</span> <span class="o">((</span><span class="n">currentTime</span> <span class="o">/</span> <span class="mi">60000</span><span class="o">)</span> <span class="o">+</span> <span class="mi">1</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="c1">// Schedule this event for the amount of time that it would take to get to</span>
+</span><span class='line'>            <span class="c1">// the top of the next minute.</span>
+</span><span class='line'>            <span class="kd">final</span> <span class="kt">long</span> <span class="n">tickEventDelay</span> <span class="o">=</span> <span class="n">nextTime</span> <span class="o">-</span> <span class="n">currentTime</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="kd">final</span> <span class="n">WorkSource</span> <span class="n">workSource</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span> <span class="c1">// Let system take blame for time tick events.</span>
+</span><span class='line'>            <span class="n">set</span><span class="o">(</span><span class="n">ELAPSED_REALTIME</span><span class="o">,</span> <span class="n">SystemClock</span><span class="o">.</span><span class="na">elapsedRealtime</span><span class="o">()</span> <span class="o">+</span> <span class="n">tickEventDelay</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span>
+</span><span class='line'>                    <span class="mi">0</span><span class="o">,</span> <span class="n">mTimeTickSender</span><span class="o">,</span> <span class="kc">true</span><span class="o">,</span> <span class="n">workSource</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>可是这样的话，每秒钟的提醒它肯定满足不了，那么时钟是如何实现秒针的现实的呢？</p>
+
+<figure class='code'><figcaption><span>packages/apps/DeskClock/src/com/android/deskclock/AnalogClock.java</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'>    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onAttachedToWindow</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>     <span class="o">...</span>
+</span><span class='line'>     <span class="c1">// tick the seconds</span>
+</span><span class='line'>     <span class="n">post</span><span class="o">(</span><span class="n">mClockTick</span><span class="o">);</span>
+</span><span class='line'>     <span class="o">...</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">private</span> <span class="kd">final</span> <span class="n">Runnable</span> <span class="n">mClockTick</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Runnable</span> <span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="nd">@Override</span>
+</span><span class='line'>        <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">onTimeChanged</span><span class="o">();</span>
+</span><span class='line'>            <span class="n">invalidate</span><span class="o">();</span>
+</span><span class='line'>            <span class="n">AnalogClock</span><span class="o">.</span><span class="na">this</span><span class="o">.</span><span class="na">postDelayed</span><span class="o">(</span><span class="n">mClockTick</span><span class="o">,</span> <span class="mi">1000</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">};</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在创建的时候 post 一个 Runnable， 在 Runnable 中的 run 方法中 又设定了在一秒钟之后，再 post 这个 Runnable。这样每秒钟都会执行 Runnable 一次，进行重新绘制。</p>
+
+<p>DeskClock 中的 widget 插件和应用里面第二个 TAB 中的数字时钟都是使用 <code>TextClock</code>， <code>TextClock</code> 也是监听 <code>ACTION_TIME_TICK</code> 来完成每分钟的更新的。参考代码：</p>
+
+<ul>
+<li>frameworks/base/core/java/android/widget/TextClock.java</li>
+</ul>
+
+
+<p>Statusbar 上的 Clock 也是监听 <code>ACTION_TIME_TICK</code> 来完成每分钟的更新的。参考代码:</p>
+
+<ul>
+<li>frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/policy/Clock.java</li>
+</ul>
+
+
+<p>Keyguard 上的 Clock 显示也是使用的 <code>TextClock</code> 同上 。</p>
+
+<p>对于分钟这个精度的时间显示都可以使用监听 <code>ACTION_TIME_TICK</code> 的方式来完成。但是收到这个 Intent 的时候并没有将当前的时间传递过来，所以还是需要另外的接口来完成获取当前准确时间的需求。</p>
+
+<p>获取当前 UTC 时间是通过 <code>System.currentTimeMillis()</code> 来完成的。</p>
+
+<figure class='code'><figcaption><span>libcore/luni/src/main/java/java/lang/System.java</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="cm">/** </span>
+</span><span class='line'><span class="cm"> * Returns the current time in milliseconds since January 1, 1970 00:00:00.0 UTC.</span>
+</span><span class='line'><span class="cm"> *</span>
+</span><span class='line'><span class="cm"> * &lt;p&gt;This method always returns UTC times, regardless of the system&#39;s time zone.</span>
+</span><span class='line'><span class="cm"> * This is often called &quot;Unix time&quot; or &quot;epoch time&quot;.</span>
+</span><span class='line'><span class="cm"> * Use a {@link java.text.DateFormat} instance to format this time for display to a human.</span>
+</span><span class='line'><span class="cm"> *</span>
+</span><span class='line'><span class="cm"> * &lt;p&gt;This method shouldn&#39;t be used for measuring timeouts or</span>
+</span><span class='line'><span class="cm"> * other elapsed time measurements, as changing the system time can affect</span>
+</span><span class='line'><span class="cm"> * the results. Use {@link #nanoTime} for that.</span>
+</span><span class='line'><span class="cm"> */</span>
+</span><span class='line'><span class="kd">public</span> <span class="kd">static</span> <span class="kd">native</span> <span class="kt">long</span> <span class="nf">currentTimeMillis</span><span class="o">();</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>为什么定义 1970.1.1 开始呢？因为那大概是Unix诞生的时间。</p>
+
+<p>这个 native 方法调用 <code>gettimeofday</code> 来完成的:</p>
+
+<figure class='code'><figcaption><span>libcore/luni/src/main/native/java_lang_System.cpp</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">static</span> <span class="n">jlong</span> <span class="n">System_currentTimeMillis</span><span class="p">(</span><span class="n">JNIEnv</span><span class="o">*</span><span class="p">,</span> <span class="n">jclass</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">timeval</span> <span class="n">now</span><span class="p">;</span>
+</span><span class='line'>    <span class="n">gettimeofday</span><span class="p">(</span><span class="o">&amp;</span><span class="n">now</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span><span class='line'>    <span class="n">jlong</span> <span class="n">when</span> <span class="o">=</span> <span class="n">now</span><span class="p">.</span><span class="n">tv_sec</span> <span class="o">*</span> <span class="mi">1000LL</span> <span class="o">+</span> <span class="n">now</span><span class="p">.</span><span class="n">tv_usec</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">;</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">when</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在 Linux shell 环境下输入 <code>man gettimeofday</code> 获取更多信息：</p>
+
+<figure class='code'><figcaption><span>libcore/luni/src/main/native/java_lang_System.cpp</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">GETTIMEOFDAY</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>                                      <span class="n">Linux</span> <span class="n">Programmer</span><span class="err">&#39;</span><span class="n">s</span> <span class="n">Manual</span>                                     <span class="n">GETTIMEOFDAY</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">NAME</span>
+</span><span class='line'>       <span class="n">gettimeofday</span><span class="p">,</span> <span class="n">settimeofday</span> <span class="o">-</span> <span class="n">get</span> <span class="o">/</span> <span class="n">set</span> <span class="n">time</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">SYNOPSIS</span>
+</span><span class='line'>       <span class="err">#</span><span class="n">include</span> <span class="o">&lt;</span><span class="n">sys</span><span class="o">/</span><span class="n">time</span><span class="p">.</span><span class="n">h</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'>       <span class="kt">int</span> <span class="n">gettimeofday</span><span class="p">(</span><span class="k">struct</span> <span class="n">timeval</span> <span class="o">*</span><span class="n">tv</span><span class="p">,</span> <span class="k">struct</span> <span class="n">timezone</span> <span class="o">*</span><span class="n">tz</span><span class="p">);</span>
+</span><span class='line'>       <span class="kt">int</span> <span class="n">settimeofday</span><span class="p">(</span><span class="k">const</span> <span class="k">struct</span> <span class="n">timeval</span> <span class="o">*</span><span class="n">tv</span><span class="p">,</span> <span class="k">const</span> <span class="k">struct</span> <span class="n">timezone</span> <span class="o">*</span><span class="n">tz</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>   <span class="n">Feature</span> <span class="n">Test</span> <span class="n">Macro</span> <span class="n">Requirements</span> <span class="k">for</span> <span class="n">glibc</span> <span class="p">(</span><span class="n">see</span> <span class="n">feature_test_macros</span><span class="p">(</span><span class="mi">7</span><span class="p">))</span><span class="o">:</span>
+</span><span class='line'>
+</span><span class='line'>       <span class="n">settimeofday</span><span class="p">()</span><span class="o">:</span> <span class="n">_BSD_SOURCE</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">DESCRIPTION</span>
+</span><span class='line'>       <span class="n">The</span>  <span class="n">functions</span>  <span class="n">gettimeofday</span><span class="p">()</span>  <span class="n">and</span>  <span class="n">settimeofday</span><span class="p">()</span>  <span class="n">can</span>  <span class="n">get</span> <span class="n">and</span> <span class="n">set</span> <span class="n">the</span> <span class="n">time</span> <span class="n">as</span> <span class="n">well</span> <span class="n">as</span> <span class="n">a</span> <span class="n">timezone</span><span class="p">.</span>  <span class="n">The</span> <span class="n">tv</span> <span class="n">argument</span> <span class="n">is</span> <span class="n">a</span>
+</span><span class='line'>       <span class="k">struct</span> <span class="n">timeval</span> <span class="p">(</span><span class="n">as</span> <span class="n">specified</span> <span class="n">in</span> <span class="o">&lt;</span><span class="n">sys</span><span class="o">/</span><span class="n">time</span><span class="p">.</span><span class="n">h</span><span class="o">&gt;</span><span class="p">)</span><span class="o">:</span>
+</span><span class='line'>
+</span><span class='line'>           <span class="k">struct</span> <span class="n">timeval</span> <span class="p">{</span>
+</span><span class='line'>               <span class="n">time_t</span>      <span class="n">tv_sec</span><span class="p">;</span>     <span class="cm">/* seconds */</span>
+</span><span class='line'>               <span class="n">suseconds_t</span> <span class="n">tv_usec</span><span class="p">;</span>    <span class="cm">/* microseconds */</span>
+</span><span class='line'>           <span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'>       <span class="n">and</span> <span class="n">gives</span> <span class="n">the</span> <span class="n">number</span> <span class="n">of</span> <span class="n">seconds</span> <span class="n">and</span> <span class="n">microseconds</span> <span class="n">since</span> <span class="n">the</span> <span class="n">Epoch</span> <span class="p">(</span><span class="n">see</span> <span class="n">time</span><span class="p">(</span><span class="mi">2</span><span class="p">)).</span>  <span class="n">The</span> <span class="n">tz</span> <span class="n">argument</span> <span class="n">is</span> <span class="n">a</span> <span class="k">struct</span> <span class="nl">timezone:</span>
+</span><span class='line'>
+</span><span class='line'>           <span class="k">struct</span> <span class="n">timezone</span> <span class="p">{</span>
+</span><span class='line'>               <span class="kt">int</span> <span class="n">tz_minuteswest</span><span class="p">;</span>     <span class="cm">/* minutes west of Greenwich */</span>
+</span><span class='line'>               <span class="kt">int</span> <span class="n">tz_dsttime</span><span class="p">;</span>         <span class="cm">/* type of DST correction */</span>
+</span><span class='line'>           <span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'>       <span class="n">If</span> <span class="n">either</span> <span class="n">tv</span> <span class="n">or</span> <span class="n">tz</span> <span class="n">is</span> <span class="nb">NULL</span><span class="p">,</span> <span class="n">the</span> <span class="n">corresponding</span> <span class="n">structure</span> <span class="n">is</span> <span class="n">not</span> <span class="n">set</span> <span class="n">or</span> <span class="n">returned</span><span class="p">.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>timeval 带有两个成员， <code>tv_sec</code> 保存秒数，<code>tv_usec</code> 保存微秒(1/1000000 秒).可以看到上面 timeval 到毫秒的转化 :</p>
+
+<figure class='code'><figcaption><span>libcore/luni/src/main/native/java_lang_System.cpp</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="n">jlong</span> <span class="n">when</span> <span class="o">=</span> <span class="n">now</span><span class="p">.</span><span class="n">tv_sec</span> <span class="o">*</span> <span class="mi">1000LL</span> <span class="o">+</span> <span class="n">now</span><span class="p">.</span><span class="n">tv_usec</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>gettimeofday的实现是经 libc 进入内核，实际上是一个 system call 。详情参考 kernel 的代码。</p>
+
+<p>关于 libc 和 内核的实现关系，我需要学习后再来讨论，可以参考下 <a href="http://www.win.tue.nl/~aeb/linux/lk/lk-3.html">user space and libc interface</a></p>
+
+<p>获取系统已经运行的时间有几个不同的 API , 都在 SystemClock.java 中:</p>
+
+<ul>
+<li>elapsedRealtime ()                //Returns milliseconds since boot, including time spent in sleep.</li>
+<li>elapsedRealtimeNanos ()          //Returns nanoseconds since boot, including time spent in sleep.</li>
+<li>uptimeMillis ()                  //Returns milliseconds since boot, not counting time spent in deep sleep.</li>
+</ul>
+
+
+<p><code>elapsedRealtime()</code> 和 <code>elapsedRealtimeNanos()</code> 包含系统 sleep 的时间，而 <code>uptimeMillis()</code> 不包含 sleep 的时间。参考 <a href="http://developer.android.com/reference/android/os/SystemClock.html">SystemClock</a></p>
+
+<p><code>elapsedRealtime()</code> api 用的比较多，Android 系统里面 Settings->About phone->Status->Uptime 显示的就是这个时间。Settings->Battery 显示的时间也是用这个时间计算出来的（减去上一次 unplug 的时间）。</p>
+
+<p>来看下 <code>elapsedRealtime</code> 的底层实现：</p>
+
+<figure class='code'><figcaption><span>SystemClock.java</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'> <span class="kd">native</span> <span class="kd">public</span> <span class="kd">static</span> <span class="kt">long</span> <span class="nf">elapsedRealtime</span><span class="o">();</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在 SystemClock 里用的是 native 的方法。</p>
+
+<figure class='code'><figcaption><span>frameworks/base/core/jni/android_os_SystemClock.cpp </span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cm">/*</span>
+</span><span class='line'><span class="cm"> * native public static long elapsedRealtime();</span>
+</span><span class='line'><span class="cm"> */</span>
+</span><span class='line'><span class="k">static</span> <span class="n">jlong</span> <span class="n">android_os_SystemClock_elapsedRealtime</span><span class="p">(</span><span class="n">JNIEnv</span><span class="o">*</span> <span class="n">env</span><span class="p">,</span>
+</span><span class='line'>        <span class="n">jobject</span> <span class="n">clazz</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="k">return</span> <span class="p">(</span><span class="n">jlong</span><span class="p">)</span><span class="n">elapsedRealtime</span><span class="p">();</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>cpp 中调用了libutils 中的方法 <code>elapsedRealtime()</code>.</p>
+
+<figure class='code'><figcaption><span>system/core/libutils/SystemClock.cpp</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cm">/*</span>
+</span><span class='line'><span class="cm"> * native public static long elapsedRealtime();</span>
+</span><span class='line'><span class="cm"> */</span>
+</span><span class='line'><span class="n">int64_t</span> <span class="n">elapsedRealtime</span><span class="p">()</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">nanoseconds_to_milliseconds</span><span class="p">(</span><span class="n">elapsedRealtimeNano</span><span class="p">());</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">-&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="cm">/*</span>
+</span><span class='line'><span class="cm"> * native public static long elapsedRealtimeNano();</span>
+</span><span class='line'><span class="cm"> */</span>
+</span><span class='line'><span class="n">int64_t</span> <span class="n">elapsedRealtimeNano</span><span class="p">()</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'><span class="p">...</span>
+</span><span class='line'>    <span class="k">static</span> <span class="kt">int</span> <span class="n">s_fd</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="n">s_fd</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="kt">int</span> <span class="n">fd</span> <span class="o">=</span> <span class="n">open</span><span class="p">(</span><span class="s">&quot;/dev/alarm&quot;</span><span class="p">,</span> <span class="n">O_RDONLY</span><span class="p">);</span>
+</span><span class='line'>        <span class="k">if</span> <span class="p">(</span><span class="n">android_atomic_cmpxchg</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">fd</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">s_fd</span><span class="p">))</span> <span class="p">{</span>
+</span><span class='line'>            <span class="n">close</span><span class="p">(</span><span class="n">fd</span><span class="p">);</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">result</span> <span class="o">=</span> <span class="n">ioctl</span><span class="p">(</span><span class="n">s_fd</span><span class="p">,</span>
+</span><span class='line'>            <span class="n">ANDROID_ALARM_GET_TIME</span><span class="p">(</span><span class="n">ANDROID_ALARM_ELAPSED_REALTIME</span><span class="p">),</span> <span class="o">&amp;</span><span class="n">ts</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="n">result</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="n">timestamp</span> <span class="o">=</span> <span class="n">seconds_to_nanoseconds</span><span class="p">(</span><span class="n">ts</span><span class="p">.</span><span class="n">tv_sec</span><span class="p">)</span> <span class="o">+</span> <span class="n">ts</span><span class="p">.</span><span class="n">tv_nsec</span><span class="p">;</span>
+</span><span class='line'>        <span class="n">checkTimeStamps</span><span class="p">(</span><span class="n">timestamp</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">prevTimestamp</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">prevMethod</span><span class="p">,</span> <span class="n">METHOD_IOCTL</span><span class="p">);</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">timestamp</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">...</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>和闹钟的提醒功能相似，<code>elapsedRealtimeNano()</code> 也是通过 <code>/dev/alarm</code> 的 ioctl 来完成的，具体的实现要参看 driver 的代码了。</p>
+
+<p>好了，获取当前时间(UTC)通过 kernel system call 完成， 获取系统运行时间通过 ioctl
+<code>/dev/alarm</code> 来完成。</p>
+
+<p>Alarm/Clock 系统还需要提供的一个功能是设置/同步时间。由于手机芯片中缺少一个断电之后能继续维持时间的模块，所以，拔掉电池之后再开机之后时间会出现偏差（如果没有同步或手动设置时间)。</p>
+
+<p>在 Android 系统中， Settings-> Date &amp; Time  &ndash;> 提供了设置时间和同步时间的UI 接口。
+Date 和 Time 的设置都是使用 AlarmManagerService 提供的 <code>setTime</code> 接口。</p>
+
+<figure class='code'><figcaption><span>AlarmManagerService.java</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kt">void</span> <span class="nf">setTime</span><span class="o">(</span><span class="kt">long</span> <span class="n">millis</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">mContext</span><span class="o">.</span><span class="na">enforceCallingOrSelfPermission</span><span class="o">(</span>
+</span><span class='line'>            <span class="s">&quot;android.permission.SET_TIME&quot;</span><span class="o">,</span>
+</span><span class='line'>            <span class="s">&quot;setTime&quot;</span><span class="o">);</span>  <span class="c1">//检查 permission</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">SystemClock</span><span class="o">.</span><span class="na">setCurrentTimeMillis</span><span class="o">(</span><span class="n">millis</span><span class="o">);</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>AlarmManagerService 调用了 SystemClock 的 api <code>setCurrentTimeMillis</code>.</p>
+
+<figure class='code'><figcaption><span>SystemClock.java</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="cm">/** </span>
+</span><span class='line'><span class="cm"> * Sets the current wall time, in milliseconds.  Requires the calling</span>
+</span><span class='line'><span class="cm"> * process to have appropriate permissions.</span>
+</span><span class='line'><span class="cm"> *</span>
+</span><span class='line'><span class="cm"> * @return if the clock was successfully set to the specified time.</span>
+</span><span class='line'><span class="cm"> */</span>
+</span><span class='line'><span class="kd">native</span> <span class="kd">public</span> <span class="kd">static</span> <span class="kt">boolean</span> <span class="nf">setCurrentTimeMillis</span><span class="o">(</span><span class="kt">long</span> <span class="n">millis</span><span class="o">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>SystemClock.java 调用了 native 方法</p>
+
+<figure class='code'><figcaption><span>android_os_SystemClock.cpp</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cm">/*</span>
+</span><span class='line'><span class="cm"> * Set the current time.  This only works when running as root.</span>
+</span><span class='line'><span class="cm"> */</span>
+</span><span class='line'><span class="k">static</span> <span class="kt">int</span> <span class="n">setCurrentTimeMillis</span><span class="p">(</span><span class="n">int64_t</span> <span class="n">millis</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">...</span>
+</span><span class='line'>    <span class="n">fd</span> <span class="o">=</span> <span class="n">open</span><span class="p">(</span><span class="s">&quot;/dev/alarm&quot;</span><span class="p">,</span> <span class="n">O_RDWR</span><span class="p">);</span>
+</span><span class='line'><span class="p">...</span>
+</span><span class='line'>    <span class="n">res</span> <span class="o">=</span> <span class="n">ioctl</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">ANDROID_ALARM_SET_RTC</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">ts</span><span class="p">);</span>
+</span><span class='line'><span class="p">...</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>android_os_SystemClock.cpp 是直接利用 ioctl <code>/dev/alarm</code> 调用到 driver 的 alarm 来完成。</p>
+
+<p>同步时间的功能是定期的从 Google 的服务器 2.android.pool.ntp.org (默认配置) 获取时间,刷新的时间间隔有两种，一种长的是 24 h，一种短的是 60s。</p>
+
+<p>参考代码:</p>
+
+<ul>
+<li>frameworks/base/services/java/com/android/server/NetworkTimeUpdateService.java</li>
+<li>frameworks/base/core/java/android/util/NtpTrustedTime.java</li>
+<li>frameworks/base/core/res/res/values/config.xml</li>
+</ul>
+
+
+<p>通过 ioctl <code>/dev/alarm</code> 操组 driver 的 alarm 模块来完成设置时间，通过定期和 Google 服务器 2.android.pool.ntp.org 同步来完成时间的同步。</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">zhibin</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-12-27T14:40:00+08:00" pubdate data-updated="true">Dec 27<span>th</span>, 2013</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/alarm/'>alarm</a>, <a class='category' href='/blog/categories/android/'>android</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://SteveVallay.github.io/blog/2013/12/27/alarm/" data-via="zhibin_" data-counturl="http://SteveVallay.github.io/blog/2013/12/27/alarm/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2013/12/24/android-properties-data-structure/" title="Previous Post: android properties data structure">&laquo; android properties data structure</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2013/12/27/alarm/">Alarm</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/12/24/android-properties-data-structure/">Android Properties Data Structure</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/12/23/android-system-properties2/">Android System Properties Dynamic</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/12/13/android-systemproperties/">Android System Properties</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/11/13/deploy-app-to-digit-ocean/">Deploy App to Digit Ocean</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/SteveVallay">@SteveVallay</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'SteveVallay',
+            count: 2,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - zhibin -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'zhibin';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://SteveVallay.github.io/blog/2013/12/27/alarm/';
+        var disqus_url = 'http://SteveVallay.github.io/blog/2013/12/27/alarm/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
