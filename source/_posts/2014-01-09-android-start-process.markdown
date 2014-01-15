@@ -217,9 +217,10 @@ int main(int argc, char **argv)
 
 ```
 
+代码看下来，可以看出来，init 的主要工作就是:
 
-
-
+1. 解析 init.rc 文件并执行相应的 action/commands.
+2. 作为一个 Daemon 进程处理 property_set,keychord 和 signal 事件。
 
 ``` system/core/rootdir/init.rc
 service zygote /system/bin/app_process -Xzygote /system/bin --zygote --start-system-server
