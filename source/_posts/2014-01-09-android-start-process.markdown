@@ -39,7 +39,7 @@ init 进程是内核启动后调用的第一个用户空间的程序，从 init 
 
 init 是一个二进制文件，代码在: **system/core/init/init.c**
 
-打开 init.c （kitkat)，找到 `main` 函数,来看看 `main` init 主要做了哪些工作（...表示省略部分代码)：
+打开 init.c （kitkat)，找到 `main` 函数,来看看 init 主要做了哪些工作（...表示省略部分代码)：
 
 ```c system/core/init/init.c
 int main(int argc, char **argv)
@@ -220,9 +220,108 @@ int main(int argc, char **argv)
 代码看下来，可以看出来，init 的主要工作就是:
 
 1. 解析 init.rc 文件并执行相应的 action/commands.
-2. 作为一个 Daemon 进程处理 property_set,keychord 和 signal 事件。
+2. 作为一个 Daemon 进程处理 property_set,keychord(key combo） 和 signal 事件。
 
-``` system/core/rootdir/init.rc
+init.rc 的解析过程略过，详情请见 system/core/init/init_parser.c
+
+
+下面来看看 init.rc 里面究竟干了些什么？
+
+```sh system/core/rootdir/init.rc
+#导入其他 rc 文件
+import /init.environ.rc
+import /init.usb.rc
+import /init.${ro.hardware}.rc  #这里保留了导入特定平台相关 rc 的接口,这里可能导入很多东西！
+import /init.trace.rc
+
+#early-init 要处理的事情
+on early-init
+    # Set init and its forked children's oom_adj.
+    write /proc/1/oom_adj -16 
+
+    # Set the security context for the init process.
+    # This should occur before anything else (e.g. ueventd) is started.
+    setcon u:r:init:s0
+
+    start ueventd
+
+# create mountpoints
+    mkdir /mnt 0775 root system
+
+#init 要处理的事情
+on init
+
+sysclktz 0
+
+loglevel 3
+
+# Backward compatibility
+    symlink /system/etc /etc
+    symlink /sys/kernel/debug /d
+
+# Right now vendor lives on the same filesystem as system,
+# but someday that may change.
+    symlink /system/vendor /vendor
+
+#...省略部分代码
+
+on post-fs
+    # once everything is setup, no need to modify /
+    mount rootfs rootfs / ro remount
+    # mount shared so changes propagate into child namespaces
+    mount rootfs rootfs / shared rec
+    mount tmpfs tmpfs /mnt/secure private rec
+#...省略部分代码
+
+on post-fs-data
+    # We chown/chmod /data again so because mount is run as root + defaults
+    chown system system /data
+    chmod 0771 /data
+    # We restorecon /data in case the userdata partition has been reset.
+    restorecon /data
+#...省略部分代码
+
+on boot
+# basic network init
+    ifup lo
+    hostname localhost
+    domainname localdomain
+#...省略部分代码
+
+#这两句重要！！
+    class_start core
+    class_start main
+
+on nonencrypted
+    class_start late_start
+
+on charger
+    class_start charger
+
+on property:vold.decrypt=trigger_reset_main
+    class_reset main
+#...省略部分代码
+
+service console /system/bin/sh
+    class core
+    console
+    disabled
+    user shell
+    group log
+
+#...省略部分代码
+
+service servicemanager /system/bin/servicemanager
+    class core
+    user system
+    group system
+    critical
+    onrestart restart healthd
+    onrestart restart zygote
+    onrestart restart media
+    onrestart restart surfaceflinger
+    onrestart restart drm
+#...省略部分代码
 service zygote /system/bin/app_process -Xzygote /system/bin --zygote --start-system-server
     class main
     socket zygote stream 660 root system
@@ -231,5 +330,79 @@ service zygote /system/bin/app_process -Xzygote /system/bin --zygote --start-sys
     onrestart restart media
     onrestart restart netd
 ```
+
+虽然 ini.rc 里面这么多内容，但是你仔细观察就会发现，这里面只有两种模式：
+
+- 第一种 trigger 触发
+```
+on trigger
+   ...
+```
+- 第二种 service 
+```
+service ...
+   ...
+```
+
+`on xxxx` 这种是基于某个事件触发， init.rc 里面列举的有
+- on early-init
+- on init
+- on post-fs
+- on boot
+- on nonencrypted
+- on charger
+- on property:key=value
+
+你一定会奇怪，这些 trigger 是如何定义的，在什么时间点触发？ 其实这些 trigger 没有定义，触发的顺序由 init.c 里面添加它们到 action queue 的顺序决定。
+
+```c  system/core/init/init.c
+action_for_each_trigger("early-init", action_add_queue_tail);
+...
+action_for_each_trigger("init", action_add_queue_tail);
+action_for_each_trigger("early-fs", action_add_queue_tail);
+...
+```
+
+在 init.c 中以合适的顺序添加到 action queue 里面之后，在 init.c 最后依次从 action queue 中取出这些 action,顺序执行。
+
+```c system/core/init/init.c
+    for(;;) {
+        int nr, i, timeout = -1;
+
+        execute_one_command();  //这里取出 action 来执行。
+        ...
+    }
+```
+
+`on property` 例外，这个是在 set property 之后，查询有没有相关的 action，如果有的话添加到 action queue , 等待取出来执行。
+
+
+那么 service 是如何启动的呢？service 并没有像 trigger 一样的方式进入 action queue.仔细观察一下 service 里面的 option 就会发现，每个 service 都有一个 class.
+
+```
+service ueventd /sbin/ueventd
+    class core
+
+service servicemanager /system/bin/servicemanager
+    class core
+
+service healthd-charger /sbin/healthd -n
+    class charger
+
+service netd /system/bin/netd
+    class main
+
+service zygote /system/bin/app_process -Xzygote /system/bin --zygote --start-system-server
+    class main
+...
+```
+
+
+
+
+
+
+
+
 
 [101]:http://stevevallay.github.io/blog/2013/12/23/android-system-properties2/
