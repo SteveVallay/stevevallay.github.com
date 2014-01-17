@@ -345,6 +345,7 @@ service ...
 ```
 
 `on xxxx` 这种是基于某个事件触发， init.rc 里面列举的有
+
 - on early-init
 - on init
 - on post-fs
@@ -396,6 +397,167 @@ service zygote /system/bin/app_process -Xzygote /system/bin --zygote --start-sys
     class main
 ...
 ```
+
+这个 class 指的就是 service 的类别， service 不是像 trigger 一样，通过名字来查找，而是通过类别来一起启动的。
+
+在 `on boot`，可以看到:
+
+```
+on boot
+...
+    class_start core
+    class_start main
+```
+
+`core` 和 `main` 类别的 service 在 `on boot` 的时候被一起启动了.
+
+
+通过上面的分析，可以看得出来，虽然 init.rc 里面的内容很多，但还是很容易理解的：
+
+- on xxx 是在 init.c 里面通过 xxx 关键字进入 action 队列并顺序执行的。
+- service xxx 是以 `class xxx` 分类的，一类在一起进入队列并执行的， core 和 main 类别的 service 是 on boot 的时候一起执行的。
+
+
+OK, 看得出来，其实那些 service 并没有什么特别的，都是 init 启动的而已。
+
+那么，Android 是如何从 Native 切换到 Java 世界的呢？这依赖于 init.rc 里面启动的一个重要 service  -- zygote
+
+zygote 是在 init.rc 中被定义为一个 service ：
+
+```bash
+service zygote /system/bin/app_process -Xzygote /system/bin --zygote --start-system-server
+    class main
+    socket zygote stream 660 root system
+    onrestart write /sys/android_power/request_state wake
+    onrestart write /sys/power/state on
+    onrestart restart media
+    onrestart restart netd
+```
+
+name = `zygote`
+path = `/system/bin/app_process`
+arguments = `-Xzygote /system/bin --zygote --start-system-server`
+
+zygote 这个 service 在启动的时候实际上是执行了 /system/bin/app_process 这个二进制文件 , 这个文件的源码在:
+
+`frameworks/base/cmds/app_process/app_main.cpp` 
+
+```c frameworks/base/cmds/app_process/app_main.cpp
+int main(int argc, char* const argv[])
+{
+...
+//-Xzygote 传给 Vm
+    int i = runtime.addVmArguments(argc, argv);
+...
+//其他参数解析
+    while (i < argc) {
+        const char* arg = argv[i++];
+        if (!parentDir) {
+            parentDir = arg;
+        } else if (strcmp(arg, "--zygote") == 0) {
+            zygote = true;
+            niceName = "zygote";
+        } else if (strcmp(arg, "--start-system-server") == 0) {
+            startSystemServer = true;
+        } else if (strcmp(arg, "--application") == 0) {
+            application = true;
+        } else if (strncmp(arg, "--nice-name=", 12) == 0) {
+            niceName = arg + 12;
+        } else {
+            className = arg; 
+            break;
+        }
+    }
+...
+// call runtime.start 并 传了两个参数
+    if (zygote) {
+        runtime.start("com.android.internal.os.ZygoteInit",
+                startSystemServer ? "start-system-server" : "");
+    }
+    ...
+}
+```
+
+
+在最后调用了 `runtime` 的 start 方法并传入了 `com.android.internal.os.ZygoteInit` 和 `start-system-server` 两个参数。
+
+`runtime` 是 `AppRuntime` 的实例， `start` 是继承自基类 `AndroidRuntime` 的方法。
+
+```cpp frameworks/core/jni/AndroidRuntime.cpp
+/*
+ * Start the Android runtime.  This involves starting the virtual machine
+ * and calling the "static void main(String[] args)" method in the class
+ * named by "className".
+ *
+ * Passes the main function two arguments, the class name and the specified
+ * options string.
+ */
+void AndroidRuntime::start(const char* className, const char* options)
+{
+...
+     if (startVm(&mJavaVM, &env) != 0) {
+        return;
+     }
+...
+    onVmCreated(env);
+...
+    strArray = env->NewObjectArray(2, stringClass, NULL);
+    assert(strArray != NULL);
+    classNameStr = env->NewStringUTF(className);
+    assert(classNameStr != NULL);
+    env->SetObjectArrayElement(strArray, 0, classNameStr);
+    optionsStr = env->NewStringUTF(options);
+    env->SetObjectArrayElement(strArray, 1, optionsStr);
+...
+    /*
+     * Start VM.  This thread becomes the main thread of the VM, and will
+     * not return until the VM exits.
+     */
+    char* slashClassName = toSlashClassName(className);
+    jclass startClass = env->FindClass(slashClassName);
+    if (startClass == NULL) {
+        ALOGE("JavaVM unable to locate class '%s'\n", slashClassName);
+        /* keep going */
+    } else {
+        jmethodID startMeth = env->GetStaticMethodID(startClass, "main",
+            "([Ljava/lang/String;)V");
+        if (startMeth == NULL) {
+            ALOGE("JavaVM unable to find main() in '%s'\n", className);
+            /* keep going */
+        } else {
+            env->CallStaticVoidMethod(startClass, startMeth, strArray);
+     }
+
+}
+```
+
+调用 `start` 的时候传递了两个参数 `com.android.internal.os.ZygoteInit` , `start-system-server`,对应 `start` 的两个形参 `className` 和 `options`。在 `start` 里面，可以看到，先是 启动了 VM , 然后将两个参数放到 VM 的 env 里面，在然后，找到 `com.android.internal.os.ZygoteInit` 并调用其  `main` 方法 !
+
+哈哈！ 终于开启了 java 世界！ 来看看 `ZygoteInit` 干了些什么?
+
+```java frameworks/base/core/java/com/android/internal/os/ZygoteInit.java
+public static void main(String argv[]) {
+...
+            registerZygoteSocket();
+...
+            if (argv[1].equals("start-system-server")) {
+                startSystemServer();
+            } else if (!argv[1].equals("")) {
+                throw new RuntimeException(argv[0] + USAGE_STRING);
+            }
+...
+            runSelectLoop();
+...
+}
+```
+
+`ZygoteInit` 的 `main` 里面做了三件事 :
+
+1.  注册 zygote socket 
+2.  启动 system server 
+3.  无限循环监听 zygote socket 消息。
+
+在 init 启动 zygote 
 
 
 
