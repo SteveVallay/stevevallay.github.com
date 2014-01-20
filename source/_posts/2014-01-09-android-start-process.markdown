@@ -557,8 +557,274 @@ public static void main(String argv[]) {
 2.  启动 system server 
 3.  无限循环监听 zygote socket 消息。
 
-在 init 启动 zygote 
+在 init 启动 zygote 的时候创建了一个 socket - `/dev/socket/zygote` 
 
+```bash
+service zygote /system/bin/app_process -Xzygote /system/bin --zygote --start-system-server
+    class main
+    socket zygote stream 660 root system
+...
+```
+
+`registerZygoteSocket` 就是用这个 socket 的 fd 创建了一个 Server socket , 用来接收 client 发来的消息。
+
+
+然后调用，`startSystemServer()` 来启动 system server 进程。
+```java ZygoteInit.java
+    /**
+     * Prepare the arguments and fork for the system server process.
+     */
+    private static boolean startSystemServer()
+            throws MethodAndArgsCaller, RuntimeException {
+...
+        /* Hardcoded command line to start the system server */
+        String args[] = { 
+            "--setuid=1000",
+            "--setgid=1000",
+            "--setgroups=1001,1002,1003,1004,1005,1006,1007,1008,1009,1010,1018,1021,1032,3001,3002,3003,3006,3007",
+            "--capabilities=" + capabilities + "," + capabilities,
+            "--runtime-init",
+            "--nice-name=system_server",
+            "com.android.server.SystemServer",
+        };
+...
+            /* Request to fork the system server process */
+            pid = Zygote.forkSystemServer(
+                    parsedArgs.uid, parsedArgs.gid,
+                    parsedArgs.gids,
+                    parsedArgs.debugFlags,
+                    null,
+                    parsedArgs.permittedCapabilities,
+                    parsedArgs.effectiveCapabilities);
+...
+        /* For child process */
+        if (pid == 0) {
+            handleSystemServerProcess(parsedArgs);
+        }
+
+        return true;
+```
+
+这一步，调用 `Zygote.forkSystemServer` , `forkSystemServer` 又调用了 `nativenativeForkSystemServer`
+
+```java  libcore/dalvik/src/main/java/dalvik/system/Zygote.java
+    public static int forkSystemServer(int uid, int gid, int[] gids, int debugFlags,
+            int[][] rlimits, long permittedCapabilities, long effectiveCapabilities) {
+        preFork();
+        int pid = nativeForkSystemServer(
+                uid, gid, gids, debugFlags, rlimits, permittedCapabilities, effectiveCapabilities);
+        postFork();
+        return pid;
+    }
+```
+
+`nativenativeForkSystemServer` 在 dalvik 里面 
+
+```cpp dalvik/vm/native/dalvik_system_Zygote.cpp
+static void Dalvik_dalvik_system_Zygote_forkSystemServer(
+        const u4* args, JValue* pResult)
+{
+    pid_t pid;
+    pid = forkAndSpecializeCommon(args, true);
+
+    /* The zygote process checks whether the child process has died or not. */
+    if (pid > 0) {
+        int status;
+
+        ALOGI("System server process %d has been created", pid);
+        gDvm.systemServerPid = pid;
+        /*如果 system server 没启动成功，zygote 会自杀!*/
+        if (waitpid(pid, &status, WNOHANG) == pid) {
+            ALOGE("System server process %d has died. Restarting Zygote!", pid);
+            kill(getpid(), SIGKILL);
+        }   
+    }   
+    RETURN_INT(pid);
+}
+```
+
+来看看 `forkAndSpecializeCommon`:
+
+```
+static pid_t forkAndSpecializeCommon(const u4* args, bool isSystemServer)
+{
+...
+    setSignalHandler();
+...
+    pid = fork();
+...
+    if (pid == 0) {
+        unsetSignalHandler();
+    }
+...
+}
+```
+这里 fork 之前，注册了 signal 处理函数 `setSignalHandler`, 子进程里面又取消了signal 处理函数，说明这个是为父进程 zygote 注册的，来看看里面干了些啥：
+
+```
+static void sigchldHandler(int s)
+{
+...
+        /*
+         * If the just-crashed process is the system_server, bring down zygote
+         * so that it is restarted by init and system server will be restarted
+         * from there.
+         */
+        if (pid == gDvm.systemServerPid) {
+            ALOG(LOG_INFO, ZYGOTE_LOG_TAG,
+                "Exit zygote because system server (%d) has terminated",
+                (int) pid);
+            kill(getpid(), SIGKILL);
+        }
+...
+}
+```
+
+这里如果 system server 挂了， zygote 又要自杀!!
+
+
+OK , 假设正常执行，继续回到 `startSystemServer`, 下一步， system server 和 zygote 分道扬镳了终于, system server 调用 `handleSystemServerProcess`, zygote 则调用 `runSelectLoop()`, 先看 zygote `runSelectLoop`:
+
+```
+    /** 
+     * Runs the zygote process's select loop. Accepts new connections as
+     * they happen, and reads commands from connections one spawn-request's
+     * worth at a time.
+     *
+     * @throws MethodAndArgsCaller in a child process when a main() should
+     * be executed.
+     */
+    private static void runSelectLoop() throws MethodAndArgsCaller {
+        ....
+        while (true) {
+            ...
+            } else if (index == 0) {
+                ZygoteConnection newPeer = acceptCommandPeer();
+                peers.add(newPeer);
+                fds.add(newPeer.getFileDesciptor());
+            } else {
+                boolean done;
+                done = peers.get(index).runOnce();
+            }
+        }
+    }
+```
+
+`acceptCommandPeer()` 实际是在阻塞式的等待 client 来发起连接。
+
+```
+    /**
+     * Waits for and accepts a single command connection. Throws
+     * RuntimeException on failure.
+     */
+    private static ZygoteConnection acceptCommandPeer() {
+        try {
+            return new ZygoteConnection(sServerSocket.accept());
+        } catch (IOException ex) {
+            throw new RuntimeException(
+                    "IOException during accept()", ex);
+        }
+    }
+```
+
+`runOnce()` 则是 client 建立连接之后，读取 client 发过来的数据，并 fork 出新的进程。
+
+```
+    boolean runOnce() throws ZygoteInit.MethodAndArgsCaller {
+            ...
+            args = readArgumentList();
+            ...
+            pid = Zygote.forkAndSpecialize(parsedArgs.uid, parsedArgs.gid, parsedArgs.gids,
+            parsedArgs.debugFlags, rlimits, parsedArgs.mountExternal, parsedArgs.seInfo,
+            parsedArgs.niceName);
+            ...
+    }
+```
+
+回过头来看 system server `handleSystemServerProcess`:
+
+```java ZygoteInit.java
+ /** 
+ * Finish remaining work for the newly forked system server process.
+ */
+ private static void handleSystemServerProcess( ZygoteConnection.Arguments parsedArgs) throws ZygoteInit.MethodAndArgsCaller {
+    ...
+    RuntimeInit.zygoteInit(parsedArgs.targetSdkVersion, parsedArgs.remainingArgs);
+    ...
+ }
+```
+
+调用了 `RuntimeInit.zygoteInit`:
+
+```java RuntimeInit.java
+    public static final void zygoteInit(int targetSdkVersion, String[] argv)
+            throws ZygoteInit.MethodAndArgsCaller {
+        if (DEBUG) Slog.d(TAG, "RuntimeInit: Starting application from zygote");
+        
+        //重定向 log
+        redirectLogStreams();
+        
+        //设置 timezone ,useragent 等等
+        commonInit();
+        //app_main.cpp 的 onZygoteInit, 初始化 Binder thread pool.
+        nativeZygoteInit();
+       
+        //
+        applicationInit(targetSdkVersion, argv);
+    } 
+```
+
+继续 `applicationInit`,传入的 `startClass` 参数正是 "com.android.server.SystemServer" , 所以这里是掉到了 `SystemServer` 的 main 方法。
+
+```java RuntimeInit.java
+    private static void applicationInit(int targetSdkVersion, String[] argv)
+            throws ZygoteInit.MethodAndArgsCaller {
+        ...
+        // Remaining arguments are passed to the start class's static main
+        invokeStaticMain(args.startClass, args.startArgs);
+    }
+```
+
+终于到了 SystemServer 里面来了 :
+```java SystemServer.java
+    public static void main(String[] args) {
+        ...
+        System.loadLibrary("android_servers");
+        // Initialize native services.
+        nativeInit();
+        // This used to be its own separate thread, but now it is
+        // just the loop we run on the main thread.
+        ServerThread thr = new ServerThread();
+        thr.initAndLoop();
+    }
+```
+
+主要干了两件事：
+
+1. nativeInit
+2. ServerThread 启动
+
+
+nativeInit 好像没干啥嘛
+
+```cpp services/jni/com_android_server_SystemServer.cpp
+static void android_server_SystemServer_nativeInit(JNIEnv* env, jobject clazz) {
+    char propBuf[PROPERTY_VALUE_MAX];
+    property_get("system_init.startsensorservice", propBuf, "1");
+    if (strcmp(propBuf, "1") == 0) {
+        // Start the sensor service
+        SensorService::instantiate();
+    }   
+}
+```
+
+ServerThread 里面内容可就多喽 ！
+
+```java SystemServer.java
+    public void initAndLoop() {
+    
+    }
+```
 
 
 
