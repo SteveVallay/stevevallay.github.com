@@ -1263,8 +1263,101 @@ ServerThread 里面内容可就多喽 ！
         //进入消息循环
         Looper.loop();
     }
+
 ```
 
+system server 启动了，来看下 Launcher 是怎么启动的。system server 的最后一段调用了 ActivityManagerService 的 systemReady() 回调。
+
+ActivityManagerService 的 systemReady()：
+
+```java ActivityManagerService.java
+    public void systemReady(final Runnable goingCallback) {
+        ...
+            mStackSupervisor.resumeTopActivitiesLocked();
+        ...
+    }
+
+```
+
+->mStackSupervisor.resumeTopActivitiesLocked
+
+```java ActivityStackSupervisor.java
+    boolean resumeTopActivitiesLocked() {
+        return resumeTopActivitiesLocked(null, null, null);
+    }    
+
+    boolean resumeTopActivitiesLocked(ActivityStack targetStack, ActivityRecord target,
+            Bundle targetOptions) {
+        if (targetStack == null) {
+            targetStack = getFocusedStack();
+        }    
+        boolean result = false;
+        for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
+            final ActivityStack stack = mStacks.get(stackNdx);
+            if (isFrontStack(stack)) {
+                if (stack == targetStack) {
+                    result = stack.resumeTopActivityLocked(target, targetOptions);
+                } else {
+                    stack.resumeTopActivityLocked(null);
+                }    
+            }    
+        }    
+        return result;
+    } 
+```
+
+->stack.resumeTopActivityLocked
+
+```java ActivityStack.java
+    final boolean resumeTopActivityLocked(ActivityRecord prev) {
+        return resumeTopActivityLocked(prev, null);
+    }
+
+    final boolean resumeTopActivityLocked(ActivityRecord prev, Bundle options) {
+        if (ActivityManagerService.DEBUG_LOCKSCREEN) mService.logLockScreen("");
+        ...
+        if (next == null) {
+            // There are no more activities!  Let's just start up the
+            // Launcher...
+            ActivityOptions.abort(options);
+            if (DEBUG_STATES) Slog.d(TAG, "resumeTopActivityLocked: No more activities go home");
+            if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
+            return mStackSupervisor.resumeHomeActivity(prev);
+        }   
+```
+
+->mStackSupervisor.resumeHomeActivity
+
+```java ActivityStackSupervisor.java
+    boolean resumeHomeActivity(ActivityRecord prev) {
+        ...  
+        return mService.startHomeActivityLocked(mCurrentUser);
+    } 
+```
+
+->mService.startHomeActivityLocked(mCurrentUser)
+
+```java ActivityManagerService.java
+    boolean startHomeActivityLocked(int userId) {
+        Intent intent = getHomeIntent();
+        ActivityInfo aInfo =
+            resolveActivityInfo(intent, STOCK_PM_FLAGS, userId);
+        if (aInfo != null) {
+            intent.setComponent(new ComponentName(
+                    aInfo.applicationInfo.packageName, aInfo.name));
+            // Don't do this if the home app is currently being
+            // instrumented.
+            aInfo = new ActivityInfo(aInfo);
+            aInfo.applicationInfo = getAppInfoForUser(aInfo.applicationInfo, userId);
+            ProcessRecord app = getProcessRecordLocked(aInfo.processName,
+                    aInfo.applicationInfo.uid, true);
+            if (app == null || app.instrumentationClass == null) {
+                intent.setFlags(intent.getFlags() | Intent.FLAG_ACTIVITY_NEW_TASK);
+                mStackSupervisor.startHomeActivity(intent, aInfo);
+            }
+        }
+    }
+```
 
 
 
