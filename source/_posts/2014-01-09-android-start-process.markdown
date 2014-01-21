@@ -822,9 +822,449 @@ ServerThread 里面内容可就多喽 ！
 
 ```java SystemServer.java
     public void initAndLoop() {
-    
+        ...
+        Looper.prepareMainLooper();
+
+        //为 window manager 创建一个 handler.
+        HandlerThread wmHandlerThread = new HandlerThread("WindowManager");
+        wmHandlerThread.start();
+        Handler wmHandler = new Handler(wmHandlerThread.getLooper());
+        wmHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                android.os.Process.setThreadPriority(
+                        android.os.Process.THREAD_PRIORITY_DISPLAY);
+                android.os.Process.setCanSelfBackground(false);
+            }
+        });
+
+        // 启动 installd , Power Manager Activity Manager service.
+        boolean onlyCore = false;
+        boolean firstBoot = false;
+        try {
+            installer = new Installer();
+            installer.ping();
+
+            power = new PowerManagerService();
+            ServiceManager.addService(Context.POWER_SERVICE, power);
+
+            context = ActivityManagerService.main(factoryTest);
+        }
+
+
+        boolean disableStorage = SystemProperties.getBoolean("config.disable_storage", false);
+        boolean disableMedia = SystemProperties.getBoolean("config.disable_media", false);
+        boolean disableBluetooth = SystemProperties.getBoolean("config.disable_bluetooth", false);
+        boolean disableTelephony = SystemProperties.getBoolean("config.disable_telephony", false);
+        boolean disableLocation = SystemProperties.getBoolean("config.disable_location", false);
+        boolean disableSystemUI = SystemProperties.getBoolean("config.disable_systemui", false);
+        boolean disableNonCoreServices = SystemProperties.getBoolean("config.disable_noncore", false);
+        boolean disableNetwork = SystemProperties.getBoolean("config.disable_network", false);
+
+        
+        //各种 service add 
+
+        try {
+            display = new DisplayManagerService(context, wmHandler);
+            ServiceManager.addService(Context.DISPLAY_SERVICE, display, true);
+
+            telephonyRegistry = new TelephonyRegistry(context);
+            ServiceManager.addService("telephony.registry", telephonyRegistry);
+
+            if (android.telephony.MSimTelephonyManager.getDefault().isMultiSimEnabled()) {
+                msimTelephonyRegistry = new MSimTelephonyRegistry(context);
+                ServiceManager.addService("telephony.msim.registry", msimTelephonyRegistry);
+            }
+
+            ServiceManager.addService("scheduling_policy", new SchedulingPolicyService());
+
+            String cryptState = SystemProperties.get("vold.decrypt");
+            if (ENCRYPTING_STATE.equals(cryptState)) {
+                onlyCore = true;
+            } else if (ENCRYPTED_STATE.equals(cryptState)) {
+                onlyCore = true;
+            }
+
+            pm = PackageManagerService.main(context, installer,
+                    factoryTest != SystemServer.FACTORY_TEST_OFF,
+                    onlyCore);
+
+            ActivityManagerService.setSystemProcess();
+
+            ServiceManager.addService("entropy", new EntropyMixer(context));
+
+            ServiceManager.addService(Context.USER_SERVICE,
+                    UserManagerService.getInstance());
+
+            mContentResolver = context.getContentResolver();
+
+                accountManager = new AccountManagerService(context);
+                ServiceManager.addService(Context.ACCOUNT_SERVICE, accountManager);
+
+            contentService = ContentService.main(context,
+                    factoryTest == SystemServer.FACTORY_TEST_LOW_LEVEL);
+
+            ActivityManagerService.installSystemProviders();
+
+            lights = new LightsService(context);
+
+            battery = new BatteryService(context, lights);
+            ServiceManager.addService("battery", battery);
+
+            vibrator = new VibratorService(context);
+            ServiceManager.addService("vibrator", vibrator);
+
+            consumerIr = new ConsumerIrService(context); 
+            ServiceManager.addService(Context.CONSUMER_IR_SERVICE, consumerIr);
+
+            power.init(context, lights, ActivityManagerService.self(), battery,
+                    BatteryStatsService.getService(),
+                    ActivityManagerService.self().getAppOpsService(), display);
+
+            alarm = new AlarmManagerService(context);
+            ServiceManager.addService(Context.ALARM_SERVICE, alarm);
+
+            Watchdog.getInstance().init(context, battery, power, alarm,
+                    ActivityManagerService.self());
+            Watchdog.getInstance().addThread(wmHandler, "WindowManager thread");
+
+            inputManager = new InputManagerService(context, wmHandler);
+
+            wm = WindowManagerService.main(context, power, display, inputManager,
+                    wmHandler, factoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL,
+                    !firstBoot, onlyCore);
+            ServiceManager.addService(Context.WINDOW_SERVICE, wm);
+            ServiceManager.addService(Context.INPUT_SERVICE, inputManager);
+
+            inputManager.setWindowManagerCallbacks(wm.getInputMonitor());
+            inputManager.start();
+
+            display.setWindowManager(wm);
+            display.setInputManager(inputManager);
+
+
+                    imm = new InputMethodManagerService(context, wm);
+                    ServiceManager.addService(Context.INPUT_METHOD_SERVICE, imm);
+
+                    ServiceManager.addService(Context.ACCESSIBILITY_SERVICE,
+                            new AccessibilityManagerService(context));
+
+            wm.displayReady();
+
+            pm.performBootDexOpt();
+
+                    mountService = new MountService(context);
+                    ServiceManager.addService("mount", mountService);
+
+            if (!disableNonCoreServices) {
+                    lockSettings = new LockSettingsService(context);
+                    ServiceManager.addService("lock_settings", lockSettings);
+
+                    devicePolicy = new DevicePolicyManagerService(context);
+                    ServiceManager.addService(Context.DEVICE_POLICY_SERVICE, devicePolicy);
+            }
+
+            if (!disableSystemUI) {
+                    statusBar = new StatusBarManagerService(context, wm);
+                    ServiceManager.addService(Context.STATUS_BAR_SERVICE, statusBar);
+            }
+
+
+            if (!disableNonCoreServices) {
+                    ServiceManager.addService(Context.CLIPBOARD_SERVICE,
+                            new ClipboardService(context));
+            }
+
+            if (!disableNetwork) {
+                    networkManagement = NetworkManagementService.create(context);
+                    ServiceManager.addService(Context.NETWORKMANAGEMENT_SERVICE, networkManagement);
+            }
+
+            if (!disableNonCoreServices) {
+                    tsms = new TextServicesManagerService(context);
+                    ServiceManager.addService(Context.TEXT_SERVICES_MANAGER_SERVICE, tsms);
+            }
+
+            if (!disableNetwork) {
+                    networkStats = new NetworkStatsService(context, networkManagement, alarm);
+                    ServiceManager.addService(Context.NETWORK_STATS_SERVICE, networkStats);
+
+                    networkPolicy = new NetworkPolicyManagerService(
+                            context, ActivityManagerService.self(), power,
+                            networkStats, networkManagement);
+                    ServiceManager.addService(Context.NETWORK_POLICY_SERVICE, networkPolicy);
+
+                    wifiP2p = new WifiP2pService(context);
+                    ServiceManager.addService(Context.WIFI_P2P_SERVICE, wifiP2p);
+
+                    wifi = new WifiService(context);
+                    ServiceManager.addService(Context.WIFI_SERVICE, wifi);
+
+                    serviceDiscovery = NsdService.create(context);
+                    ServiceManager.addService(
+                            Context.NSD_SERVICE, serviceDiscovery);
+            }
+
+            if (!disableNonCoreServices) {
+                    ServiceManager.addService(Context.UPDATE_LOCK_SERVICE,
+                            new UpdateLockService(context));
+            }
+
+
+            /*   
+             * MountService has a few dependencies: Notification Manager and
+             * AppWidget Provider. Make sure MountService is completely started
+             * first before continuing.
+             */
+            if (mountService != null && !onlyCore) {
+                mountService.waitForAsecScan();
+            }
+
+            try {
+                if (accountManager != null)
+                    accountManager.systemReady();
+            }
+
+            try {
+                if (contentService != null)
+                    contentService.systemReady();
+            }
+
+            try {
+                notification = new NotificationManagerService(context, statusBar, lights);
+                ServiceManager.addService(Context.NOTIFICATION_SERVICE, notification);
+                networkPolicy.bindNotificationManager(notification);
+            }
+
+            try {
+                ServiceManager.addService(DeviceStorageMonitorService.SERVICE,
+                        new DeviceStorageMonitorService(context));
+            }
+
+            if (!disableLocation) {
+                    location = new LocationManagerService(context);
+                    ServiceManager.addService(Context.LOCATION_SERVICE, location);
+
+                    countryDetector = new CountryDetectorService(context);
+                    ServiceManager.addService(Context.COUNTRY_DETECTOR, countryDetector);
+            }
+
+            if (!disableNonCoreServices) {
+                try {
+                    Slog.i(TAG, "Search Service");
+                    ServiceManager.addService(Context.SEARCH_SERVICE,
+                            new SearchManagerService(context));
+                }
+            }
+
+            try {
+                ServiceManager.addService(Context.DROPBOX_SERVICE,
+                        new DropBoxManagerService(context, new File("/data/system/dropbox")));
+            }
+
+            if (!disableNonCoreServices && context.getResources().getBoolean(
+                        R.bool.config_enableWallpaperService)) {
+                try {
+                    if (!headless) {
+                        wallpaper = new WallpaperManagerService(context);
+                        ServiceManager.addService(Context.WALLPAPER_SERVICE, wallpaper);
+                    }
+                }
+            }
+
+            if (!disableMedia && !"0".equals(SystemProperties.get("system_init.startaudioservice"))) {
+                try {
+                    ServiceManager.addService(Context.AUDIO_SERVICE, new AudioService(context));
+                }
+            }
+
+            if (!disableNonCoreServices) {
+                try {
+                    // Listen for dock station changes
+                    dock = new DockObserver(context);
+                }
+            }
+
+            if (!disableMedia) {
+                try {
+                    // Listen for wired headset changes
+                    inputManager.setWiredAccessoryCallbacks(
+                            new WiredAccessoryManager(context, inputManager));
+                } catch (Throwable e) {
+                    reportWtf("starting WiredAccessoryManager", e);
+                }
+            }
+
+
+            if (!disableNonCoreServices) {
+                try {
+                    // Manage USB host and device support
+                    usb = new UsbService(context);
+                    ServiceManager.addService(Context.USB_SERVICE, usb);
+                }
+
+                try {
+                    // Serial port support
+                    serial = new SerialService(context);
+                    ServiceManager.addService(Context.SERIAL_SERVICE, serial);
+                }
+            }
+
+            try {
+                twilight = new TwilightService(context);
+            }
+
+            try {
+                // Listen for UI mode changes
+                uiMode = new UiModeManagerService(context, twilight);
+            }
+
+            if (!disableNonCoreServices) {
+                try {
+                    ServiceManager.addService(Context.BACKUP_SERVICE,
+                            new BackupManagerService(context));
+                }
+
+                try {
+                    appWidget = new AppWidgetService(context);
+                    ServiceManager.addService(Context.APPWIDGET_SERVICE, appWidget);
+                }
+
+                try {
+                    recognition = new RecognitionManagerService(context);
+                }
+            }
+
+            try {
+                ServiceManager.addService("diskstats", new DiskStatsService(context));
+            }
+
+            try {
+                ServiceManager.addService("samplingprofiler",
+                            new SamplingProfilerService(context));
+            }
+
+            if (!disableNetwork) {
+                try {
+                    networkTimeUpdater = new NetworkTimeUpdateService(context);
+                }
+            }
+
+            if (!disableMedia) {
+                try {
+                    commonTimeMgmtService = new CommonTimeManagementService(context);
+                    ServiceManager.addService("commontime_management", commonTimeMgmtService);
+                }
+            }
+
+            if (!disableNetwork) {
+                try {
+                    CertBlacklister blacklister = new CertBlacklister(context);
+                }
+            }
+
+            if (!disableNonCoreServices &&
+                context.getResources().getBoolean(R.bool.config_dreamsSupported)) {
+                try {
+                    // Dreams (interactive idle-time views, a/k/a screen savers)
+                    dreamy = new DreamManagerService(context, wmHandler);
+                    ServiceManager.addService(DreamService.DREAM_SERVICE, dreamy);
+                }
+            }
+
+            if (!disableNonCoreServices) {
+                try {
+                    atlas = new AssetAtlasService(context);
+                    ServiceManager.addService(AssetAtlasService.ASSET_ATLAS_SERVICE, atlas);
+                }
+            }
+
+
+            try {
+                new IdleMaintenanceService(context, battery);
+            }
+
+            try {
+                printManager = new PrintManagerService(context);
+                ServiceManager.addService(Context.PRINT_SERVICE, printManager);
+            }
+
+            if (!disableNonCoreServices) {
+                try {
+                    mediaRouter = new MediaRouterService(context);
+                    ServiceManager.addService(Context.MEDIA_ROUTER_SERVICE, mediaRouter);
+                }
+            }
+        //safe mode 相关
+        final boolean safeMode = wm.detectSafeMode();
+        if (safeMode) {
+            ActivityManagerService.self().enterSafeMode();
+            // Post the safe mode state in the Zygote class
+            Zygote.systemInSafeMode = true;
+            // Disable the JIT for the system_server process
+            VMRuntime.getRuntime().disableJitCompilation();
+        } else {
+            // Enable the JIT for the system_server process
+            VMRuntime.getRuntime().startJitCompilation();
+        }
+
+
+        //service system ready
+        vibrator.systemReady();
+        lockSettings.systemReady();
+        devicePolicy.systemReady();
+        notification.systemReady();
+        wm.systemReady();
+        if (safeMode) {
+            ActivityManagerService.self().showSafeModeOverlay();
+        }
+        power.systemReady(twilight, dreamy);
+        pm.systemReady();
+        display.systemReady(safeMode, onlyCore);
+
+        //接下来是 ActivityManagerService 的 systemReady
+        ActivityManagerService.self().systemReady(new Runnable() {
+            public void run() {
+
+                    ActivityManagerService.self().startObservingNativeCrashes();
+                    startSystemUi(contextF);
+                    if (mountServiceF != null) mountServiceF.systemReady();
+                    if (batteryF != null) batteryF.systemReady();
+                    if (networkManagementF != null) networkManagementF.systemReady();
+                    if (networkStatsF != null) networkStatsF.systemReady();
+                    if (networkPolicyF != null) networkPolicyF.systemReady();
+                    if (connectivityF != null) connectivityF.systemReady();
+                    if (dockF != null) dockF.systemReady();
+                    if (usbF != null) usbF.systemReady();
+                    if (twilightF != null) twilightF.systemReady();
+                    if (uiModeF != null) uiModeF.systemReady();
+                    if (recognitionF != null) recognitionF.systemReady();
+                Watchdog.getInstance().start();
+
+                // It is now okay to let the various system services start their
+                // third party code...
+
+                    if (appWidgetF != null) appWidgetF.systemRunning(safeMode);
+                    if (wallpaperF != null) wallpaperF.systemRunning();
+                    if (immF != null) immF.systemRunning(statusBarF);
+                    if (locationF != null) locationF.systemRunning();
+                    if (countryDetectorF != null) countryDetectorF.systemRunning();
+                    if (networkTimeUpdaterF != null) networkTimeUpdaterF.systemRunning();
+                    if (commonTimeMgmtServiceF != null) commonTimeMgmtServiceF.systemRunning();
+                        textServiceManagerServiceF.systemRunning();
+                    if (dreamyF != null) dreamyF.systemRunning();
+                    if (atlasF != null) atlasF.systemRunning();
+                    if (inputManagerF != null) inputManagerF.systemRunning();
+                    if (telephonyRegistryF != null) telephonyRegistryF.systemRunning();
+                    if (msimTelephonyRegistryF != null) msimTelephonyRegistryF.systemRunning();
+                    if (printManagerF != null) printManagerF.systemRuning();
+                    if (mediaRouterF != null) mediaRouterF.systemRunning();
+       
+        //进入消息循环
+        Looper.loop();
     }
 ```
+
 
 
 
