@@ -1358,11 +1358,143 @@ ActivityManagerService 的 systemReady()：
         }
     }
 ```
+-> mStackSupervisor.startHomeActivity
 
+```java ActivityStackSupervisor.java
+    void startHomeActivity(Intent intent, ActivityInfo aInfo) {
+        moveHomeToTop();
+        startActivityLocked(null, intent, null, aInfo, null, null, 0, 0, 0, null, 0,
+                null, false, null);
+    }
 
+->
+startActivityLocked
+->
+startActivityUncheckedLocked
+->
+resumeTopActivitiesLocked
 
+```
 
+->ActivityStack.resumeTopActivityLocked
 
+->
+ActivityStackSupervisor.startSpecificActivityLocked
+
+-> 
+ActivityManagerService.startProcessLocked
+
+->
+
+```java ActivityManagerService.java
+            // Start the process.  It will either succeed and return a result containing
+            // the PID of the new process, or else throw a RuntimeException.
+            Process.ProcessStartResult startResult = Process.start("android.app.ActivityThread",
+                    app.processName, uid, uid, gids, debugFlags, mountExternal,
+                    app.info.targetSdkVersion, app.info.seinfo, null);
+```
+->
+Process.start
+
+->
+startViaZygote
+
+```java Process.java
+    public static final ProcessStartResult start(final String processClass,
+                                  final String niceName,
+                                  int uid, int gid, int[] gids,
+                                  int debugFlags, int mountExternal,
+                                  int targetSdkVersion,
+                                  String seInfo,
+                                  String[] zygoteArgs) {
+        try {
+            return startViaZygote(processClass, niceName, uid, gid, gids,
+                    debugFlags, mountExternal, targetSdkVersion, seInfo, zygoteArgs);
+        } catch (ZygoteStartFailedEx ex) {
+            Log.e(LOG_TAG,
+                    "Starting VM process through Zygote failed");
+            throw new RuntimeException(
+                    "Starting VM process through Zygote failed", ex); 
+        }    
+    }
+```
+
+->
+
+```java Process.java
+    private static ProcessStartResult startViaZygote(final String processClass,
+                                  final String niceName,
+                                  final int uid, final int gid,
+                                  final int[] gids,
+                                  int debugFlags, int mountExternal,
+                                  int targetSdkVersion,
+                                  String seInfo,
+                                  String[] extraArgs)
+                                  throws ZygoteStartFailedEx {
+             ...
+             return zygoteSendArgsAndGetResult(argsForZygote);
+    }
+```
+
+```java Process.java
+    private static ProcessStartResult zygoteSendArgsAndGetResult(ArrayList<String> args)
+            throws ZygoteStartFailedEx {
+        openZygoteSocketIfNeeded();
+        ...
+            sZygoteWriter.write(Integer.toString(args.size()));            sZygoteWriter.newLine();
+        ...
+            sZygoteWriter.write(arg);
+    }
+```
+
+openZygoteSocketIfNeeded?
+
+```java Process.java
+    private static final String ZYGOTE_SOCKET = "zygote";
+    private static void openZygoteSocketIfNeeded()
+            throws ZygoteStartFailedEx {
+                sZygoteSocket = new LocalSocket();
+
+                sZygoteSocket.connect(new LocalSocketAddress(ZYGOTE_SOCKET,
+                        LocalSocketAddress.Namespace.RESERVED));
+    }
+
+```
+
+yes -> connect to "zygote" and send args, back to zygote:
+
+```java ZygoteInit.java 
+   private static void runSelectLoop(){
+                done = peers.get(index).runOnce();
+   }
+```
+
+->runOnce?
+
+```java ZygoteConnection.java
+boolean runOnce(){
+...
+
+            pid = Zygote.forkAndSpecialize(parsedArgs.uid, parsedArgs.gid, parsedArgs.gids,
+                    parsedArgs.debugFlags, rlimits, parsedArgs.mountExternal, parsedArgs.seInfo,
+                    parsedArgs.niceName);
+...
+handleChildProc(parsedArgs, descriptors, childPipeFd, newStderr);
+}
+```
+->
+Zygote.forkAndSpecialize
+
+```java Zygote.java
+    public static int forkAndSpecialize(int uid, int gid, int[] gids, int debugFlags,
+            int[][] rlimits, int mountExternal, String seInfo, String niceName) {
+        preFork();
+        int pid = nativeForkAndSpecialize(
+                uid, gid, gids, debugFlags, rlimits, mountExternal, seInfo, niceName);
+        postFork();
+        return pid;
+    }
+```
 
 
 
