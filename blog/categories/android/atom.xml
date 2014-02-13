@@ -4,7 +4,7 @@
   <title><![CDATA[Category: android | Zhibin's blog]]></title>
   <link href="http://SteveVallay.github.io/blog/categories/android/atom.xml" rel="self"/>
   <link href="http://SteveVallay.github.io/"/>
-  <updated>2014-01-08T17:06:38+08:00</updated>
+  <updated>2014-02-13T15:14:46+08:00</updated>
   <id>http://SteveVallay.github.io/</id>
   <author>
     <name><![CDATA[zhibin]]></name>
@@ -12,6 +12,1712 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Android 启动流程]]></title>
+    <link href="http://SteveVallay.github.io/blog/2014/01/09/android-start-process/"/>
+    <updated>2014-01-09T14:23:00+08:00</updated>
+    <id>http://SteveVallay.github.io/blog/2014/01/09/android-start-process</id>
+    <content type="html"><![CDATA[<p>保持你的好奇心和创造力。</p>
+
+<!--more-->
+
+
+<p>早就好奇， Android 启动的流程是怎样的，正好有时间好好看一下。</p>
+
+<p>在追溯代码之前，先让我们提出几个问题，Andorid 启动过程中需要完成什么任务？然后，站在设计者的角度，想一想，如果是你来设计，你会怎么做？</p>
+
+<ol>
+<li>系统服务什么形式存在？如何启动？</li>
+<li>系统服务如何为应用提供服务？</li>
+<li>应用如何被启动，应用之间如何交互？</li>
+<li>应用如何安装/升级？</li>
+<li>权限如何控制？</li>
+</ol>
+
+
+<p>暂时想到这些问题，没有细节到具体的模块(如 Telephony,Multimedia 等).下面，来揭开 Android 启动之谜.</p>
+
+<h2>Power 键  到 User Space</h2>
+
+<p>按下 Power 键的时候，系统加电，触发 bootloader (代码见 bootable/),bootloader 载入内存，bootloader 引导 kernel, kernel 启动，kernel 启动用户空间的 init 进程。</p>
+
+<p>这部分还不是很熟悉，这里不做详解。:&ndash;)</p>
+
+<h2>Init 进程</h2>
+
+<p>init 进程是内核启动后调用的第一个用户空间的程序，从 init 开始，系统开始进入用户空间。</p>
+
+<p>init 是一个二进制文件，代码在: <strong>system/core/init/init.c</strong></p>
+
+<p>打开 init.c （kitkat)，找到 <code>main</code> 函数,来看看 init 主要做了哪些工作（&hellip;表示省略部分代码)：</p>
+
+<p>```c system/core/init/init.c
+int main(int argc, char **argv)
+{
+&hellip;</p>
+
+<pre><code>/*清除 umask*/
+umask(0);
+
+/*创建目录，挂载文件系统*/
+mkdir("/dev", 0755);
+mkdir("/proc", 0755);
+mkdir("/sys", 0755);
+
+mount("tmpfs", "/dev", "tmpfs", MS_NOSUID, "mode=0755");
+mkdir("/dev/pts", 0755);
+mkdir("/dev/socket", 0755);
+mount("devpts", "/dev/pts", "devpts", 0, NULL);
+mount("proc", "/proc", "proc", 0, NULL);
+mount("sysfs", "/sys", "sysfs", 0, NULL);
+
+/*猜猜这句是干什么？很有意思 哈哈！*/
+close(open("/dev/.booting", O_WRONLY | O_CREAT, 0000));
+
+/*打开 /dev/null 并将 0,1,2 重定向到 /dev/null*/
+open_devnull_stdio();
+
+klog_init();
+/*初始化 property 详见[android properties][101]*/
+property_init();
+get_hardware_name(hardware, &amp;revision);
+
+process_kernel_cmdline();
+
+/*selinux 相关*/
+union selinux_callback cb;
+cb.func_log = klog_write;
+selinux_set_callback(SELINUX_CB_LOG, cb);
+
+cb.func_audit = audit_callback;
+selinux_set_callback(SELINUX_CB_AUDIT, cb);
+
+selinux_initialize();
+
+restorecon("/dev");
+restorecon("/dev/socket");
+restorecon("/dev/__properties__");
+restorecon_recursive("/sys");
+
+/*load 默认的properties*/
+if (!is_charger)
+    property_load_boot_defaults();
+
+/*init 的主要工作之一:解析 init.rc */
+INFO("reading config file\n");
+init_parse_config_file("/init.rc");
+
+/*action_for_each_trigger 和 queue_builtin_action 将 action/command 都是加入到 command 队列里面，等待合适的时机执行*/
+action_for_each_trigger("early-init", action_add_queue_tail);
+
+queue_builtin_action(wait_for_coldboot_done_action, "wait_for_coldboot_done");
+queue_builtin_action(mix_hwrng_into_linux_rng_action, "mix_hwrng_into_linux_rng");
+queue_builtin_action(keychord_init_action, "keychord_init");
+queue_builtin_action(console_init_action, "console_init");
+
+
+/* execute all the boot actions to get us started */
+action_for_each_trigger("init", action_add_queue_tail);
+
+if (!is_charger) {
+    action_for_each_trigger("early-fs", action_add_queue_tail);
+    action_for_each_trigger("fs", action_add_queue_tail);
+    action_for_each_trigger("post-fs", action_add_queue_tail);
+    action_for_each_trigger("post-fs-data", action_add_queue_tail);
+} 
+
+queue_builtin_action(mix_hwrng_into_linux_rng_action, "mix_hwrng_into_linux_rng");
+
+queue_builtin_action(property_service_init_action, "property_service_init");
+queue_builtin_action(signal_init_action, "signal_init");
+queue_builtin_action(check_startup_action, "check_startup");
+
+if (is_charger) {
+    action_for_each_trigger("charger", action_add_queue_tail);
+} else {
+    action_for_each_trigger("early-boot", action_add_queue_tail);
+    action_for_each_trigger("boot", action_add_queue_tail);
+}
+
+/* run all property triggers based on current state of the properties */
+queue_builtin_action(queue_property_triggers_action, "queue_property_triggers");
+</code></pre>
+
+<h1>if BOOTCHART</h1>
+
+<pre><code>queue_builtin_action(bootchart_init_action, "bootchart_init");
+</code></pre>
+
+<h1>endif</h1>
+
+<pre><code>/*解析完 init.rc 之后到此的这一段，好像都是在想队列里面添加 action/command*/
+
+/*什么时候来执行呢？下面！*/
+
+/*init 最后进入了一个无限循环，不会主动退出！*/
+for(;;) {
+    int nr, i, timeout = -1;
+
+    /*执行command 队列里面的一条命令!*/
+    execute_one_command();
+    restart_processes();
+
+    /*添加property fd (socket） 到 ufds */
+    if (!property_set_fd_init &amp;&amp; get_property_set_fd() &gt; 0) {
+        ufds[fd_count].fd = get_property_set_fd();
+        ufds[fd_count].events = POLLIN;
+        ufds[fd_count].revents = 0;
+        fd_count++;
+        property_set_fd_init = 1;
+    }
+
+    /*添加 signal fd 到 ufds*/
+    if (!signal_fd_init &amp;&amp; get_signal_fd() &gt; 0) {
+        ufds[fd_count].fd = get_signal_fd();
+        ufds[fd_count].events = POLLIN;
+        ufds[fd_count].revents = 0;
+        fd_count++;
+        signal_fd_init = 1;
+    }
+
+    /*添加 keychord ?fd 到 ufds*/
+    if (!keychord_fd_init &amp;&amp; get_keychord_fd() &gt; 0) {
+        ufds[fd_count].fd = get_keychord_fd();
+        ufds[fd_count].events = POLLIN;
+        ufds[fd_count].revents = 0;
+        fd_count++;
+        keychord_fd_init = 1;
+    }
+
+    /*计算进程restart 时间*/
+    if (process_needs_restart) {
+        timeout = (process_needs_restart - gettime()) * 1000;
+        if (timeout &lt; 0)
+            timeout = 0;
+    }
+
+    if (!action_queue_empty() || cur_action)
+        timeout = 0;
+</code></pre>
+
+<h1>if BOOTCHART</h1>
+
+<pre><code>    if (bootchart_count &gt; 0) {
+        if (timeout &lt; 0 || timeout &gt; BOOTCHART_POLLING_MS)
+            timeout = BOOTCHART_POLLING_MS;
+        if (bootchart_step() &lt; 0 || --bootchart_count == 0) {
+            bootchart_finish();
+            bootchart_count = 0;
+        }
+    }
+</code></pre>
+
+<h1>endif</h1>
+
+<pre><code>    /*poll出 ufds 的事件，等待 timeout 时间*/
+    nr = poll(ufds, fd_count, timeout);
+    if (nr &lt;= 0)
+        continue;
+   /*处理 ufds 事件!(property set , signal,keychord?)*/
+    for (i = 0; i &lt; fd_count; i++) {
+        if (ufds[i].revents == POLLIN) {
+            if (ufds[i].fd == get_property_set_fd())
+                handle_property_set_fd();
+            else if (ufds[i].fd == get_keychord_fd())
+                handle_keychord();
+            else if (ufds[i].fd == get_signal_fd())
+                handle_signal();
+        }
+    }
+
+}
+</code></pre>
+
+<p>}</p>
+
+<p>```</p>
+
+<p>代码看下来，可以看出来，init 的主要工作就是:</p>
+
+<ol>
+<li>解析 init.rc 文件并执行相应的 action/commands.</li>
+<li>作为一个 Daemon 进程处理 property_set,keychord(key combo） 和 signal 事件。</li>
+</ol>
+
+
+<p>init.rc 的解析过程略过，详情请见 system/core/init/init_parser.c</p>
+
+<p>下面来看看 init.rc 里面究竟干了些什么？</p>
+
+<p>```sh system/core/rootdir/init.rc</p>
+
+<h1>导入其他 rc 文件</h1>
+
+<p>import /init.environ.rc
+import /init.usb.rc
+import /init.${ro.hardware}.rc  #这里保留了导入特定平台相关 rc 的接口,这里可能导入很多东西！
+import /init.trace.rc</p>
+
+<h1>early-init 要处理的事情</h1>
+
+<p>on early-init</p>
+
+<pre><code># Set init and its forked children's oom_adj.
+write /proc/1/oom_adj -16 
+
+# Set the security context for the init process.
+# This should occur before anything else (e.g. ueventd) is started.
+setcon u:r:init:s0
+
+start ueventd
+</code></pre>
+
+<h1>create mountpoints</h1>
+
+<pre><code>mkdir /mnt 0775 root system
+</code></pre>
+
+<h1>init 要处理的事情</h1>
+
+<p>on init</p>
+
+<p>sysclktz 0</p>
+
+<p>loglevel 3</p>
+
+<h1>Backward compatibility</h1>
+
+<pre><code>symlink /system/etc /etc
+symlink /sys/kernel/debug /d
+</code></pre>
+
+<h1>Right now vendor lives on the same filesystem as system,</h1>
+
+<h1>but someday that may change.</h1>
+
+<pre><code>symlink /system/vendor /vendor
+</code></pre>
+
+<h1>&hellip;省略部分代码</h1>
+
+<p>on post-fs</p>
+
+<pre><code># once everything is setup, no need to modify /
+mount rootfs rootfs / ro remount
+# mount shared so changes propagate into child namespaces
+mount rootfs rootfs / shared rec
+mount tmpfs tmpfs /mnt/secure private rec
+</code></pre>
+
+<h1>&hellip;省略部分代码</h1>
+
+<p>on post-fs-data</p>
+
+<pre><code># We chown/chmod /data again so because mount is run as root + defaults
+chown system system /data
+chmod 0771 /data
+# We restorecon /data in case the userdata partition has been reset.
+restorecon /data
+</code></pre>
+
+<h1>&hellip;省略部分代码</h1>
+
+<p>on boot</p>
+
+<h1>basic network init</h1>
+
+<pre><code>ifup lo
+hostname localhost
+domainname localdomain
+</code></pre>
+
+<h1>&hellip;省略部分代码</h1>
+
+<h1>这两句重要！！</h1>
+
+<pre><code>class_start core
+class_start main
+</code></pre>
+
+<p>on nonencrypted</p>
+
+<pre><code>class_start late_start
+</code></pre>
+
+<p>on charger</p>
+
+<pre><code>class_start charger
+</code></pre>
+
+<p>on property:vold.decrypt=trigger_reset_main</p>
+
+<pre><code>class_reset main
+</code></pre>
+
+<h1>&hellip;省略部分代码</h1>
+
+<p>service console /system/bin/sh</p>
+
+<pre><code>class core
+console
+disabled
+user shell
+group log
+</code></pre>
+
+<h1>&hellip;省略部分代码</h1>
+
+<p>service servicemanager /system/bin/servicemanager</p>
+
+<pre><code>class core
+user system
+group system
+critical
+onrestart restart healthd
+onrestart restart zygote
+onrestart restart media
+onrestart restart surfaceflinger
+onrestart restart drm
+</code></pre>
+
+<h1>&hellip;省略部分代码</h1>
+
+<p>service zygote /system/bin/app_process -Xzygote /system/bin &mdash;zygote &mdash;start-system-server</p>
+
+<pre><code>class main
+socket zygote stream 660 root system
+onrestart write /sys/android_power/request_state wake
+onrestart write /sys/power/state on
+onrestart restart media
+onrestart restart netd
+</code></pre>
+
+<p>```</p>
+
+<p>虽然 ini.rc 里面这么多内容，但是你仔细观察就会发现，这里面只有两种模式：</p>
+
+<ul>
+<li>第一种 trigger 触发
+<code>
+on trigger
+ ...
+</code></li>
+<li>第二种 service
+<code>
+service ...
+ ...
+</code></li>
+</ul>
+
+
+<p><code>on xxxx</code> 这种是基于某个事件触发， init.rc 里面列举的有</p>
+
+<ul>
+<li>on early-init</li>
+<li>on init</li>
+<li>on post-fs</li>
+<li>on boot</li>
+<li>on nonencrypted</li>
+<li>on charger</li>
+<li>on property:key=value</li>
+</ul>
+
+
+<p>你一定会奇怪，这些 trigger 是如何定义的，在什么时间点触发？ 其实这些 trigger 没有定义，触发的顺序由 init.c 里面添加它们到 action queue 的顺序决定。</p>
+
+<p><code>c  system/core/init/init.c
+action_for_each_trigger("early-init", action_add_queue_tail);
+...
+action_for_each_trigger("init", action_add_queue_tail);
+action_for_each_trigger("early-fs", action_add_queue_tail);
+...
+</code></p>
+
+<p>在 init.c 中以合适的顺序添加到 action queue 里面之后，在 init.c 最后依次从 action queue 中取出这些 action,顺序执行。</p>
+
+<p>```c system/core/init/init.c</p>
+
+<pre><code>for(;;) {
+    int nr, i, timeout = -1;
+
+    execute_one_command();  //这里取出 action 来执行。
+    ...
+}
+</code></pre>
+
+<p>```</p>
+
+<p><code>on property</code> 例外，这个是在 set property 之后，查询有没有相关的 action，如果有的话添加到 action queue , 等待取出来执行。</p>
+
+<p>那么 service 是如何启动的呢？service 并没有像 trigger 一样的方式进入 action queue.仔细观察一下 service 里面的 option 就会发现，每个 service 都有一个 class.</p>
+
+<p>```
+service ueventd /sbin/ueventd</p>
+
+<pre><code>class core
+</code></pre>
+
+<p>service servicemanager /system/bin/servicemanager</p>
+
+<pre><code>class core
+</code></pre>
+
+<p>service healthd-charger /sbin/healthd -n</p>
+
+<pre><code>class charger
+</code></pre>
+
+<p>service netd /system/bin/netd</p>
+
+<pre><code>class main
+</code></pre>
+
+<p>service zygote /system/bin/app_process -Xzygote /system/bin &mdash;zygote &mdash;start-system-server</p>
+
+<pre><code>class main
+</code></pre>
+
+<p>&hellip;
+```</p>
+
+<p>这个 class 指的就是 service 的类别， service 不是像 trigger 一样，通过名字来查找，而是通过类别来一起启动的。</p>
+
+<p>在 <code>on boot</code>，可以看到:</p>
+
+<p>```
+on boot
+&hellip;</p>
+
+<pre><code>class_start core
+class_start main
+</code></pre>
+
+<p>```</p>
+
+<p><code>core</code> 和 <code>main</code> 类别的 service 在 <code>on boot</code> 的时候被一起启动了.</p>
+
+<p>通过上面的分析，可以看得出来，虽然 init.rc 里面的内容很多，但还是很容易理解的：</p>
+
+<ul>
+<li>on xxx 是在 init.c 里面通过 xxx 关键字进入 action 队列并顺序执行的。</li>
+<li>service xxx 是以 <code>class xxx</code> 分类的，一类在一起进入队列并执行的， core 和 main 类别的 service 是 on boot 的时候一起执行的。</li>
+</ul>
+
+
+<p>OK, 看得出来，其实那些 service 并没有什么特别的，都是 init 启动的而已。</p>
+
+<p>那么，Android 是如何从 Native 切换到 Java 世界的呢？这依赖于 init.rc 里面启动的一个重要 service  &mdash; zygote</p>
+
+<p>zygote 是在 init.rc 中被定义为一个 service ：</p>
+
+<p>```bash
+service zygote /system/bin/app_process -Xzygote /system/bin &mdash;zygote &mdash;start-system-server</p>
+
+<pre><code>class main
+socket zygote stream 660 root system
+onrestart write /sys/android_power/request_state wake
+onrestart write /sys/power/state on
+onrestart restart media
+onrestart restart netd
+</code></pre>
+
+<p>```</p>
+
+<p>name = <code>zygote</code>
+path = <code>/system/bin/app_process</code>
+arguments = <code>-Xzygote /system/bin --zygote --start-system-server</code></p>
+
+<p>zygote 这个 service 在启动的时候实际上是执行了 /system/bin/app_process 这个二进制文件 , 这个文件的源码在:</p>
+
+<p><code>frameworks/base/cmds/app_process/app_main.cpp</code></p>
+
+<p>```c frameworks/base/cmds/app_process/app_main.cpp
+int main(int argc, char* const argv[])
+{
+&hellip;
+//-Xzygote 传给 Vm</p>
+
+<pre><code>int i = runtime.addVmArguments(argc, argv);
+</code></pre>
+
+<p>&hellip;
+//其他参数解析</p>
+
+<pre><code>while (i &lt; argc) {
+    const char* arg = argv[i++];
+    if (!parentDir) {
+        parentDir = arg;
+    } else if (strcmp(arg, "--zygote") == 0) {
+        zygote = true;
+        niceName = "zygote";
+    } else if (strcmp(arg, "--start-system-server") == 0) {
+        startSystemServer = true;
+    } else if (strcmp(arg, "--application") == 0) {
+        application = true;
+    } else if (strncmp(arg, "--nice-name=", 12) == 0) {
+        niceName = arg + 12;
+    } else {
+        className = arg; 
+        break;
+    }
+}
+</code></pre>
+
+<p>&hellip;
+// call runtime.start 并 传了两个参数</p>
+
+<pre><code>if (zygote) {
+    runtime.start("com.android.internal.os.ZygoteInit",
+            startSystemServer ? "start-system-server" : "");
+}
+...
+</code></pre>
+
+<p>}
+```</p>
+
+<p>在最后调用了 <code>runtime</code> 的 start 方法并传入了 <code>com.android.internal.os.ZygoteInit</code> 和 <code>start-system-server</code> 两个参数。</p>
+
+<p><code>runtime</code> 是 <code>AppRuntime</code> 的实例， <code>start</code> 是继承自基类 <code>AndroidRuntime</code> 的方法。</p>
+
+<p>```cpp frameworks/core/jni/AndroidRuntime.cpp
+/<em>
+ * Start the Android runtime.  This involves starting the virtual machine
+ * and calling the &ldquo;static void main(String[] args)&rdquo; method in the class
+ * named by &ldquo;className&rdquo;.
+ *
+ * Passes the main function two arguments, the class name and the specified
+ * options string.
+ </em>/
+void AndroidRuntime::start(const char<em> className, const char</em> options)
+{
+&hellip;</p>
+
+<pre><code> if (startVm(&amp;mJavaVM, &amp;env) != 0) {
+    return;
+ }
+</code></pre>
+
+<p>&hellip;</p>
+
+<pre><code>onVmCreated(env);
+</code></pre>
+
+<p>&hellip;</p>
+
+<pre><code>strArray = env-&gt;NewObjectArray(2, stringClass, NULL);
+assert(strArray != NULL);
+classNameStr = env-&gt;NewStringUTF(className);
+assert(classNameStr != NULL);
+env-&gt;SetObjectArrayElement(strArray, 0, classNameStr);
+optionsStr = env-&gt;NewStringUTF(options);
+env-&gt;SetObjectArrayElement(strArray, 1, optionsStr);
+</code></pre>
+
+<p>&hellip;</p>
+
+<pre><code>/*
+ * Start VM.  This thread becomes the main thread of the VM, and will
+ * not return until the VM exits.
+ */
+char* slashClassName = toSlashClassName(className);
+jclass startClass = env-&gt;FindClass(slashClassName);
+if (startClass == NULL) {
+    ALOGE("JavaVM unable to locate class '%s'\n", slashClassName);
+    /* keep going */
+} else {
+    jmethodID startMeth = env-&gt;GetStaticMethodID(startClass, "main",
+        "([Ljava/lang/String;)V");
+    if (startMeth == NULL) {
+        ALOGE("JavaVM unable to find main() in '%s'\n", className);
+        /* keep going */
+    } else {
+        env-&gt;CallStaticVoidMethod(startClass, startMeth, strArray);
+ }
+</code></pre>
+
+<p>}
+```</p>
+
+<p>调用 <code>start</code> 的时候传递了两个参数 <code>com.android.internal.os.ZygoteInit</code> , <code>start-system-server</code>,对应 <code>start</code> 的两个形参 <code>className</code> 和 <code>options</code>。在 <code>start</code> 里面，可以看到，先是 启动了 VM , 然后将两个参数放到 VM 的 env 里面，在然后，找到 <code>com.android.internal.os.ZygoteInit</code> 并调用其  <code>main</code> 方法 !</p>
+
+<p>哈哈！ 终于开启了 java 世界！ 来看看 <code>ZygoteInit</code> 干了些什么?</p>
+
+<p>```java frameworks/base/core/java/com/android/internal/os/ZygoteInit.java
+public static void main(String argv[]) {
+&hellip;</p>
+
+<pre><code>        registerZygoteSocket();
+</code></pre>
+
+<p>&hellip;</p>
+
+<pre><code>        if (argv[1].equals("start-system-server")) {
+            startSystemServer();
+        } else if (!argv[1].equals("")) {
+            throw new RuntimeException(argv[0] + USAGE_STRING);
+        }
+</code></pre>
+
+<p>&hellip;</p>
+
+<pre><code>        runSelectLoop();
+</code></pre>
+
+<p>&hellip;
+}
+```</p>
+
+<p><code>ZygoteInit</code> 的 <code>main</code> 里面做了三件事 :</p>
+
+<ol>
+<li>注册 zygote socket</li>
+<li>启动 system server</li>
+<li>无限循环监听 zygote socket 消息。</li>
+</ol>
+
+
+<p>在 init 启动 zygote 的时候创建了一个 socket &ndash; <code>/dev/socket/zygote</code></p>
+
+<p>```bash
+service zygote /system/bin/app_process -Xzygote /system/bin &mdash;zygote &mdash;start-system-server</p>
+
+<pre><code>class main
+socket zygote stream 660 root system
+</code></pre>
+
+<p>&hellip;
+```</p>
+
+<p><code>registerZygoteSocket</code> 就是用这个 socket 的 fd 创建了一个 Server socket , 用来接收 client 发来的消息。</p>
+
+<p>然后调用，<code>startSystemServer()</code> 来启动 system server 进程。
+```java ZygoteInit.java</p>
+
+<pre><code>/**
+ * Prepare the arguments and fork for the system server process.
+ */
+private static boolean startSystemServer()
+        throws MethodAndArgsCaller, RuntimeException {
+</code></pre>
+
+<p>&hellip;</p>
+
+<pre><code>    /* Hardcoded command line to start the system server */
+    String args[] = { 
+        "--setuid=1000",
+        "--setgid=1000",
+        "--setgroups=1001,1002,1003,1004,1005,1006,1007,1008,1009,1010,1018,1021,1032,3001,3002,3003,3006,3007",
+        "--capabilities=" + capabilities + "," + capabilities,
+        "--runtime-init",
+        "--nice-name=system_server",
+        "com.android.server.SystemServer",
+    };
+</code></pre>
+
+<p>&hellip;</p>
+
+<pre><code>        /* Request to fork the system server process */
+        pid = Zygote.forkSystemServer(
+                parsedArgs.uid, parsedArgs.gid,
+                parsedArgs.gids,
+                parsedArgs.debugFlags,
+                null,
+                parsedArgs.permittedCapabilities,
+                parsedArgs.effectiveCapabilities);
+</code></pre>
+
+<p>&hellip;</p>
+
+<pre><code>    /* For child process */
+    if (pid == 0) {
+        handleSystemServerProcess(parsedArgs);
+    }
+
+    return true;
+</code></pre>
+
+<p>```</p>
+
+<p>这一步，调用 <code>Zygote.forkSystemServer</code> , <code>forkSystemServer</code> 又调用了 <code>nativenativeForkSystemServer</code></p>
+
+<p>```java  libcore/dalvik/src/main/java/dalvik/system/Zygote.java</p>
+
+<pre><code>public static int forkSystemServer(int uid, int gid, int[] gids, int debugFlags,
+        int[][] rlimits, long permittedCapabilities, long effectiveCapabilities) {
+    preFork();
+    int pid = nativeForkSystemServer(
+            uid, gid, gids, debugFlags, rlimits, permittedCapabilities, effectiveCapabilities);
+    postFork();
+    return pid;
+}
+</code></pre>
+
+<p>```</p>
+
+<p><code>nativenativeForkSystemServer</code> 在 dalvik 里面</p>
+
+<p>```cpp dalvik/vm/native/dalvik_system_Zygote.cpp
+static void Dalvik_dalvik_system_Zygote_forkSystemServer(</p>
+
+<pre><code>    const u4* args, JValue* pResult)
+</code></pre>
+
+<p>{</p>
+
+<pre><code>pid_t pid;
+pid = forkAndSpecializeCommon(args, true);
+
+/* The zygote process checks whether the child process has died or not. */
+if (pid &gt; 0) {
+    int status;
+
+    ALOGI("System server process %d has been created", pid);
+    gDvm.systemServerPid = pid;
+    /*如果 system server 没启动成功，zygote 会自杀!*/
+    if (waitpid(pid, &amp;status, WNOHANG) == pid) {
+        ALOGE("System server process %d has died. Restarting Zygote!", pid);
+        kill(getpid(), SIGKILL);
+    }   
+}   
+RETURN_INT(pid);
+</code></pre>
+
+<p>}
+```</p>
+
+<p>来看看 <code>forkAndSpecializeCommon</code>:</p>
+
+<p>```
+static pid_t forkAndSpecializeCommon(const u4* args, bool isSystemServer)
+{
+&hellip;</p>
+
+<pre><code>setSignalHandler();
+</code></pre>
+
+<p>&hellip;</p>
+
+<pre><code>pid = fork();
+</code></pre>
+
+<p>&hellip;</p>
+
+<pre><code>if (pid == 0) {
+    unsetSignalHandler();
+}
+</code></pre>
+
+<p>&hellip;
+}
+<code>``
+这里 fork 之前，注册了 signal 处理函数</code>setSignalHandler`, 子进程里面又取消了signal 处理函数，说明这个是为父进程 zygote 注册的，来看看里面干了些啥：</p>
+
+<p>```
+static void sigchldHandler(int s)
+{
+&hellip;</p>
+
+<pre><code>    /*
+     * If the just-crashed process is the system_server, bring down zygote
+     * so that it is restarted by init and system server will be restarted
+     * from there.
+     */
+    if (pid == gDvm.systemServerPid) {
+        ALOG(LOG_INFO, ZYGOTE_LOG_TAG,
+            "Exit zygote because system server (%d) has terminated",
+            (int) pid);
+        kill(getpid(), SIGKILL);
+    }
+</code></pre>
+
+<p>&hellip;
+}
+```</p>
+
+<p>这里如果 system server 挂了， zygote 又要自杀!!</p>
+
+<p>OK , 假设正常执行，继续回到 <code>startSystemServer</code>, 下一步， system server 和 zygote 分道扬镳了终于, system server 调用 <code>handleSystemServerProcess</code>, zygote 则调用 <code>runSelectLoop()</code>, 先看 zygote <code>runSelectLoop</code>:</p>
+
+<p>```</p>
+
+<pre><code>/** 
+ * Runs the zygote process's select loop. Accepts new connections as
+ * they happen, and reads commands from connections one spawn-request's
+ * worth at a time.
+ *
+ * @throws MethodAndArgsCaller in a child process when a main() should
+ * be executed.
+ */
+private static void runSelectLoop() throws MethodAndArgsCaller {
+    ....
+    while (true) {
+        ...
+        } else if (index == 0) {
+            ZygoteConnection newPeer = acceptCommandPeer();
+            peers.add(newPeer);
+            fds.add(newPeer.getFileDesciptor());
+        } else {
+            boolean done;
+            done = peers.get(index).runOnce();
+        }
+    }
+}
+</code></pre>
+
+<p>```</p>
+
+<p><code>acceptCommandPeer()</code> 实际是在阻塞式的等待 client 来发起连接。</p>
+
+<p>```</p>
+
+<pre><code>/**
+ * Waits for and accepts a single command connection. Throws
+ * RuntimeException on failure.
+ */
+private static ZygoteConnection acceptCommandPeer() {
+    try {
+        return new ZygoteConnection(sServerSocket.accept());
+    } catch (IOException ex) {
+        throw new RuntimeException(
+                "IOException during accept()", ex);
+    }
+}
+</code></pre>
+
+<p>```</p>
+
+<p><code>runOnce()</code> 则是 client 建立连接之后，读取 client 发过来的数据，并 fork 出新的进程。</p>
+
+<p>```</p>
+
+<pre><code>boolean runOnce() throws ZygoteInit.MethodAndArgsCaller {
+        ...
+        args = readArgumentList();
+        ...
+        pid = Zygote.forkAndSpecialize(parsedArgs.uid, parsedArgs.gid, parsedArgs.gids,
+        parsedArgs.debugFlags, rlimits, parsedArgs.mountExternal, parsedArgs.seInfo,
+        parsedArgs.niceName);
+        ...
+}
+</code></pre>
+
+<p>```</p>
+
+<p>回过头来看 system server <code>handleSystemServerProcess</code>:</p>
+
+<p>```java ZygoteInit.java
+ /<em>*
+ * Finish remaining work for the newly forked system server process.
+ </em>/
+ private static void handleSystemServerProcess( ZygoteConnection.Arguments parsedArgs) throws ZygoteInit.MethodAndArgsCaller {</p>
+
+<pre><code>...
+RuntimeInit.zygoteInit(parsedArgs.targetSdkVersion, parsedArgs.remainingArgs);
+...
+</code></pre>
+
+<p> }
+```</p>
+
+<p>调用了 <code>RuntimeInit.zygoteInit</code>:</p>
+
+<p>```java RuntimeInit.java</p>
+
+<pre><code>public static final void zygoteInit(int targetSdkVersion, String[] argv)
+        throws ZygoteInit.MethodAndArgsCaller {
+    if (DEBUG) Slog.d(TAG, "RuntimeInit: Starting application from zygote");
+
+    //重定向 log
+    redirectLogStreams();
+
+    //设置 timezone ,useragent 等等
+    commonInit();
+    //app_main.cpp 的 onZygoteInit, 初始化 Binder thread pool.
+    nativeZygoteInit();
+
+    //
+    applicationInit(targetSdkVersion, argv);
+} 
+</code></pre>
+
+<p>```</p>
+
+<p>继续 <code>applicationInit</code>,传入的 <code>startClass</code> 参数正是 &ldquo;com.android.server.SystemServer&rdquo; , 所以这里是掉到了 <code>SystemServer</code> 的 main 方法。</p>
+
+<p>```java RuntimeInit.java</p>
+
+<pre><code>private static void applicationInit(int targetSdkVersion, String[] argv)
+        throws ZygoteInit.MethodAndArgsCaller {
+    ...
+    // Remaining arguments are passed to the start class's static main
+    invokeStaticMain(args.startClass, args.startArgs);
+}
+</code></pre>
+
+<p>```</p>
+
+<p>终于到了 SystemServer 里面来了 :
+```java SystemServer.java</p>
+
+<pre><code>public static void main(String[] args) {
+    ...
+    System.loadLibrary("android_servers");
+    // Initialize native services.
+    nativeInit();
+    // This used to be its own separate thread, but now it is
+    // just the loop we run on the main thread.
+    ServerThread thr = new ServerThread();
+    thr.initAndLoop();
+}
+</code></pre>
+
+<p>```</p>
+
+<p>主要干了两件事：</p>
+
+<ol>
+<li>nativeInit</li>
+<li>ServerThread 启动</li>
+</ol>
+
+
+<p>nativeInit 好像没干啥嘛</p>
+
+<p>```cpp services/jni/com_android_server_SystemServer.cpp
+static void android_server_SystemServer_nativeInit(JNIEnv* env, jobject clazz) {</p>
+
+<pre><code>char propBuf[PROPERTY_VALUE_MAX];
+property_get("system_init.startsensorservice", propBuf, "1");
+if (strcmp(propBuf, "1") == 0) {
+    // Start the sensor service
+    SensorService::instantiate();
+}   
+</code></pre>
+
+<p>}
+```</p>
+
+<p>ServerThread 里面内容可就多喽 ！</p>
+
+<p>```java SystemServer.java</p>
+
+<pre><code>public void initAndLoop() {
+    ...
+    Looper.prepareMainLooper();
+
+    //为 window manager 创建一个 handler.
+    HandlerThread wmHandlerThread = new HandlerThread("WindowManager");
+    wmHandlerThread.start();
+    Handler wmHandler = new Handler(wmHandlerThread.getLooper());
+    wmHandler.post(new Runnable() {
+        @Override
+        public void run() {
+            android.os.Process.setThreadPriority(
+                    android.os.Process.THREAD_PRIORITY_DISPLAY);
+            android.os.Process.setCanSelfBackground(false);
+        }
+    });
+
+    // 启动 installd , Power Manager Activity Manager service.
+    boolean onlyCore = false;
+    boolean firstBoot = false;
+    try {
+        installer = new Installer();
+        installer.ping();
+
+        power = new PowerManagerService();
+        ServiceManager.addService(Context.POWER_SERVICE, power);
+
+        context = ActivityManagerService.main(factoryTest);
+    }
+
+
+    boolean disableStorage = SystemProperties.getBoolean("config.disable_storage", false);
+    boolean disableMedia = SystemProperties.getBoolean("config.disable_media", false);
+    boolean disableBluetooth = SystemProperties.getBoolean("config.disable_bluetooth", false);
+    boolean disableTelephony = SystemProperties.getBoolean("config.disable_telephony", false);
+    boolean disableLocation = SystemProperties.getBoolean("config.disable_location", false);
+    boolean disableSystemUI = SystemProperties.getBoolean("config.disable_systemui", false);
+    boolean disableNonCoreServices = SystemProperties.getBoolean("config.disable_noncore", false);
+    boolean disableNetwork = SystemProperties.getBoolean("config.disable_network", false);
+
+
+    //各种 service add 
+
+    try {
+        display = new DisplayManagerService(context, wmHandler);
+        ServiceManager.addService(Context.DISPLAY_SERVICE, display, true);
+
+        telephonyRegistry = new TelephonyRegistry(context);
+        ServiceManager.addService("telephony.registry", telephonyRegistry);
+
+        if (android.telephony.MSimTelephonyManager.getDefault().isMultiSimEnabled()) {
+            msimTelephonyRegistry = new MSimTelephonyRegistry(context);
+            ServiceManager.addService("telephony.msim.registry", msimTelephonyRegistry);
+        }
+
+        ServiceManager.addService("scheduling_policy", new SchedulingPolicyService());
+
+        String cryptState = SystemProperties.get("vold.decrypt");
+        if (ENCRYPTING_STATE.equals(cryptState)) {
+            onlyCore = true;
+        } else if (ENCRYPTED_STATE.equals(cryptState)) {
+            onlyCore = true;
+        }
+
+        pm = PackageManagerService.main(context, installer,
+                factoryTest != SystemServer.FACTORY_TEST_OFF,
+                onlyCore);
+
+        ActivityManagerService.setSystemProcess();
+
+        ServiceManager.addService("entropy", new EntropyMixer(context));
+
+        ServiceManager.addService(Context.USER_SERVICE,
+                UserManagerService.getInstance());
+
+        mContentResolver = context.getContentResolver();
+
+            accountManager = new AccountManagerService(context);
+            ServiceManager.addService(Context.ACCOUNT_SERVICE, accountManager);
+
+        contentService = ContentService.main(context,
+                factoryTest == SystemServer.FACTORY_TEST_LOW_LEVEL);
+
+        ActivityManagerService.installSystemProviders();
+
+        lights = new LightsService(context);
+
+        battery = new BatteryService(context, lights);
+        ServiceManager.addService("battery", battery);
+
+        vibrator = new VibratorService(context);
+        ServiceManager.addService("vibrator", vibrator);
+
+        consumerIr = new ConsumerIrService(context); 
+        ServiceManager.addService(Context.CONSUMER_IR_SERVICE, consumerIr);
+
+        power.init(context, lights, ActivityManagerService.self(), battery,
+                BatteryStatsService.getService(),
+                ActivityManagerService.self().getAppOpsService(), display);
+
+        alarm = new AlarmManagerService(context);
+        ServiceManager.addService(Context.ALARM_SERVICE, alarm);
+
+        Watchdog.getInstance().init(context, battery, power, alarm,
+                ActivityManagerService.self());
+        Watchdog.getInstance().addThread(wmHandler, "WindowManager thread");
+
+        inputManager = new InputManagerService(context, wmHandler);
+
+        wm = WindowManagerService.main(context, power, display, inputManager,
+                wmHandler, factoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL,
+                !firstBoot, onlyCore);
+        ServiceManager.addService(Context.WINDOW_SERVICE, wm);
+        ServiceManager.addService(Context.INPUT_SERVICE, inputManager);
+
+        inputManager.setWindowManagerCallbacks(wm.getInputMonitor());
+        inputManager.start();
+
+        display.setWindowManager(wm);
+        display.setInputManager(inputManager);
+
+
+                imm = new InputMethodManagerService(context, wm);
+                ServiceManager.addService(Context.INPUT_METHOD_SERVICE, imm);
+
+                ServiceManager.addService(Context.ACCESSIBILITY_SERVICE,
+                        new AccessibilityManagerService(context));
+
+        wm.displayReady();
+
+        pm.performBootDexOpt();
+
+                mountService = new MountService(context);
+                ServiceManager.addService("mount", mountService);
+
+        if (!disableNonCoreServices) {
+                lockSettings = new LockSettingsService(context);
+                ServiceManager.addService("lock_settings", lockSettings);
+
+                devicePolicy = new DevicePolicyManagerService(context);
+                ServiceManager.addService(Context.DEVICE_POLICY_SERVICE, devicePolicy);
+        }
+
+        if (!disableSystemUI) {
+                statusBar = new StatusBarManagerService(context, wm);
+                ServiceManager.addService(Context.STATUS_BAR_SERVICE, statusBar);
+        }
+
+
+        if (!disableNonCoreServices) {
+                ServiceManager.addService(Context.CLIPBOARD_SERVICE,
+                        new ClipboardService(context));
+        }
+
+        if (!disableNetwork) {
+                networkManagement = NetworkManagementService.create(context);
+                ServiceManager.addService(Context.NETWORKMANAGEMENT_SERVICE, networkManagement);
+        }
+
+        if (!disableNonCoreServices) {
+                tsms = new TextServicesManagerService(context);
+                ServiceManager.addService(Context.TEXT_SERVICES_MANAGER_SERVICE, tsms);
+        }
+
+        if (!disableNetwork) {
+                networkStats = new NetworkStatsService(context, networkManagement, alarm);
+                ServiceManager.addService(Context.NETWORK_STATS_SERVICE, networkStats);
+
+                networkPolicy = new NetworkPolicyManagerService(
+                        context, ActivityManagerService.self(), power,
+                        networkStats, networkManagement);
+                ServiceManager.addService(Context.NETWORK_POLICY_SERVICE, networkPolicy);
+
+                wifiP2p = new WifiP2pService(context);
+                ServiceManager.addService(Context.WIFI_P2P_SERVICE, wifiP2p);
+
+                wifi = new WifiService(context);
+                ServiceManager.addService(Context.WIFI_SERVICE, wifi);
+
+                serviceDiscovery = NsdService.create(context);
+                ServiceManager.addService(
+                        Context.NSD_SERVICE, serviceDiscovery);
+        }
+
+        if (!disableNonCoreServices) {
+                ServiceManager.addService(Context.UPDATE_LOCK_SERVICE,
+                        new UpdateLockService(context));
+        }
+
+
+        /*   
+         * MountService has a few dependencies: Notification Manager and
+         * AppWidget Provider. Make sure MountService is completely started
+         * first before continuing.
+         */
+        if (mountService != null &amp;&amp; !onlyCore) {
+            mountService.waitForAsecScan();
+        }
+
+        try {
+            if (accountManager != null)
+                accountManager.systemReady();
+        }
+
+        try {
+            if (contentService != null)
+                contentService.systemReady();
+        }
+
+        try {
+            notification = new NotificationManagerService(context, statusBar, lights);
+            ServiceManager.addService(Context.NOTIFICATION_SERVICE, notification);
+            networkPolicy.bindNotificationManager(notification);
+        }
+
+        try {
+            ServiceManager.addService(DeviceStorageMonitorService.SERVICE,
+                    new DeviceStorageMonitorService(context));
+        }
+
+        if (!disableLocation) {
+                location = new LocationManagerService(context);
+                ServiceManager.addService(Context.LOCATION_SERVICE, location);
+
+                countryDetector = new CountryDetectorService(context);
+                ServiceManager.addService(Context.COUNTRY_DETECTOR, countryDetector);
+        }
+
+        if (!disableNonCoreServices) {
+            try {
+                Slog.i(TAG, "Search Service");
+                ServiceManager.addService(Context.SEARCH_SERVICE,
+                        new SearchManagerService(context));
+            }
+        }
+
+        try {
+            ServiceManager.addService(Context.DROPBOX_SERVICE,
+                    new DropBoxManagerService(context, new File("/data/system/dropbox")));
+        }
+
+        if (!disableNonCoreServices &amp;&amp; context.getResources().getBoolean(
+                    R.bool.config_enableWallpaperService)) {
+            try {
+                if (!headless) {
+                    wallpaper = new WallpaperManagerService(context);
+                    ServiceManager.addService(Context.WALLPAPER_SERVICE, wallpaper);
+                }
+            }
+        }
+
+        if (!disableMedia &amp;&amp; !"0".equals(SystemProperties.get("system_init.startaudioservice"))) {
+            try {
+                ServiceManager.addService(Context.AUDIO_SERVICE, new AudioService(context));
+            }
+        }
+
+        if (!disableNonCoreServices) {
+            try {
+                // Listen for dock station changes
+                dock = new DockObserver(context);
+            }
+        }
+
+        if (!disableMedia) {
+            try {
+                // Listen for wired headset changes
+                inputManager.setWiredAccessoryCallbacks(
+                        new WiredAccessoryManager(context, inputManager));
+            } catch (Throwable e) {
+                reportWtf("starting WiredAccessoryManager", e);
+            }
+        }
+
+
+        if (!disableNonCoreServices) {
+            try {
+                // Manage USB host and device support
+                usb = new UsbService(context);
+                ServiceManager.addService(Context.USB_SERVICE, usb);
+            }
+
+            try {
+                // Serial port support
+                serial = new SerialService(context);
+                ServiceManager.addService(Context.SERIAL_SERVICE, serial);
+            }
+        }
+
+        try {
+            twilight = new TwilightService(context);
+        }
+
+        try {
+            // Listen for UI mode changes
+            uiMode = new UiModeManagerService(context, twilight);
+        }
+
+        if (!disableNonCoreServices) {
+            try {
+                ServiceManager.addService(Context.BACKUP_SERVICE,
+                        new BackupManagerService(context));
+            }
+
+            try {
+                appWidget = new AppWidgetService(context);
+                ServiceManager.addService(Context.APPWIDGET_SERVICE, appWidget);
+            }
+
+            try {
+                recognition = new RecognitionManagerService(context);
+            }
+        }
+
+        try {
+            ServiceManager.addService("diskstats", new DiskStatsService(context));
+        }
+
+        try {
+            ServiceManager.addService("samplingprofiler",
+                        new SamplingProfilerService(context));
+        }
+
+        if (!disableNetwork) {
+            try {
+                networkTimeUpdater = new NetworkTimeUpdateService(context);
+            }
+        }
+
+        if (!disableMedia) {
+            try {
+                commonTimeMgmtService = new CommonTimeManagementService(context);
+                ServiceManager.addService("commontime_management", commonTimeMgmtService);
+            }
+        }
+
+        if (!disableNetwork) {
+            try {
+                CertBlacklister blacklister = new CertBlacklister(context);
+            }
+        }
+
+        if (!disableNonCoreServices &amp;&amp;
+            context.getResources().getBoolean(R.bool.config_dreamsSupported)) {
+            try {
+                // Dreams (interactive idle-time views, a/k/a screen savers)
+                dreamy = new DreamManagerService(context, wmHandler);
+                ServiceManager.addService(DreamService.DREAM_SERVICE, dreamy);
+            }
+        }
+
+        if (!disableNonCoreServices) {
+            try {
+                atlas = new AssetAtlasService(context);
+                ServiceManager.addService(AssetAtlasService.ASSET_ATLAS_SERVICE, atlas);
+            }
+        }
+
+
+        try {
+            new IdleMaintenanceService(context, battery);
+        }
+
+        try {
+            printManager = new PrintManagerService(context);
+            ServiceManager.addService(Context.PRINT_SERVICE, printManager);
+        }
+
+        if (!disableNonCoreServices) {
+            try {
+                mediaRouter = new MediaRouterService(context);
+                ServiceManager.addService(Context.MEDIA_ROUTER_SERVICE, mediaRouter);
+            }
+        }
+    //safe mode 相关
+    final boolean safeMode = wm.detectSafeMode();
+    if (safeMode) {
+        ActivityManagerService.self().enterSafeMode();
+        // Post the safe mode state in the Zygote class
+        Zygote.systemInSafeMode = true;
+        // Disable the JIT for the system_server process
+        VMRuntime.getRuntime().disableJitCompilation();
+    } else {
+        // Enable the JIT for the system_server process
+        VMRuntime.getRuntime().startJitCompilation();
+    }
+
+
+    //service system ready
+    vibrator.systemReady();
+    lockSettings.systemReady();
+    devicePolicy.systemReady();
+    notification.systemReady();
+    wm.systemReady();
+    if (safeMode) {
+        ActivityManagerService.self().showSafeModeOverlay();
+    }
+    power.systemReady(twilight, dreamy);
+    pm.systemReady();
+    display.systemReady(safeMode, onlyCore);
+
+    //接下来是 ActivityManagerService 的 systemReady
+    ActivityManagerService.self().systemReady(new Runnable() {
+        public void run() {
+
+                ActivityManagerService.self().startObservingNativeCrashes();
+                startSystemUi(contextF);
+                if (mountServiceF != null) mountServiceF.systemReady();
+                if (batteryF != null) batteryF.systemReady();
+                if (networkManagementF != null) networkManagementF.systemReady();
+                if (networkStatsF != null) networkStatsF.systemReady();
+                if (networkPolicyF != null) networkPolicyF.systemReady();
+                if (connectivityF != null) connectivityF.systemReady();
+                if (dockF != null) dockF.systemReady();
+                if (usbF != null) usbF.systemReady();
+                if (twilightF != null) twilightF.systemReady();
+                if (uiModeF != null) uiModeF.systemReady();
+                if (recognitionF != null) recognitionF.systemReady();
+            Watchdog.getInstance().start();
+
+            // It is now okay to let the various system services start their
+            // third party code...
+
+                if (appWidgetF != null) appWidgetF.systemRunning(safeMode);
+                if (wallpaperF != null) wallpaperF.systemRunning();
+                if (immF != null) immF.systemRunning(statusBarF);
+                if (locationF != null) locationF.systemRunning();
+                if (countryDetectorF != null) countryDetectorF.systemRunning();
+                if (networkTimeUpdaterF != null) networkTimeUpdaterF.systemRunning();
+                if (commonTimeMgmtServiceF != null) commonTimeMgmtServiceF.systemRunning();
+                    textServiceManagerServiceF.systemRunning();
+                if (dreamyF != null) dreamyF.systemRunning();
+                if (atlasF != null) atlasF.systemRunning();
+                if (inputManagerF != null) inputManagerF.systemRunning();
+                if (telephonyRegistryF != null) telephonyRegistryF.systemRunning();
+                if (msimTelephonyRegistryF != null) msimTelephonyRegistryF.systemRunning();
+                if (printManagerF != null) printManagerF.systemRuning();
+                if (mediaRouterF != null) mediaRouterF.systemRunning();
+
+    //进入消息循环
+    Looper.loop();
+}
+</code></pre>
+
+<p>```</p>
+
+<p>system server 启动了，来看下 Launcher 是怎么启动的。system server 的最后一段调用了 ActivityManagerService 的 systemReady() 回调。</p>
+
+<p>ActivityManagerService 的 systemReady()：</p>
+
+<p>```java ActivityManagerService.java</p>
+
+<pre><code>public void systemReady(final Runnable goingCallback) {
+    ...
+        mStackSupervisor.resumeTopActivitiesLocked();
+    ...
+}
+</code></pre>
+
+<p>```</p>
+
+<p>&ndash;>mStackSupervisor.resumeTopActivitiesLocked</p>
+
+<p>```java ActivityStackSupervisor.java</p>
+
+<pre><code>boolean resumeTopActivitiesLocked() {
+    return resumeTopActivitiesLocked(null, null, null);
+}    
+
+boolean resumeTopActivitiesLocked(ActivityStack targetStack, ActivityRecord target,
+        Bundle targetOptions) {
+    if (targetStack == null) {
+        targetStack = getFocusedStack();
+    }    
+    boolean result = false;
+    for (int stackNdx = mStacks.size() - 1; stackNdx &gt;= 0; --stackNdx) {
+        final ActivityStack stack = mStacks.get(stackNdx);
+        if (isFrontStack(stack)) {
+            if (stack == targetStack) {
+                result = stack.resumeTopActivityLocked(target, targetOptions);
+            } else {
+                stack.resumeTopActivityLocked(null);
+            }    
+        }    
+    }    
+    return result;
+} 
+</code></pre>
+
+<p>```</p>
+
+<p>&ndash;>stack.resumeTopActivityLocked</p>
+
+<p>```java ActivityStack.java</p>
+
+<pre><code>final boolean resumeTopActivityLocked(ActivityRecord prev) {
+    return resumeTopActivityLocked(prev, null);
+}
+
+final boolean resumeTopActivityLocked(ActivityRecord prev, Bundle options) {
+    if (ActivityManagerService.DEBUG_LOCKSCREEN) mService.logLockScreen("");
+    ...
+    if (next == null) {
+        // There are no more activities!  Let's just start up the
+        // Launcher...
+        ActivityOptions.abort(options);
+        if (DEBUG_STATES) Slog.d(TAG, "resumeTopActivityLocked: No more activities go home");
+        if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
+        return mStackSupervisor.resumeHomeActivity(prev);
+    }   
+</code></pre>
+
+<p>```</p>
+
+<p>&ndash;>mStackSupervisor.resumeHomeActivity</p>
+
+<p>```java ActivityStackSupervisor.java</p>
+
+<pre><code>boolean resumeHomeActivity(ActivityRecord prev) {
+    ...  
+    return mService.startHomeActivityLocked(mCurrentUser);
+} 
+</code></pre>
+
+<p>```</p>
+
+<p>&ndash;>mService.startHomeActivityLocked(mCurrentUser)</p>
+
+<p>```java ActivityManagerService.java</p>
+
+<pre><code>boolean startHomeActivityLocked(int userId) {
+    Intent intent = getHomeIntent();
+    ActivityInfo aInfo =
+        resolveActivityInfo(intent, STOCK_PM_FLAGS, userId);
+    if (aInfo != null) {
+        intent.setComponent(new ComponentName(
+                aInfo.applicationInfo.packageName, aInfo.name));
+        // Don't do this if the home app is currently being
+        // instrumented.
+        aInfo = new ActivityInfo(aInfo);
+        aInfo.applicationInfo = getAppInfoForUser(aInfo.applicationInfo, userId);
+        ProcessRecord app = getProcessRecordLocked(aInfo.processName,
+                aInfo.applicationInfo.uid, true);
+        if (app == null || app.instrumentationClass == null) {
+            intent.setFlags(intent.getFlags() | Intent.FLAG_ACTIVITY_NEW_TASK);
+            mStackSupervisor.startHomeActivity(intent, aInfo);
+        }
+    }
+}
+</code></pre>
+
+<p>```
+&ndash;> mStackSupervisor.startHomeActivity</p>
+
+<p>```java ActivityStackSupervisor.java</p>
+
+<pre><code>void startHomeActivity(Intent intent, ActivityInfo aInfo) {
+    moveHomeToTop();
+    startActivityLocked(null, intent, null, aInfo, null, null, 0, 0, 0, null, 0,
+            null, false, null);
+}
+</code></pre>
+
+<p>&ndash;>
+startActivityLocked
+&ndash;>
+startActivityUncheckedLocked
+&ndash;>
+resumeTopActivitiesLocked</p>
+
+<p>```</p>
+
+<p>&ndash;>ActivityStack.resumeTopActivityLocked</p>
+
+<p>&ndash;>
+ActivityStackSupervisor.startSpecificActivityLocked</p>
+
+<p>&ndash;>
+ActivityManagerService.startProcessLocked</p>
+
+<p>&ndash;></p>
+
+<p>```java ActivityManagerService.java</p>
+
+<pre><code>        // Start the process.  It will either succeed and return a result containing
+        // the PID of the new process, or else throw a RuntimeException.
+        Process.ProcessStartResult startResult = Process.start("android.app.ActivityThread",
+                app.processName, uid, uid, gids, debugFlags, mountExternal,
+                app.info.targetSdkVersion, app.info.seinfo, null);
+</code></pre>
+
+<p>```
+&ndash;>
+Process.start</p>
+
+<p>&ndash;>
+startViaZygote</p>
+
+<p>```java Process.java</p>
+
+<pre><code>public static final ProcessStartResult start(final String processClass,
+                              final String niceName,
+                              int uid, int gid, int[] gids,
+                              int debugFlags, int mountExternal,
+                              int targetSdkVersion,
+                              String seInfo,
+                              String[] zygoteArgs) {
+    try {
+        return startViaZygote(processClass, niceName, uid, gid, gids,
+                debugFlags, mountExternal, targetSdkVersion, seInfo, zygoteArgs);
+    } catch (ZygoteStartFailedEx ex) {
+        Log.e(LOG_TAG,
+                "Starting VM process through Zygote failed");
+        throw new RuntimeException(
+                "Starting VM process through Zygote failed", ex); 
+    }    
+}
+</code></pre>
+
+<p>```</p>
+
+<p>&ndash;></p>
+
+<p>```java Process.java</p>
+
+<pre><code>private static ProcessStartResult startViaZygote(final String processClass,
+                              final String niceName,
+                              final int uid, final int gid,
+                              final int[] gids,
+                              int debugFlags, int mountExternal,
+                              int targetSdkVersion,
+                              String seInfo,
+                              String[] extraArgs)
+                              throws ZygoteStartFailedEx {
+         ...
+         return zygoteSendArgsAndGetResult(argsForZygote);
+}
+</code></pre>
+
+<p>```</p>
+
+<p>```java Process.java</p>
+
+<pre><code>private static ProcessStartResult zygoteSendArgsAndGetResult(ArrayList&lt;String&gt; args)
+        throws ZygoteStartFailedEx {
+    openZygoteSocketIfNeeded();
+    ...
+        sZygoteWriter.write(Integer.toString(args.size()));            sZygoteWriter.newLine();
+    ...
+        sZygoteWriter.write(arg);
+}
+</code></pre>
+
+<p>```</p>
+
+<p>openZygoteSocketIfNeeded?</p>
+
+<p>```java Process.java</p>
+
+<pre><code>private static final String ZYGOTE_SOCKET = "zygote";
+private static void openZygoteSocketIfNeeded()
+        throws ZygoteStartFailedEx {
+            sZygoteSocket = new LocalSocket();
+
+            sZygoteSocket.connect(new LocalSocketAddress(ZYGOTE_SOCKET,
+                    LocalSocketAddress.Namespace.RESERVED));
+}
+</code></pre>
+
+<p>```</p>
+
+<p>yes &ndash;> connect to &ldquo;zygote&rdquo; and send args, back to zygote:</p>
+
+<p>```java ZygoteInit.java
+   private static void runSelectLoop(){</p>
+
+<pre><code>            done = peers.get(index).runOnce();
+</code></pre>
+
+<p>   }
+```</p>
+
+<p>&ndash;>runOnce?</p>
+
+<p>```java ZygoteConnection.java
+boolean runOnce(){
+&hellip;</p>
+
+<pre><code>        pid = Zygote.forkAndSpecialize(parsedArgs.uid, parsedArgs.gid, parsedArgs.gids,
+                parsedArgs.debugFlags, rlimits, parsedArgs.mountExternal, parsedArgs.seInfo,
+                parsedArgs.niceName);
+</code></pre>
+
+<p>&hellip;
+handleChildProc(parsedArgs, descriptors, childPipeFd, newStderr);
+}
+```
+&ndash;>
+Zygote.forkAndSpecialize</p>
+
+<p>```java Zygote.java</p>
+
+<pre><code>public static int forkAndSpecialize(int uid, int gid, int[] gids, int debugFlags,
+        int[][] rlimits, int mountExternal, String seInfo, String niceName) {
+    preFork();
+    int pid = nativeForkAndSpecialize(
+            uid, gid, gids, debugFlags, rlimits, mountExternal, seInfo, niceName);
+    postFork();
+    return pid;
+}
+</code></pre>
+
+<p>```</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[alarm]]></title>
