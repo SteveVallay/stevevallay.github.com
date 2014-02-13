@@ -1394,7 +1394,7 @@ ActivityManagerService.startProcessLocked
                     app.info.targetSdkVersion, app.info.seinfo, null);
 ```
 ->
-Process.start
+Process.start 注意这里传入的 processClass 是 "android.app.ActivityThread"
 
 ->
 startViaZygote
@@ -1495,6 +1495,110 @@ Zygote.forkAndSpecialize
         return pid;
     }
 ```
+
+-> nativeForkAndSpecialize
+```cpp dalvik_system_Zygote.cpp
+static void Dalvik_dalvik_system_Zygote_forkAndSpecialize(const u4* args,
+    JValue* pResult)
+{
+    pid_t pid;
+
+    pid = forkAndSpecializeCommon(args, false);
+
+    RETURN_INT(pid);
+}
+
+
+static pid_t forkAndSpecializeCommon(const u4* args, bool isSystemServer)
+{
+...
+ pid = fork();
+...
+return pid;
+}
+```
+
+fork 创建新进程，返回到 ZygoteConnection 的 runOnce.
+
+```java frameworks/base/core/java/com/android/internal/os/ZygoteConnection.java
+ boolean runOnce() throws ZygoteInit.MethodAndArgsCaller {
+...
+        try {
+            if (pid == 0) {
+                // in child
+                IoUtils.closeQuietly(serverPipeFd);
+                serverPipeFd = null;
+                handleChildProc(parsedArgs, descriptors, childPipeFd, newStderr);
+
+                // should never get here, the child is expected to either
+                // throw ZygoteInit.MethodAndArgsCaller or exec().
+                return true;
+            } else {
+                // in parent...pid of < 0 means failure
+                IoUtils.closeQuietly(childPipeFd);
+                childPipeFd = null;
+                return handleParentProc(pid, descriptors, serverPipeFd, parsedArgs);
+            }
+        } finally {
+            IoUtils.closeQuietly(childPipeFd);
+            IoUtils.closeQuietly(serverPipeFd);
+        }
+...
+}
+```
+
+子进程进入 -> handleChildProc
+
+
+```java frameworks/base/core/java/com/android/internal/os/ZygoteConnection.java
+    private void handleChildProc(Arguments parsedArgs,
+            FileDescriptor[] descriptors, FileDescriptor pipeFd, PrintStream newStderr)
+            throws ZygoteInit.MethodAndArgsCaller {
+...
+                    ZygoteInit.invokeStaticMain(cloader, className, mainArgs);
+...
+
+    }
+```
+
+调用 className 的 main 方法, className 是哪个呢？就是上面传入的 "android.app.ActivityThread"
+
+->
+```java frameworks/base/core/java/com/android/internal/os/ZygoteInit.java
+
+    static void invokeStaticMain(ClassLoader loader,
+            String className, String[] argv)
+            throws ZygoteInit.MethodAndArgsCaller {
+         ...
+         cl = loader.loadClass(className);
+         m = cl.getMethod("main", new Class[] { String[].class });
+         ...
+        /*
+         * This throw gets caught in ZygoteInit.main(), which responds
+         * by invoking the exception's run() method. This arrangement
+         * clears up all the stack frames that were required in setting
+         * up the process.
+         */
+        throw new ZygoteInit.MethodAndArgsCaller(m, argv);
+
+    }
+```
+
+抛出异常，返回到 ZygoteInit.main() 里面 ;-) 
+
+```java frameworks/base/core/java/com/android/internal/os/ZygoteInit.java
+    public static void main(String argv[]) {
+        try {
+            ...
+        } catch (MethodAndArgsCaller caller) {
+            caller.run();
+        }
+        ...
+    }
+```
+在这里执行 "android.app.ActivityThread" 的 main 方法.
+
+
 
 
 
