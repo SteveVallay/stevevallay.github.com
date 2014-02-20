@@ -1600,6 +1600,4 @@ fork 创建新进程，返回到 ZygoteConnection 的 runOnce.
 
 
 
-
-
 [101]:http://stevevallay.github.io/blog/2013/12/23/android-system-properties2/
