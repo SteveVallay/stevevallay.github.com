@@ -2621,7 +2621,7 @@ ActivityManagerService.startProcessLocked</p>
 
 
 <p>&ndash;>
-Process.start</p>
+Process.start 注意这里传入的 processClass 是 &ldquo;android.app.ActivityThread&rdquo;</p>
 
 <p>&ndash;>
 startViaZygote</p>
@@ -2790,7 +2790,182 @@ Zygote.forkAndSpecialize</p>
 </span></code></pre></td></tr></table></div></figure>
 
 
+<p>&ndash;> nativeForkAndSpecialize</p>
 
+<figure class='code'><figcaption><span>dalvik_system_Zygote.cpp</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">static</span> <span class="kt">void</span> <span class="n">Dalvik_dalvik_system_Zygote_forkAndSpecialize</span><span class="p">(</span><span class="k">const</span> <span class="n">u4</span><span class="o">*</span> <span class="n">args</span><span class="p">,</span>
+</span><span class='line'>    <span class="n">JValue</span><span class="o">*</span> <span class="n">pResult</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="n">pid_t</span> <span class="n">pid</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">pid</span> <span class="o">=</span> <span class="n">forkAndSpecializeCommon</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="kc">false</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">RETURN_INT</span><span class="p">(</span><span class="n">pid</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="k">static</span> <span class="n">pid_t</span> <span class="n">forkAndSpecializeCommon</span><span class="p">(</span><span class="k">const</span> <span class="n">u4</span><span class="o">*</span> <span class="n">args</span><span class="p">,</span> <span class="kt">bool</span> <span class="n">isSystemServer</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'><span class="p">...</span>
+</span><span class='line'> <span class="n">pid</span> <span class="o">=</span> <span class="n">fork</span><span class="p">();</span>
+</span><span class='line'><span class="p">...</span>
+</span><span class='line'><span class="k">return</span> <span class="n">pid</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>fork 创建新进程，返回到 ZygoteConnection 的 runOnce.</p>
+
+<figure class='code'><figcaption><span>frameworks/base/core/java/com/android/internal/os/ZygoteConnection.java</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'> <span class="kt">boolean</span> <span class="nf">runOnce</span><span class="o">()</span> <span class="kd">throws</span> <span class="n">ZygoteInit</span><span class="o">.</span><span class="na">MethodAndArgsCaller</span> <span class="o">{</span>
+</span><span class='line'><span class="o">...</span>
+</span><span class='line'>        <span class="k">try</span> <span class="o">{</span>
+</span><span class='line'>            <span class="k">if</span> <span class="o">(</span><span class="n">pid</span> <span class="o">==</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                <span class="c1">// in child</span>
+</span><span class='line'>                <span class="n">IoUtils</span><span class="o">.</span><span class="na">closeQuietly</span><span class="o">(</span><span class="n">serverPipeFd</span><span class="o">);</span>
+</span><span class='line'>                <span class="n">serverPipeFd</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+</span><span class='line'>                <span class="n">handleChildProc</span><span class="o">(</span><span class="n">parsedArgs</span><span class="o">,</span> <span class="n">descriptors</span><span class="o">,</span> <span class="n">childPipeFd</span><span class="o">,</span> <span class="n">newStderr</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'>                <span class="c1">// should never get here, the child is expected to either</span>
+</span><span class='line'>                <span class="c1">// throw ZygoteInit.MethodAndArgsCaller or exec().</span>
+</span><span class='line'>                <span class="k">return</span> <span class="kc">true</span><span class="o">;</span>
+</span><span class='line'>            <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+</span><span class='line'>                <span class="c1">// in parent...pid of &lt; 0 means failure</span>
+</span><span class='line'>                <span class="n">IoUtils</span><span class="o">.</span><span class="na">closeQuietly</span><span class="o">(</span><span class="n">childPipeFd</span><span class="o">);</span>
+</span><span class='line'>                <span class="n">childPipeFd</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+</span><span class='line'>                <span class="k">return</span> <span class="nf">handleParentProc</span><span class="o">(</span><span class="n">pid</span><span class="o">,</span> <span class="n">descriptors</span><span class="o">,</span> <span class="n">serverPipeFd</span><span class="o">,</span> <span class="n">parsedArgs</span><span class="o">);</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>        <span class="o">}</span> <span class="k">finally</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">IoUtils</span><span class="o">.</span><span class="na">closeQuietly</span><span class="o">(</span><span class="n">childPipeFd</span><span class="o">);</span>
+</span><span class='line'>            <span class="n">IoUtils</span><span class="o">.</span><span class="na">closeQuietly</span><span class="o">(</span><span class="n">serverPipeFd</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'><span class="o">...</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>子进程进入 &ndash;> handleChildProc</p>
+
+<figure class='code'><figcaption><span>frameworks/base/core/java/com/android/internal/os/ZygoteConnection.java</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">private</span> <span class="kt">void</span> <span class="nf">handleChildProc</span><span class="o">(</span><span class="n">Arguments</span> <span class="n">parsedArgs</span><span class="o">,</span>
+</span><span class='line'>        <span class="n">FileDescriptor</span><span class="o">[]</span> <span class="n">descriptors</span><span class="o">,</span> <span class="n">FileDescriptor</span> <span class="n">pipeFd</span><span class="o">,</span> <span class="n">PrintStream</span> <span class="n">newStderr</span><span class="o">)</span>
+</span><span class='line'>        <span class="kd">throws</span> <span class="n">ZygoteInit</span><span class="o">.</span><span class="na">MethodAndArgsCaller</span> <span class="o">{</span>
+</span><span class='line'><span class="o">...</span>
+</span><span class='line'>                <span class="n">ZygoteInit</span><span class="o">.</span><span class="na">invokeStaticMain</span><span class="o">(</span><span class="n">cloader</span><span class="o">,</span> <span class="n">className</span><span class="o">,</span> <span class="n">mainArgs</span><span class="o">);</span>
+</span><span class='line'><span class="o">...</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>调用 className 的 main 方法, className 是哪个呢？就是上面传入的 &ldquo;android.app.ActivityThread&rdquo;</p>
+
+<p>&ndash;></p>
+
+<figure class='code'><figcaption><span>frameworks/base/core/java/com/android/internal/os/ZygoteInit.java</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'>    <span class="kd">static</span> <span class="kt">void</span> <span class="nf">invokeStaticMain</span><span class="o">(</span><span class="n">ClassLoader</span> <span class="n">loader</span><span class="o">,</span>
+</span><span class='line'>            <span class="n">String</span> <span class="n">className</span><span class="o">,</span> <span class="n">String</span><span class="o">[]</span> <span class="n">argv</span><span class="o">)</span>
+</span><span class='line'>            <span class="kd">throws</span> <span class="n">ZygoteInit</span><span class="o">.</span><span class="na">MethodAndArgsCaller</span> <span class="o">{</span>
+</span><span class='line'>         <span class="o">...</span>
+</span><span class='line'>         <span class="n">cl</span> <span class="o">=</span> <span class="n">loader</span><span class="o">.</span><span class="na">loadClass</span><span class="o">(</span><span class="n">className</span><span class="o">);</span>
+</span><span class='line'>         <span class="n">m</span> <span class="o">=</span> <span class="n">cl</span><span class="o">.</span><span class="na">getMethod</span><span class="o">(</span><span class="s">&quot;main&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="n">Class</span><span class="o">[]</span> <span class="o">{</span> <span class="n">String</span><span class="o">[].</span><span class="na">class</span> <span class="o">});</span>
+</span><span class='line'>         <span class="o">...</span>
+</span><span class='line'>        <span class="cm">/*</span>
+</span><span class='line'><span class="cm">         * This throw gets caught in ZygoteInit.main(), which responds</span>
+</span><span class='line'><span class="cm">         * by invoking the exception&#39;s run() method. This arrangement</span>
+</span><span class='line'><span class="cm">         * clears up all the stack frames that were required in setting</span>
+</span><span class='line'><span class="cm">         * up the process.</span>
+</span><span class='line'><span class="cm">         */</span>
+</span><span class='line'>        <span class="k">throw</span> <span class="k">new</span> <span class="n">ZygoteInit</span><span class="o">.</span><span class="na">MethodAndArgsCaller</span><span class="o">(</span><span class="n">m</span><span class="o">,</span> <span class="n">argv</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>抛出异常，返回到 ZygoteInit.main() 里面 ;&ndash;)</p>
+
+<figure class='code'><figcaption><span>frameworks/base/core/java/com/android/internal/os/ZygoteInit.java</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span> <span class="n">argv</span><span class="o">[])</span> <span class="o">{</span>
+</span><span class='line'>    <span class="k">try</span> <span class="o">{</span>
+</span><span class='line'>        <span class="o">...</span>
+</span><span class='line'>    <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">MethodAndArgsCaller</span> <span class="n">caller</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">caller</span><span class="o">.</span><span class="na">run</span><span class="o">();</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>    <span class="o">...</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在这里执行 &ldquo;android.app.ActivityThread&rdquo; 的 main 方法.</p>
 </div>
 
 
@@ -2841,6 +3016,8 @@ Zygote.forkAndSpecialize</p>
         <a class="basic-alignment left" href="/blog/2013/12/27/alarm/" title="Previous Post: alarm">&laquo; alarm</a>
       
       
+        <a class="basic-alignment right" href="/blog/2014/04/28/unlink/" title="Next Post: unlink">unlink &raquo;</a>
+      
     </p>
   </footer>
 </article>
@@ -2860,6 +3037,10 @@ Zygote.forkAndSpecialize</p>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/04/28/unlink/">Unlink</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/01/09/android-start-process/">Android 启动流程</a>
       </li>
     
@@ -2873,10 +3054,6 @@ Zygote.forkAndSpecialize</p>
     
       <li class="post">
         <a href="/blog/2013/12/23/android-system-properties2/">Android System Properties Dynamic</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/12/13/android-systemproperties/">Android System Properties</a>
       </li>
     
   </ul>

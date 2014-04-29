@@ -4,7 +4,7 @@
   <title><![CDATA[Category: startup | Zhibin's blog]]></title>
   <link href="http://SteveVallay.github.io/blog/categories/startup/atom.xml" rel="self"/>
   <link href="http://SteveVallay.github.io/"/>
-  <updated>2014-02-13T15:14:46+08:00</updated>
+  <updated>2014-04-29T20:18:05+08:00</updated>
   <id>http://SteveVallay.github.io/</id>
   <author>
     <name><![CDATA[zhibin]]></name>
@@ -1596,7 +1596,7 @@ ActivityManagerService.startProcessLocked</p>
 
 <p>```
 &ndash;>
-Process.start</p>
+Process.start 注意这里传入的 processClass 是 &ldquo;android.app.ActivityThread&rdquo;</p>
 
 <p>&ndash;>
 startViaZygote</p>
@@ -1716,6 +1716,128 @@ Zygote.forkAndSpecialize</p>
 </code></pre>
 
 <p>```</p>
+
+<p>&ndash;> nativeForkAndSpecialize
+```cpp dalvik_system_Zygote.cpp
+static void Dalvik_dalvik_system_Zygote_forkAndSpecialize(const u4* args,</p>
+
+<pre><code>JValue* pResult)
+</code></pre>
+
+<p>{</p>
+
+<pre><code>pid_t pid;
+
+pid = forkAndSpecializeCommon(args, false);
+
+RETURN_INT(pid);
+</code></pre>
+
+<p>}</p>
+
+<p>static pid_t forkAndSpecializeCommon(const u4* args, bool isSystemServer)
+{
+&hellip;
+ pid = fork();
+&hellip;
+return pid;
+}
+```</p>
+
+<p>fork 创建新进程，返回到 ZygoteConnection 的 runOnce.</p>
+
+<p>```java frameworks/base/core/java/com/android/internal/os/ZygoteConnection.java
+ boolean runOnce() throws ZygoteInit.MethodAndArgsCaller {
+&hellip;</p>
+
+<pre><code>    try {
+        if (pid == 0) {
+            // in child
+            IoUtils.closeQuietly(serverPipeFd);
+            serverPipeFd = null;
+            handleChildProc(parsedArgs, descriptors, childPipeFd, newStderr);
+
+            // should never get here, the child is expected to either
+            // throw ZygoteInit.MethodAndArgsCaller or exec().
+            return true;
+        } else {
+            // in parent...pid of &lt; 0 means failure
+            IoUtils.closeQuietly(childPipeFd);
+            childPipeFd = null;
+            return handleParentProc(pid, descriptors, serverPipeFd, parsedArgs);
+        }
+    } finally {
+        IoUtils.closeQuietly(childPipeFd);
+        IoUtils.closeQuietly(serverPipeFd);
+    }
+</code></pre>
+
+<p>&hellip;
+}
+```</p>
+
+<p>子进程进入 &ndash;> handleChildProc</p>
+
+<p>```java frameworks/base/core/java/com/android/internal/os/ZygoteConnection.java</p>
+
+<pre><code>private void handleChildProc(Arguments parsedArgs,
+        FileDescriptor[] descriptors, FileDescriptor pipeFd, PrintStream newStderr)
+        throws ZygoteInit.MethodAndArgsCaller {
+</code></pre>
+
+<p>&hellip;</p>
+
+<pre><code>                ZygoteInit.invokeStaticMain(cloader, className, mainArgs);
+</code></pre>
+
+<p>&hellip;</p>
+
+<pre><code>}
+</code></pre>
+
+<p>```</p>
+
+<p>调用 className 的 main 方法, className 是哪个呢？就是上面传入的 &ldquo;android.app.ActivityThread&rdquo;</p>
+
+<p>&ndash;>
+```java frameworks/base/core/java/com/android/internal/os/ZygoteInit.java</p>
+
+<pre><code>static void invokeStaticMain(ClassLoader loader,
+        String className, String[] argv)
+        throws ZygoteInit.MethodAndArgsCaller {
+     ...
+     cl = loader.loadClass(className);
+     m = cl.getMethod("main", new Class[] { String[].class });
+     ...
+    /*
+     * This throw gets caught in ZygoteInit.main(), which responds
+     * by invoking the exception's run() method. This arrangement
+     * clears up all the stack frames that were required in setting
+     * up the process.
+     */
+    throw new ZygoteInit.MethodAndArgsCaller(m, argv);
+
+}
+</code></pre>
+
+<p>```</p>
+
+<p>抛出异常，返回到 ZygoteInit.main() 里面 ;&ndash;)</p>
+
+<p>```java frameworks/base/core/java/com/android/internal/os/ZygoteInit.java</p>
+
+<pre><code>public static void main(String argv[]) {
+    try {
+        ...
+    } catch (MethodAndArgsCaller caller) {
+        caller.run();
+    }
+    ...
+}
+</code></pre>
+
+<p>```
+在这里执行 &ldquo;android.app.ActivityThread&rdquo; 的 main 方法.</p>
 ]]></content>
   </entry>
   
