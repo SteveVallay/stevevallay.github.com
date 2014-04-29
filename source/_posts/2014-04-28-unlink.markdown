@@ -1,0 +1,58 @@
+---
+layout: post
+title: "unlink"
+date: 2014-04-28 22:23
+comments: true
+categories: 
+- linux
+---
+
+Do the things you love more than yourself.
+
+<!--more-->
+
+继续 APUE 学习。
+
+Linux 很多命令行命令和C标准库的很多接口有对应关系。pwd 命令对应 getcwd 接口，ls 命令对应 lstat 接口，rm 对应 remove 接口，link 对应 link 接口。。。。
+
+有这么一个命令叫 unlink , 它对应的 C 库接口也叫 unlink.
+
+man unlink 这么解释
+unlink - call the unlink function to remove the specified file
+
+man 2 unlink 接口 解释更清楚一点
+
+unlink - delete a name and possibly the file it refers to 
+
+       #include <unistd.h>
+
+       int unlink(const char *pathname);
+
+>unlink() deletes a name from the file system.  If that name was the last link to a file and no processes have the file open the file is deleted and the space it was using is made available for reuse.
+
+>If the name was the last link to a file but any processes still have the file open the file will remain in existence  until the last file descriptor referring to it is closed.
+
+>If the name referred to a symbolic link the link is removed.
+
+>If  the  name  referred to a socket, fifo or device the name for it is removed but processes which have the object open may continue to use it.
+
+
+unlink 从文件系统中删除一个名字，如果名字是文件的最后一个链接，则删除这个文件。这是什么意思呢，在linux 文件系统里，每个文件都是一个包含文件名的结构体，结构体并没有包含文件所包含的数据，而是有一个指针指向文件实际的存储位置。
+
+删除文件的时候，首先要判断这个文件名（结构体）是否是文件的最后一个链接，如果是才把真正的文件内容删除。
+
+如果 unlink 的时候，有进程打开了这个文件，那么直到所有的文件句柄关闭的时候才会删除。
+
+
+如果文件是 symbolic link（软链接） 的话，unlink 会删除 link, 而不会影响 link 指向的文件。
+
+如果是 socket, fifo,或 device,那么文件 name 被删除，如果有进程在打开，到进程关闭掉文件句柄时，才删除实际的存储内容。
+
+
+
+unlink 的一个常见用法是：一个进程在运行的时候创建或者打开了一个文件，在进程异常退出的时候希望删除这个文件，那么打开这个文件之后就可以立马调用 unlink，进程在的时候文件不会被删除，到进程结束的时候文件会自动被删除。
+
+
+
+
+
