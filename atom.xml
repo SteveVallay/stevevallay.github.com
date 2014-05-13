@@ -4,7 +4,7 @@
   <title><![CDATA[Zhibin's blog]]></title>
   <link href="http://SteveVallay.github.io/atom.xml" rel="self"/>
   <link href="http://SteveVallay.github.io/"/>
-  <updated>2014-04-29T20:18:05+08:00</updated>
+  <updated>2014-05-13T23:35:53+08:00</updated>
   <id>http://SteveVallay.github.io/</id>
   <author>
     <name><![CDATA[zhibin]]></name>
@@ -12,6 +12,311 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[permissions on folder]]></title>
+    <link href="http://SteveVallay.github.io/blog/2014/05/12/permissions-on-folder/"/>
+    <updated>2014-05-12T21:46:00+08:00</updated>
+    <id>http://SteveVallay.github.io/blog/2014/05/12/permissions-on-folder</id>
+    <content type="html"><![CDATA[<p>Never foget your dream, never ~</p>
+
+<!--more-->
+
+
+<p>对于一个文件来说，我们都知道，RWX 三个permission 分别对应读、写 和执行权限。但是对于目录来说，它又不能被执行，它的 X 权限有何用呢？如果没有 X 权限，是否可以修改目录中的文件呢？</p>
+
+<p>想让我们来实验一下：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>mkdir fz
+</span><span class='line'><span class="nv">$ </span>ls -ld fz
+</span><span class='line'>drwxrwxr-x 2 goodluck goodluck 4096 2014-05-12 21:57 fz
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>创建成功，默认权限775</p>
+
+<p>添加几个文件进来</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span><span class="nb">cd </span>fz/
+</span><span class='line'><span class="nv">$ </span>touch a b c
+</span><span class='line'><span class="nv">$ </span>ls -al fz
+</span><span class='line'>drwxrwxr-x 2 goodluck goodluck 4096 2014-05-12 21:59 .
+</span><span class='line'>drwxr-xr-x 8 goodluck goodluck 4096 2014-05-12 21:59 ..
+</span><span class='line'>-rw-rw-r-- 1 goodluck goodluck    0 2014-05-12 21:59 a
+</span><span class='line'>-rw-rw-r-- 1 goodluck goodluck    0 2014-05-12 21:59 b
+</span><span class='line'>-rw-rw-r-- 1 goodluck goodluck    0 2014-05-12 21:59 c
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>让我们对fz单独设置 RWX 权限来看看是什么效果。</p>
+
+<p>-R</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>sudo chmod 444 fz <span class="c">#修改 folder 的 permission 需要 root </span>
+</span><span class='line'><span class="nv">$ </span>ls -ld fz
+</span><span class='line'>dr--r--r-- 2 goodluck goodluck 4096 2014-05-12 21:59 fz
+</span><span class='line'>
+</span><span class='line'><span class="nv">$ </span>ls -al fz
+</span><span class='line'>ls: cannot access fz/.: Permission denied
+</span><span class='line'>ls: cannot access fz/..: Permission denied
+</span><span class='line'>ls: cannot access fz/a: Permission denied
+</span><span class='line'>ls: cannot access fz/c: Permission denied
+</span><span class='line'>ls: cannot access fz/b: Permission denied
+</span><span class='line'>total 0
+</span><span class='line'>d????????? ? ? ? ?                ? .
+</span><span class='line'>d????????? ? ? ? ?                ? ..
+</span><span class='line'>-????????? ? ? ? ?                ? a
+</span><span class='line'>-????????? ? ? ? ?                ? b
+</span><span class='line'>-????????? ? ? ? ?                ? c
+</span><span class='line'><span class="nv">$ </span>cat fz/a
+</span><span class='line'>cat: fz/a: Permission denied
+</span><span class='line'><span class="nv">$ </span><span class="nb">cd </span>fz
+</span><span class='line'>bash: <span class="nb">cd</span>: fz: Permission denied
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>只有 R 权限的话，只能知道 fz 里面有 . .. 两个目录和 a b c 三个文件。文件属性和文件的内容都不能读取，当然也不能写。</p>
+
+<p>-W</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>sudo chmod 222 fz
+</span><span class='line'><span class="nv">$ </span>ls -ld fz
+</span><span class='line'>d-w--w--w- 2 goodluck goodluck 4096 2014-05-12 21:59 fz
+</span><span class='line'>
+</span><span class='line'><span class="nv">$ </span>ls fz
+</span><span class='line'>ls: cannot open directory fz: Permission denied
+</span><span class='line'><span class="nv">$ </span>cat fz/a
+</span><span class='line'>cat: fz/a: Permission denied
+</span><span class='line'><span class="nv">$ </span><span class="nb">echo</span> <span class="s2">&quot;aaa&quot;</span> &gt;fz/a
+</span><span class='line'>bash: fz/a: Permission denied
+</span><span class='line'>mv fz/a fz/d
+</span><span class='line'>mv: accessing <span class="sb">`</span>fz/d<span class="err">&#39;</span>: Permission denied
+</span><span class='line'><span class="nv">$ </span><span class="nb">cd </span>fz
+</span><span class='line'>bash: <span class="nb">cd</span>: fz: Permission denied
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>只有 W 权限,啥也干不了</p>
+
+<p>-X</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>sudo chmod 111 fz
+</span><span class='line'><span class="nv">$ </span>ls -ld fz
+</span><span class='line'>d--x--x--x 2 goodluck goodluck 4096 2014-05-12 21:59 fz
+</span><span class='line'>
+</span><span class='line'><span class="nv">$ </span>ls -al fz
+</span><span class='line'>ls: cannot open directory fz: Permission denied
+</span><span class='line'><span class="nv">$ </span><span class="nb">echo</span> <span class="s2">&quot;aaa&quot;</span> &gt; fz/a  <span class="c">#success</span>
+</span><span class='line'><span class="nv">$ </span>cat fz/a
+</span><span class='line'>aaa
+</span><span class='line'>chmod +x fz/a <span class="c">#success</span>
+</span><span class='line'><span class="nv">$ </span>ls -l fz/a
+</span><span class='line'>-rw-rw-r-- 1 goodluck goodluck 4 2014-05-12 22:16 fz/a
+</span><span class='line'><span class="nv">$ </span>rm fz/a
+</span><span class='line'>rm: cannot remove <span class="sb">`</span>fz/a<span class="s1">&#39;: Permission denied</span>
+</span><span class='line'><span class="s1">$ cd fz</span>
+</span><span class='line'><span class="s1">$ cd fz</span>
+</span><span class='line'><span class="s1">$ ls</span>
+</span><span class='line'><span class="s1">ls: cannot open directory .: Permission denied</span>
+</span><span class='line'><span class="s1">$ touch ff</span>
+</span><span class='line'><span class="s1">touch: cannot touch `ff&#39;</span>: Permission denied
+</span><span class='line'>
+</span><span class='line'><span class="nv">$ </span>chmod 775 fz/a <span class="c">#fail but not prompt error</span>
+</span><span class='line'><span class="nv">$ </span><span class="nb">echo</span> <span class="nv">$?</span>
+</span><span class='line'>0 <span class="c">#seems success but not changed</span>
+</span><span class='line'>-rw-rw-r-- 1 goodluck goodluck 11 2014-05-12 22:26 fz/a
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>只有X权限可以读，写,修改内部文件内容，修改内部文件属性，不能rename/delete/create 文件,chmod 没有报错，却也没有生效</p>
+
+<p>-RX</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>sudo chmod 555 fz
+</span><span class='line'><span class="nv">$ </span>ls -ld fz
+</span><span class='line'>dr-xr-xr-x 2 goodluck goodluck 4096 2014-05-12 22:19 fz
+</span><span class='line'><span class="nv">$ </span>ls -al fz
+</span><span class='line'>total 12
+</span><span class='line'>dr-xr-xr-x 2 goodluck goodluck 4096 2014-05-12 22:19 .
+</span><span class='line'>drwxr-xr-x 8 goodluck goodluck 4096 2014-05-12 21:59 ..
+</span><span class='line'>-rw-rw-r-- 1 goodluck goodluck   11 2014-05-12 22:26 a
+</span><span class='line'>-rw-rw-r-- 1 goodluck goodluck    0 2014-05-12 21:59 b
+</span><span class='line'>-rw-rw-r-- 1 goodluck goodluck    0 2014-05-12 21:59 c
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>可以正常读、写、执行文件，cd 到目录，查看文件属性。不能 rename/delete/create 文件</p>
+
+<p>奇怪的一点是在 cd 到 fz 可以使用 chmod 修改 a 文件的permisson, 但是在 fz 外面目录则不生效，奇怪!</p>
+
+<p>-RW</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>sudo chmod 666 fz
+</span><span class='line'><span class="nv">$ </span>ls -al fz
+</span><span class='line'>ls: cannot access fz/.: Permission denied
+</span><span class='line'>ls: cannot access fz/..: Permission denied
+</span><span class='line'>ls: cannot access fz/a: Permission denied
+</span><span class='line'>ls: cannot access fz/c: Permission denied
+</span><span class='line'>ls: cannot access fz/b: Permission denied
+</span><span class='line'>total 0
+</span><span class='line'>d????????? ? ? ? ?                ? .
+</span><span class='line'>d????????? ? ? ? ?                ? ..
+</span><span class='line'>-????????? ? ? ? ?                ? a
+</span><span class='line'>-????????? ? ? ? ?                ? b
+</span><span class='line'>-????????? ? ? ? ?                ? c
+</span><span class='line'>
+</span><span class='line'><span class="nv">$ </span>rm fz/a
+</span><span class='line'>rm: cannot remove <span class="sb">`</span>fz/a<span class="s1">&#39;: Permission denied</span>
+</span><span class='line'><span class="s1">$ touch fz/d</span>
+</span><span class='line'><span class="s1">touch: cannot touch `fz/d&#39;</span>: Permission denied
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>基本上和只有 R 权限一样，只能获取目录里面文件的文件名，不能读、不能写、不能执行、不能获取文件属性、不能 delete/rename/create 文件。</p>
+
+<p>看得出来，没有 X 的 W 没有什么作用</p>
+
+<p>-WX</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>sudo chmod 333 fz
+</span><span class='line'><span class="nv">$ </span>ls -ld fz
+</span><span class='line'>d-wx-wx-wx 2 goodluck goodluck 4096 2014-05-12 22:19 fz
+</span><span class='line'><span class="nv">$ </span>cat fz/a
+</span><span class='line'><span class="nb">echo </span>aaa
+</span><span class='line'><span class="nv">$ </span>ls -al fz/a
+</span><span class='line'>-rwxrwxrwx 1 goodluck goodluck 9 2014-05-12 22:38 fz/a
+</span><span class='line'><span class="nv">$ </span><span class="nb">echo</span> <span class="s2">&quot;bbb&quot;</span>&gt; fz/b
+</span><span class='line'><span class="nv">$ </span>cat fz/b
+</span><span class='line'>bbb
+</span><span class='line'><span class="nv">$ </span>rm fz/b <span class="c">#success</span>
+</span><span class='line'><span class="nv">$ </span>touch fz/e  <span class="c">#success</span>
+</span><span class='line'><span class="nv">$ </span><span class="nb">cd </span>fz <span class="c">#success</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>只是不能获取目录中的文件名列表，如果你已经知道某个文件的名字，那么则可以读、写、执行、获取属性、delete/rename/create 都没问题。</p>
+
+<p>总结一下，linux 下，目录的权限属性：</p>
+
+<ol>
+<li>R 读取目录中包含的文件名和文件类型</li>
+<li>W create/rename/delete 目录中的文件(仅在同时有 X 权限的时候生效)</li>
+<li>X access/search 目录中的文件</li>
+</ol>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[unlink]]></title>
