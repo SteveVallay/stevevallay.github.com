@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: hearthstone cards | Zhibin's blog]]></title>
+  <link href="http://SteveVallay.github.io/blog/categories/hearthstone-cards/atom.xml" rel="self"/>
+  <link href="http://SteveVallay.github.io/"/>
+  <updated>2014-05-22T23:16:11+08:00</updated>
+  <id>http://SteveVallay.github.io/</id>
+  <author>
+    <name><![CDATA[zhibin]]></name>
+    <email><![CDATA[zhibinwang.q@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[hearthstone_cards]]></title>
+    <link href="http://SteveVallay.github.io/blog/2014/05/22/hearthstone-cards/"/>
+    <updated>2014-05-22T23:08:00+08:00</updated>
+    <id>http://SteveVallay.github.io/blog/2014/05/22/hearthstone-cards</id>
+    <content type="html"><![CDATA[<p>Hearthstone cards for android</p>
+
+<!--more-->
+
+
+<p><img src="/images/blog/hearthstone_card0.png" alt="" /></p>
+
+<p><img src="/images/blog/hearthstone_card1.png" alt="" /></p>
+
+<p><img src="/images/blog/hearthstone_card2.png" alt="" /></p>
+]]></content>
+  </entry>
+  
+</feed>
