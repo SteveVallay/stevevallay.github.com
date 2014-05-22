@@ -1,0 +1,326 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Zhibin's blog</title>
+  <meta name="author" content="zhibin">
+
+  
+  <meta name="description" content="Ruby on Rails development,programming,hacker">
+  <meta name="keywords" content="ruby, ruby on rails, web development, programming">
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://SteveVallay.github.io/blog/page/3">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Zhibin's blog" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/lib/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-39252101-2']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Zhibin's blog</a></h1>
+  
+    <h2>always smile :-)</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:SteveVallay.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div class="blog-index">
+  
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/08/15/markdown/">Markdown Usage</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-08-15T11:15:00+08:00" pubdate data-updated="true">Aug 15<span>th</span>, 2013</time>
+        
+         | <a href="/blog/2013/08/15/markdown/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>什么是 markdown ?</h3>
+
+<p>随着 <a href="https://github.com">Github</a> 的流行，markdown 渐渐获得了人们的青睐，当作一种更便于读写的格式流行起来. github 默认支持 markdown格式的文件，例如这个 <a href="https://github.com/SteveVallay/stevevallay.github.com/blob/source/README.markdown">README.markdown</a> 文件，在github 上展示的时候会被直接解析成漂亮的格式。</p>
+
+<p>随后，<a href="http://pages.github.com/">github page</a> 的出现可以使你可以在 github 上搭建一个免费博客，使用 markdown 语法。</p>
+
+<p>再然后，出现了<a href="http://jekyllrb.com/">jekyllrb</a> 和 <a href="http://octopress.org/">Octopress</a>  这种基于 <a href="http://pages.github.com/">github page</a> 和 markdown 的 Blog 框架，使人们摆脱 wordpress 的臃肿，不必担心找不到托管服务器,使用简单的 markdown 语法即可快速撰写和发布博客。(当前这个 blog 正是使用 <a href="http://octopress.org/">Octopress</a> + <a href="http://pages.github.com/">github page</a> 搭建的博客)</p>
+
+<p>简单的说，markdown 是一种轻量级的标记语言，它的目标是易读易写，使用 markdown 书写的格式可被 markdown 解析器转换成格式良好的 html/xhtml 文件。</p>
+
+<p>markdown 包含两层含义，一层是 markdown 语法；另外一层是解析 markdown 语法文件的软件。</p>
+
+<p>一些介绍 markdown 语法的资源：</p>
+
+<ul>
+<li><a href="http://daringfireball.net/projects/markdown/">markdown 作者博客</a></li>
+<li><a href="http://zh.wikipedia.org/wiki/Markdown">中文 wiki</a></li>
+<li><a href="http://en.wikipedia.org/wiki/Markdown">英文 wiki</a></li>
+<li><a href="http://wowubuntu.com/markdown/">Markdown 语法说明 (简体中文版)</a></li>
+</ul>
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/08/15/markdown/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/08/15/blog-equals-octopress-plus-github-pages/">Blog = Octopress + Github Pages</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-08-15T10:44:00+08:00" pubdate data-updated="true">Aug 15<span>th</span>, 2013</time>
+        
+         | <a href="/blog/2013/08/15/blog-equals-octopress-plus-github-pages/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Thanks to github , we have another choice to setup a blog beyond the popluar wordpress, <a href="http://page.github.com">github pages</a> +  <a href="http://octopress.org">octopress</a> (based on <a href="http://jekyllrb.com">jekyll</a>, simply we can say : octopress is jekyll + themes).</p>
+
+<p>Using octopress we can setup a blog very easy , the most import is that the blog is host at <a href="http://github.com">github</a>:</p>
+
+<ul>
+<li>it is free!</li>
+<li>version control !</li>
+<li>without bandwith limit !</li>
+<li>without storage space limit!</li>
+<li>keep as long as you wish !</li>
+</ul>
+
+
+<p><em>Let&rsquo;s go &hellip;</em></p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/08/15/blog-equals-octopress-plus-github-pages/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  <div class="pagination">
+    
+    <a href="/blog/archives">Blog Archives</a>
+    
+    <a class="next" href="/blog/page/2/">Newer &rarr;</a>
+    
+  </div>
+</div>
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/05/22/sms/">Android Sms</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/05/12/permissions-on-folder/">Permissions on Folder</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/04/28/unlink/">Unlink</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/02/20/weak-symbol/">Weak Symbol</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/01/09/android-start-process/">Android 启动流程</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating&#8230;</li>
+  </ul>
+  
+  <a href="https://github.com/SteveVallay">@SteveVallay</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'SteveVallay',
+            count: 2,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+
+
+  
+</aside>
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - zhibin -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'zhibin';
+      
+        
+        var disqus_script = 'count.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
