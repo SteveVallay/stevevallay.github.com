@@ -1,0 +1,16 @@
+---
+layout: post
+title: "android sms"
+date: 2014-05-22 17:32
+comments: true
+categories:
+- sms
+keywords: sms
+description: android sms
+---
+
+Android  SMS Process 
+<!-- more -->
+
+![graph][101]
+[101]:/images/blog/android_sms.png
