@@ -4,7 +4,7 @@
   <title><![CDATA[Zhibin's blog]]></title>
   <link href="http://SteveVallay.github.io/atom.xml" rel="self"/>
   <link href="http://SteveVallay.github.io/"/>
-  <updated>2014-05-22T17:39:32+08:00</updated>
+  <updated>2014-05-22T17:44:17+08:00</updated>
   <id>http://SteveVallay.github.io/</id>
   <author>
     <name><![CDATA[zhibin]]></name>
@@ -379,15 +379,6 @@ unlink &ndash; call the unlink function to remove the specified file</p>
 <p>如果是 socket, fifo,或 device,那么文件 name 被删除，如果有进程在打开，到进程关闭掉文件句柄时，才删除实际的存储内容。</p>
 
 <p>unlink 的一个常见用法是：一个进程在运行的时候创建或者打开了一个文件，在进程异常退出的时候希望删除这个文件，那么打开这个文件之后就可以立马调用 unlink，进程在的时候文件不会被删除，到进程结束的时候文件会自动被删除。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[weak symbol]]></title>
-    <link href="http://SteveVallay.github.io/blog/2014/02/20/weak-symbol/"/>
-    <updated>2014-02-20T11:24:00+08:00</updated>
-    <id>http://SteveVallay.github.io/blog/2014/02/20/weak-symbol</id>
-    <content type="html"><![CDATA[
 ]]></content>
   </entry>
   
@@ -7184,6 +7175,313 @@ in an experience built and designed for developers.
 来测试吧。</p>
 
 <p><a href="http://enjoyhacking.heroku.com">这里</a> 是我用来测试的 rails app.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[markdown usage]]></title>
+    <link href="http://SteveVallay.github.io/blog/2013/08/15/markdown/"/>
+    <updated>2013-08-15T11:15:00+08:00</updated>
+    <id>http://SteveVallay.github.io/blog/2013/08/15/markdown</id>
+    <content type="html"><![CDATA[<h3>什么是 markdown ?</h3>
+
+<p>随着 <a href="https://github.com">Github</a> 的流行，markdown 渐渐获得了人们的青睐，当作一种更便于读写的格式流行起来. github 默认支持 markdown格式的文件，例如这个 <a href="https://github.com/SteveVallay/stevevallay.github.com/blob/source/README.markdown">README.markdown</a> 文件，在github 上展示的时候会被直接解析成漂亮的格式。</p>
+
+<p>随后，<a href="http://pages.github.com/">github page</a> 的出现可以使你可以在 github 上搭建一个免费博客，使用 markdown 语法。</p>
+
+<p>再然后，出现了<a href="http://jekyllrb.com/">jekyllrb</a> 和 <a href="http://octopress.org/">Octopress</a>  这种基于 <a href="http://pages.github.com/">github page</a> 和 markdown 的 Blog 框架，使人们摆脱 wordpress 的臃肿，不必担心找不到托管服务器,使用简单的 markdown 语法即可快速撰写和发布博客。(当前这个 blog 正是使用 <a href="http://octopress.org/">Octopress</a> + <a href="http://pages.github.com/">github page</a> 搭建的博客)</p>
+
+<p>简单的说，markdown 是一种轻量级的标记语言，它的目标是易读易写，使用 markdown 书写的格式可被 markdown 解析器转换成格式良好的 html/xhtml 文件。</p>
+
+<p>markdown 包含两层含义，一层是 markdown 语法；另外一层是解析 markdown 语法文件的软件。</p>
+
+<p>一些介绍 markdown 语法的资源：</p>
+
+<ul>
+<li><a href="http://daringfireball.net/projects/markdown/">markdown 作者博客</a></li>
+<li><a href="http://zh.wikipedia.org/wiki/Markdown">中文 wiki</a></li>
+<li><a href="http://en.wikipedia.org/wiki/Markdown">英文 wiki</a></li>
+<li><a href="http://wowubuntu.com/markdown/">Markdown 语法说明 (简体中文版)</a></li>
+</ul>
+
+
+<!-- more -->
+
+
+<h3>谁使用 markdown ?</h3>
+
+<p>列举几个著名的：</p>
+
+<ul>
+<li><a href="https://github.com">Github</a></li>
+<li><a href="http://pages.github.com/">Github pages</a></li>
+<li><a href="https://gist.github.com/">Github Gist</a></li>
+<li><a href="http://stackoverflow.com/">Stack Overflow</a></li>
+<li><a href="http://stackoverflow.com/editing-help">StackOverflow edit help</a></li>
+</ul>
+
+
+<h3>mark down 语法 Example</h3>
+
+<h4>标题</h4>
+
+<p>使用任意数量的 <code>===</code>  表示一级标题，<code>----</code> 表示二级标题。</p>
+
+<p>如：</p>
+
+<pre><code>一级标题
+===========
+
+二级标题
+--------
+</code></pre>
+
+<p>也可以采用在行首插入 <code>#</code> 的格式，行首插入 1-6 个 <code>#</code> ，对应1级到6级标题</p>
+
+<pre><code>#一级标题
+##二级标题
+###三级标题
+</code></pre>
+
+<h3>块引用</h3>
+
+<p>在每行的行首加入 <code>&gt;</code> 可建立一个块引用</p>
+
+<p>如：</p>
+
+<pre><code>&gt;Stay hungry, stay foolish !
+</code></pre>
+
+<p>显示效果：</p>
+
+<blockquote><p>Stay hungry, stay foolish !</p></blockquote>
+
+<p>在块引用内部也支持 markdown 标记，多级引用： 比如：</p>
+
+<pre><code>&gt;###Title
+&gt;some code
+&gt;
+&gt;    sudo make me a sandwitch
+&gt;&gt;二级引用
+</code></pre>
+
+<p>显示效果：</p>
+
+<blockquote><h3>Title</h3>
+
+<p>some code</p>
+
+<pre><code>sudo make me a sandwidth
+</code></pre>
+
+<blockquote><p>二级引用</p></blockquote></blockquote>
+
+<h3>强调</h3>
+
+<p>markdown 使用 <code>*</code> 和 <code>_</code> 来表示强调，被一个或多个 <code>*</code> <code>_</code> 包围的字句会被显示为强调。</p>
+
+<p>如：</p>
+
+<pre><code>*one*
+_one_
+**two**
+__two__
+***three***
+___three___
+</code></pre>
+
+<p>显示效果：</p>
+
+<p><em>one</em>
+<em>one</em>
+<strong>two</strong>
+<strong>two</strong>
+<strong><em>three</em></strong>
+<strong><em>three</em></strong></p>
+
+<h3>列表</h3>
+
+<p>markdown 支持无序列表和有序列表。</p>
+
+<p>在行首使用  <code>*</code>, <code>+</code> 或者 <code>-</code> 加一个空格作为无序列表标记。</p>
+
+<p>如：</p>
+
+<pre><code>* ul 1
+* ul 2
+* ul 3
+</code></pre>
+
+<p>显示效果：</p>
+
+<ul>
+<li>ul 1</li>
+<li>ul 2</li>
+<li>ul 3</li>
+</ul>
+
+
+<p>有序列表使用数字和一个英文句点 <code>.</code> 加一个空格。</p>
+
+<p>如：</p>
+
+<pre><code> 1. ol 1
+ 2. ol 2
+ 3. ol 3
+</code></pre>
+
+<p>显示效果：</p>
+
+<ol>
+<li>ol 1</li>
+<li>ol 2</li>
+<li>ol 3</li>
+</ol>
+
+
+<h3>链接</h3>
+
+<p>markdown 支持两种链接：<strong>行内</strong>和<strong>参考</strong>两种形式。</p>
+
+<p><strong>行内</strong>链接的写法：将链接文字用 <code>[]</code> 括起来，链接地址用 <code>()</code> 括起来。</p>
+
+<p>如：</p>
+
+<pre><code>[My Blog](http://stevevallay.github.io)
+</code></pre>
+
+<p>显示效果:</p>
+
+<p><a href="http://stevevallay.github.io">My Blog</a></p>
+
+<p><strong>参考</strong>链接与<strong>行内</strong>链接不同，参考链接将链接地址放在另外的地方（一般集中放在页面下方),用数字来引用：</p>
+
+<p>如：</p>
+
+<pre><code>[My Blog][100]
+[100]:http://stevevallay.github.io
+</code></pre>
+
+<p>显示效果：</p>
+
+<p><a href="http://stevevallay.github.io">My Blog</a></p>
+
+<h3>引用代码</h3>
+
+<p>在句子中，可以使用反引号(<code>`</code>）标记一小段代码。</p>
+
+<p>如：</p>
+
+<pre><code>get bash help from `man bash`
+</code></pre>
+
+<p>显示效果：</p>
+
+<p>get help from <code>man bash</code></p>
+
+<p>插入一段多行程序代码，使用多个反引号开头和结尾。</p>
+
+<p>如：</p>
+
+<pre><code>```
+sudo make me a sandwich
+eat it
+```
+</code></pre>
+
+<p>显示效果：(这里的显示效果可能有些不同，因为这里使用了 Octopress 的 <a href="http://octopress.org/docs/plugins/backtick-codeblock/">Backtick Code Block </a> 插件</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo make me a sandwich
+</span><span class='line'>eat it</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>图片</h3>
+
+<p>markdown 使用和链接类似的语法来插入图片，同样也有两种样式：<strong>行内</strong>和<strong>参考</strong>。</p>
+
+<p><strong>行内</strong>引用:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>   ![Image Description](/image/path/aa.img)</span></code></pre></td></tr></table></div></figure>
+
+
+<p>显示效果：</p>
+
+<p><img src="http://SteveVallay.github.io/images/blog/create_a_repo.png" alt="Example Image" /></p>
+
+<p><strong>参考</strong>引用:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>![示例图片][101]
+</span><span class='line'>[101]:/images/blog/create_a_repo.png</span></code></pre></td></tr></table></div></figure>
+
+
+<p>显示效果：</p>
+
+<p><img src="http://SteveVallay.github.io/images/blog/create_a_repo.png" alt="示例图片" /></p>
+
+<h3>注脚</h3>
+
+<p>注脚和链接类似，只是编号使用一个 <code>^</code>符号开头，比如：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>  footnote example[^1]
+</span><span class='line'>  
+</span><span class='line'>  [^1]:this is a footnote</span></code></pre></td></tr></table></div></figure>
+
+
+<p>显示效果</p>
+
+<p>this is a fotnote<sup id="fnref:1"><a href="#fn:1" rel="footnote">1</a></sup></p>
+
+<h3>转义</h3>
+
+<p>markdown 语法中特殊意义的字符输入的时候要用反斜杠<code>\</code>来转义。</p>
+
+<p>如：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>\  反斜杠
+</span><span class='line'>`  反引号
+</span><span class='line'>*  星号
+</span><span class='line'>_  底线
+</span><span class='line'>{} 花括号
+</span><span class='line'>[] 方括号
+</span><span class='line'>() 括弧
+</span><span class='line'>#  井字号
+</span><span class='line'>+  加号
+</span><span class='line'>-  减号
+</span><span class='line'>.  英文句点
+</span><span class='line'>!  惊叹号</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Markdown 编辑器</h3>
+
+<p><code>Windows</code> 下我使用 <a href="http://markdownpad.com/">MarkdownPad</a> 作为 markdown 编辑器。</p>
+<div class="footnotes">
+<hr/>
+<ol>
+<li id="fn:1">
+<p>this is a footnote<a href="#fnref:1" rev="footnote">&#8617;</a></p></li>
+</ol>
+</div>
+
 ]]></content>
   </entry>
   
