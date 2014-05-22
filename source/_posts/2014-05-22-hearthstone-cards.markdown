@@ -11,8 +11,9 @@ description: hearthstone  cards android
 ---
 
 Hearthstone cards for android 
-<!--more-->
 ![](/images/blog/hearthstone_card0.png)
+
+<!--more-->
 
 ![](/images/blog/hearthstone_card1.png)
 
