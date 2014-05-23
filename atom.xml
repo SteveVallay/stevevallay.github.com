@@ -4,7 +4,7 @@
   <title><![CDATA[Zhibin's blog]]></title>
   <link href="http://SteveVallay.github.io/atom.xml" rel="self"/>
   <link href="http://SteveVallay.github.io/"/>
-  <updated>2014-05-22T23:21:43+08:00</updated>
+  <updated>2014-05-24T00:14:32+08:00</updated>
   <id>http://SteveVallay.github.io/</id>
   <author>
     <name><![CDATA[zhibin]]></name>
@@ -12,6 +12,167 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[file access permissions summary ]]></title>
+    <link href="http://SteveVallay.github.io/blog/2014/05/23/file-access-permissions/"/>
+    <updated>2014-05-23T23:08:00+08:00</updated>
+    <id>http://SteveVallay.github.io/blog/2014/05/23/file-access-permissions</id>
+    <content type="html"><![CDATA[<!-- more -->
+
+
+<p></p>
+
+<p>总结一下常用的 file access permission bits. <code>man 2 stat</code> 可以看到几乎所有的 file permission bits.</p>
+
+<h3>S_ISUID</h3>
+
+<p>set-user-ID</p>
+
+<p>文件： 设置了 <code>S_ISUID</code> 的文件在执行的时候会使得进程的 effective UID 和 文件的 UID 相同。</p>
+
+<p>目录： not used</p>
+
+<h3>S_ISGID</h3>
+
+<p>set-group-ID</p>
+
+<p>文件： 如果文件的 group execute 位设置了，那么设置了 <code>S_ISGID</code> 的文件在执行的时候（group 的身份来执行）会使得进程的 effective GID 和 文件 GID 相同。</p>
+
+<p>目录： 目录内新建的文件的 GID 和 目录的GID 一样。</p>
+
+<h3>S_ISVTX</h3>
+
+<p>striky bit</p>
+
+<p>文件： 内存会对文件进行 cache</p>
+
+<p>目录： 只允许文件的 owner , 目录的 owner 和 super user 对 目录内文件进行 delete、rename。(目录的 other WX 都设置了的情况下）</p>
+
+<h3>S_IRUSR</h3>
+
+<p>user-read</p>
+
+<p>文件：user 读取文件内容</p>
+
+<p>目录：user 读取目录中文件的名称</p>
+
+<h3>S_IWUSR</h3>
+
+<p>user-write</p>
+
+<p>文件：user 写文件</p>
+
+<p>目录：user 对目录中文件进行 rename/delete/create (只有在 S_IXUSR 同时设置了才可以)</p>
+
+<h3>S_IXUSR</h3>
+
+<p>user-execute</p>
+
+<p>文件：user 执行文件</p>
+
+<p>目录：user 访问目录内文件， read/write/exexute/chmod</p>
+
+<h3>S_IRGRP</h3>
+
+<p>group-read</p>
+
+<p>文件：group 读取文件内容</p>
+
+<p>目录：group 读取目录中文件的名称</p>
+
+<h3>S_IWGRP</h3>
+
+<p>group-write</p>
+
+<p>文件：group 写文件</p>
+
+<p>目录：group 对目录中文件进行 rename/delete/create (只有在 S_IXUSR 同时设置了才可以)</p>
+
+<h3>S_IXGRP</h3>
+
+<p>group-execute</p>
+
+<p>文件：group 执行文件</p>
+
+<p>目录：group 访问目录内文件 &ndash; read/write/exexute/chmod</p>
+
+<h3>S_IROTH</h3>
+
+<p>other-read</p>
+
+<p>文件：other 读取文件内容</p>
+
+<p>目录：other 读取目录中文件的名称</p>
+
+<h3>S_IWOTH</h3>
+
+<p>other-write</p>
+
+<p>文件：other 写文件</p>
+
+<p>目录：other 对目录中文件进行 rename/delete/create (只有在 S_IXUSR 同时设置了才可以)</p>
+
+<h3>S_IXOTH</h3>
+
+<p>other-execute</p>
+
+<p>文件：other 执行文件</p>
+
+<p>目录：other 访问目录内文件 &ndash; read/write/exexute/chmod</p>
+
+<h3>S_IRWXU</h3>
+
+<p>= S_IRUSR | S_IWUSR | S_IXUSR</p>
+
+<h3>S_IRWXG</h3>
+
+<p>= S_IRGRP | S_IWGRP | S_IXGRP</p>
+
+<h3>S_IRWXO</h3>
+
+<p>= S_IROTH | S_IWOTH | S_IXOTH</p>
+
+<hr />
+
+<p>参考 <code>man 2 stat</code></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>       S_ISUID    0004000   set UID bit
+</span><span class='line'>       S_ISGID    0002000   set-group-ID bit (see below)
+</span><span class='line'>       S_ISVTX    0001000   sticky bit (see below)
+</span><span class='line'>       S_IRWXU    00700     mask for file owner permissions
+</span><span class='line'>       S_IRUSR    00400     owner has read permission
+</span><span class='line'>       S_IWUSR    00200     owner has write permission
+</span><span class='line'>       S_IXUSR    00100     owner has execute permission
+</span><span class='line'>       S_IRWXG    00070     mask for group permissions
+</span><span class='line'>       S_IRGRP    00040     group has read permission
+</span><span class='line'>       S_IWGRP    00020     group has write permission
+</span><span class='line'>       S_IXGRP    00010     group has execute permission
+</span><span class='line'>       S_IRWXO    00007     mask for permissions for others (not in group)
+</span><span class='line'>       S_IROTH    00004     others have read permission
+</span><span class='line'>       S_IWOTH    00002     others have write permission
+</span><span class='line'>       S_IXOTH    00001     others have execute permission
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[hearthstone_cards]]></title>
@@ -6987,211 +7148,6 @@ PassengerDefaultRuby /home/goodluck/.rvm/wrappers/ruby-2.0.0-p247/ruby</p></bloc
 <p>下载 <a href="http://jqueryvalidation.org/">jQuery Validation</a>，把 <code>jquery.validate.min.js</code> 放在 <code>app/assets/javascripts</code> 下面就可以用了。</p>
 
 <p>使用方法可以参考 <a href="http://sleekd.com/tutorials/jquery-validation-in-ruby-on-rails/">这个tutorials</a>，或者<a href="http://jqueryvalidation.org/documentation">官方文档</a>。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[部署 Rails 程序到 Heroku]]></title>
-    <link href="http://SteveVallay.github.io/blog/2013/08/27/deploy-rails-app-on-heroku/"/>
-    <updated>2013-08-27T17:26:00+08:00</updated>
-    <id>http://SteveVallay.github.io/blog/2013/08/27/deploy-rails-app-on-heroku</id>
-    <content type="html"><![CDATA[<h2>什么是 Heroku ?</h2>
-
-<p><a href="https://www.heroku.com/">Heroku</a> 是一个 <a href="http://en.wikipedia.org/wiki/Platform_as_a_service">Saas</a> (云应用平台)，用户可以将自己的 web 程序部署到 <a href="https://www.heroku.com/">Heroku</a> 云主机上。使用简单的命令就可以部署你的程序到 <a href="https://www.heroku.com/">Heroku</a>。 <a href="https://www.heroku.com/">Heroku</a> 使用 <a href="http://git-scm.com/">Git</a> 作为版本控制工具。<a href="https://www.heroku.com/">Heroku</a> 目前支持 <a href="http://www.ruby-lang.org/en/">Ruby</a>， <a href="http://nodejs.org/">Node.js</a>，<a href="http://clojure.org/">Clojure</a>，Java，<a href="http://www.python.org/">Python</a>，<a href="http://www.scala-lang.org/">Scala</a>。默认数据库是 <a href="http://www.postgresql.org/">PostgreSQL</a>。</p>
-
-<blockquote><p>Build. Deploy. Scale. Heroku brings them together
-in an experience built and designed for developers.
-– Larry Marburger, CloudApp</p></blockquote>
-
-<p>想要部署你的程序到 <a href="https://www.heroku.com/">Heroku</a>？</p>
-
-<p>Let&rsquo;s Go !</p>
-
-<!-- more -->
-
-
-<h2>Step 1：创建账户</h2>
-
-<p>你需要先创建一个 Heroku的账户，如果你已经有了，直接看 Step 2.</p>
-
-<p><a href="https://api.heroku.com/signup/devcenter" title="创建 Heroku 账户">点此创建 Heroku 账户</a></p>
-
-<h2>Step 2： 安装 Heroku Toolbelt</h2>
-
-<p><code>Linux</code> 用户请查看 <a href="https://toolbelt.heroku.com/debian" title="install heroku toolbet linux">安装 Heroku toolbelt</a> , 或直接执行下面命令：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>wget -qO- https://toolbelt.heroku.com/install-ubuntu.sh | sh</span></code></pre></td></tr></table></div></figure>
-
-
-<p>我在执行的时候发现非常的慢，就在浏览器打开了上面这个<a href="https://toolbelt.heroku.com/install-ubuntu.sh" title="https://toolbelt.heroku.com/install-ubuntu.sh">URL</a> 然后，保存下来，手动执行了一下。</p>
-
-<p>我还修改了一行,
-将:</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>apt-get install -y heroku-toolbelt</span></code></pre></td></tr></table></div></figure>
-
-
-<p>改为:</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>apt-get install -y --force-yes heroku-toolbelt</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>Step 3: 登录</h2>
-
-<p>安装好之后，就可用命令行登录 heroku:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>heroku login
-</span><span class='line'>Enter your Heroku credentials.
-</span><span class='line'>Email: adam@example.com
-</span><span class='line'>Password:
-</span><span class='line'>Could not find an existing public key.
-</span><span class='line'>Would you like to generate one? <span class="o">[</span>Yn<span class="o">]</span>
-</span><span class='line'>Generating new SSH public key.
-</span><span class='line'>Uploading ssh public key /Users/adam/.ssh/id_rsa.pub
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>Step 4: 准备好自己的程序</h2>
-
-<p>一切就绪，你需要准备好自己的程序。</p>
-
-<p>由于 Heroku上 使用的是 PostgreSQL ， 所以我们需要修改下Gemfile。</p>
-
-<p>将:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s1">&#39;sqlite3&#39;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>修改为:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">group</span> <span class="ss">:development</span> <span class="k">do</span>
-</span><span class='line'>  <span class="n">gem</span> <span class="s1">&#39;sqlite3&#39;</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'><span class="n">group</span> <span class="ss">:production</span> <span class="k">do</span>
-</span><span class='line'>  <span class="n">gem</span> <span class="s1">&#39;pg&#39;</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>确保你的 app 已经纳入 Git 版本控制之中，如果没有请执行:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>git init
-</span><span class='line'>git add -A
-</span><span class='line'>git commit -m <span class="s2">&quot;initial commit&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>Step 5： 部署程序到 Heroku</h2>
-
-<p>下面该上传你的 app 到 Heroku 了:</p>
-
-<p>创建 Heroku App:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>heroku create
-</span><span class='line'>Creating stark-fog-398... <span class="k">done</span>, stack is cedar
-</span><span class='line'>http://stark-fog-398.herokuapp.com/ | git@heroku.com:stark-fog-398.git
-</span><span class='line'>Git remote heroku added
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p><code>push</code> 代码到 Heroku：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>git push heroku master
-</span><span class='line'>Counting objects: 67, <span class="k">done</span>.
-</span><span class='line'>Delta compression using up to 4 threads.
-</span><span class='line'>Compressing objects: 100% <span class="o">(</span>52/52<span class="o">)</span>, <span class="k">done</span>.
-</span><span class='line'>Writing objects: 100% <span class="o">(</span>67/67<span class="o">)</span>, 86.33 KiB, <span class="k">done</span>.
-</span><span class='line'>Total 67 <span class="o">(</span>delta 5<span class="o">)</span>, reused 0 <span class="o">(</span>delta 0<span class="o">)</span>
-</span><span class='line'>
-</span><span class='line'>-----&gt; Heroku receiving push
-</span><span class='line'>-----&gt; Rails app detected
-</span><span class='line'>-----&gt; Installing dependencies using Bundler version 1.1
-</span><span class='line'>       Checking <span class="k">for </span>unresolved dependencies.
-</span><span class='line'>       Unresolved dependencies detected.
-</span><span class='line'>       Running: bundle install --without development:test --path vendor/bundle --deployment
-</span><span class='line'>       Fetching <span class="nb">source </span>index <span class="k">for </span>https://rubygems.org/
-</span><span class='line'>       Installing rake <span class="o">(</span>0.8.7<span class="o">)</span>
-</span><span class='line'>       ...
-</span><span class='line'>       Installing rails <span class="o">(</span>3.0.5<span class="o">)</span>
-</span><span class='line'>       Your bundle is <span class="nb">complete</span>! It was installed into ./vendor/bundle
-</span><span class='line'>-----&gt; Rails plugin injection
-</span><span class='line'>       Injecting rails_log_stdout
-</span><span class='line'>       Injecting rails3_serve_static_assets
-</span><span class='line'>-----&gt; Discovering process types
-</span><span class='line'>       Procfile declares types -&gt; <span class="o">(</span>none<span class="o">)</span>
-</span><span class='line'>       Default types <span class="k">for </span>Rails -&gt; console, rake, web, worker
-</span><span class='line'>-----&gt; Compiled slug size is 8.3MB
-</span><span class='line'>-----&gt; Launching... <span class="k">done</span>, v5
-</span><span class='line'>       http://severe-mountain-793.herokuapp.com deployed to Heroku
-</span><span class='line'>
-</span><span class='line'>To git@heroku.com:severe-mountain-793.git
-</span><span class='line'> * <span class="o">[</span>new branch<span class="o">]</span>      master -&gt; master
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>如果这一步时间很长，或者返回 <code>Timeout</code> , 而且你在 China ，那可能遇到 <a href="http://ruby-china.org/topics/10813">这个问题</a> 了。</p>
-
-<p><code>Note:</code>
-不要使用 <code>rails new yourapp</code> 新建一个 app 来测试 Heroku, 至少你也得建个 <code>welcome#index</code>
-来测试吧。</p>
-
-<p><a href="http://enjoyhacking.heroku.com">这里</a> 是我用来测试的 rails app.</p>
 ]]></content>
   </entry>
   

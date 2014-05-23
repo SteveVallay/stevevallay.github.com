@@ -5,12 +5,12 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>使用 Disqus 评论 - Zhibin's blog</title>
+  <title>file access permissions summary  - Zhibin's blog</title>
   <meta name="author" content="zhibin">
 
   
-  <meta name="description" content="add Disqus api to your site">
-  <meta name="keywords" content="Disqus, comments">
+  <meta name="description" content="file access permission bits">
+  <meta name="keywords" content="file permissions">
 
   <!-- http://t.co/dKP3o1e -->
   <meta name="HandheldFriendly" content="True">
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://SteveVallay.github.io/blog/2013/11/06/using-disqus-api">
+  <link rel="canonical" href="http://SteveVallay.github.io/blog/2014/05/23/file-access-permissions">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="Zhibin's blog" type="application/atom+xml">
@@ -81,7 +81,7 @@
   
   <header>
     
-      <h1 class="entry-title">使用 Disqus 评论</h1>
+      <h1 class="entry-title">File Access Permissions Summary</h1>
     
     
       <p class="meta">
@@ -97,7 +97,7 @@
   
 
 
-<time datetime="2013-11-06T16:59:00+08:00" pubdate data-updated="true">Nov 6<span>th</span>, 2013</time>
+<time datetime="2014-05-23T23:08:00+08:00" pubdate data-updated="true">May 23<span>rd</span>, 2014</time>
         
          | <a href="#disqus_thread">Comments</a>
         
@@ -106,22 +106,124 @@
   </header>
 
 
-<div class="entry-content"><p>想给自己的 <a href="https://github.com/SteveVallay/rshare">Rails app</a> 添加评论功能，之前在使用 <a href="http://octopress.org/">Octopress</a> 的时候，接触到了 <a href="http://disqus.com/">Disqus</a> 这个专门做 Comments 的平台，许多的 blog 都使用 <a href="http://disqus.com/">Disqus</a> 作为它们的评论插件。所以决定使用 <a href="http://disqus.com/">Disqus</a> 的 api.</p>
-
-<!-- more -->
+<div class="entry-content"><!-- more -->
 
 
-<h3>帐号</h3>
+<p></p>
 
-<p>首先，需要现有 <a href="https://github.com/SteveVallay/rshare">Disqus</a> 的帐号， 没有的话就 <a href="https://disqus.com/profile/signup/">注册</a> 一个吧。</p>
+<p>总结一下常用的 file access permission bits. <code>man 2 stat</code> 可以看到几乎所有的 file permission bits.</p>
 
-<h3>Add Disqus to your site</h3>
+<h3>S_ISUID</h3>
 
-<p>登录之后，找到 <a href="http://disqus.com/admin/create/">Add Disqus to your site</a>, 创建一个新的 site profile ,
-简单的填写完 site name, admin url, category ，点击  Finish registration， 然后来到
-<strong>Choose your platform</strong> 界面选择你使用的平台，如果没有对应的，就选择 <strong>Universal Code</strong>(通用) 。</p>
+<p>set-user-ID</p>
 
-<p>然后，Disqus 就为你自动生成了一段代码，将这段代码贴到你的 site 上去，你就拥有了自己的评论系统。</p>
+<p>文件： 设置了 <code>S_ISUID</code> 的文件在执行的时候会使得进程的 effective UID 和 文件的 UID 相同。</p>
+
+<p>目录： not used</p>
+
+<h3>S_ISGID</h3>
+
+<p>set-group-ID</p>
+
+<p>文件： 如果文件的 group execute 位设置了，那么设置了 <code>S_ISGID</code> 的文件在执行的时候（group 的身份来执行）会使得进程的 effective GID 和 文件 GID 相同。</p>
+
+<p>目录： 目录内新建的文件的 GID 和 目录的GID 一样。</p>
+
+<h3>S_ISVTX</h3>
+
+<p>striky bit</p>
+
+<p>文件： 内存会对文件进行 cache</p>
+
+<p>目录： 只允许文件的 owner , 目录的 owner 和 super user 对 目录内文件进行 delete、rename。(目录的 other WX 都设置了的情况下）</p>
+
+<h3>S_IRUSR</h3>
+
+<p>user-read</p>
+
+<p>文件：user 读取文件内容</p>
+
+<p>目录：user 读取目录中文件的名称</p>
+
+<h3>S_IWUSR</h3>
+
+<p>user-write</p>
+
+<p>文件：user 写文件</p>
+
+<p>目录：user 对目录中文件进行 rename/delete/create (只有在 S_IXUSR 同时设置了才可以)</p>
+
+<h3>S_IXUSR</h3>
+
+<p>user-execute</p>
+
+<p>文件：user 执行文件</p>
+
+<p>目录：user 访问目录内文件， read/write/exexute/chmod</p>
+
+<h3>S_IRGRP</h3>
+
+<p>group-read</p>
+
+<p>文件：group 读取文件内容</p>
+
+<p>目录：group 读取目录中文件的名称</p>
+
+<h3>S_IWGRP</h3>
+
+<p>group-write</p>
+
+<p>文件：group 写文件</p>
+
+<p>目录：group 对目录中文件进行 rename/delete/create (只有在 S_IXUSR 同时设置了才可以)</p>
+
+<h3>S_IXGRP</h3>
+
+<p>group-execute</p>
+
+<p>文件：group 执行文件</p>
+
+<p>目录：group 访问目录内文件 &ndash; read/write/exexute/chmod</p>
+
+<h3>S_IROTH</h3>
+
+<p>other-read</p>
+
+<p>文件：other 读取文件内容</p>
+
+<p>目录：other 读取目录中文件的名称</p>
+
+<h3>S_IWOTH</h3>
+
+<p>other-write</p>
+
+<p>文件：other 写文件</p>
+
+<p>目录：other 对目录中文件进行 rename/delete/create (只有在 S_IXUSR 同时设置了才可以)</p>
+
+<h3>S_IXOTH</h3>
+
+<p>other-execute</p>
+
+<p>文件：other 执行文件</p>
+
+<p>目录：other 访问目录内文件 &ndash; read/write/exexute/chmod</p>
+
+<h3>S_IRWXU</h3>
+
+<p>= S_IRUSR | S_IWUSR | S_IXUSR</p>
+
+<h3>S_IRWXG</h3>
+
+<p>= S_IRGRP | S_IWGRP | S_IXGRP</p>
+
+<h3>S_IRWXO</h3>
+
+<p>= S_IROTH | S_IWOTH | S_IXOTH</p>
+
+<hr />
+
+<p>参考 <code>man 2 stat</code></p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -137,27 +239,26 @@
 <span class='line-number'>12</span>
 <span class='line-number'>13</span>
 <span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;div id="disqus_thread"&gt;&lt;/div&gt;
-</span><span class='line'>&lt;script type="text/javascript"&gt;
-</span><span class='line'>    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
-</span><span class='line'>    var disqus_shortname = 'yoursitename'; // required: replace example with your forum shortname
-</span><span class='line'>
-</span><span class='line'>    /* * * DON'T EDIT BELOW THIS LINE * * */
-</span><span class='line'>    (function() {
-</span><span class='line'>        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-</span><span class='line'>        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-</span><span class='line'>        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-</span><span class='line'>    })();
-</span><span class='line'>&lt;/script&gt;
-</span><span class='line'>&lt;noscript&gt;Please enable JavaScript to view the &lt;a href="http://disqus.com/?ref_noscript"&gt;comments powered by Disqus.&lt;/a&gt;&lt;/noscript&gt;
-</span><span class='line'>&lt;a href="http://disqus.com" class="dsq-brlink"&gt;comments powered by &lt;span class="logo-disqus"&gt;Disqus&lt;/span&gt;&lt;/a&gt;</span></code></pre></td></tr></table></div></figure>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>       S_ISUID    0004000   set UID bit
+</span><span class='line'>       S_ISGID    0002000   set-group-ID bit (see below)
+</span><span class='line'>       S_ISVTX    0001000   sticky bit (see below)
+</span><span class='line'>       S_IRWXU    00700     mask for file owner permissions
+</span><span class='line'>       S_IRUSR    00400     owner has read permission
+</span><span class='line'>       S_IWUSR    00200     owner has write permission
+</span><span class='line'>       S_IXUSR    00100     owner has execute permission
+</span><span class='line'>       S_IRWXG    00070     mask for group permissions
+</span><span class='line'>       S_IRGRP    00040     group has read permission
+</span><span class='line'>       S_IWGRP    00020     group has write permission
+</span><span class='line'>       S_IXGRP    00010     group has execute permission
+</span><span class='line'>       S_IRWXO    00007     mask for permissions for others (not in group)
+</span><span class='line'>       S_IROTH    00004     others have read permission
+</span><span class='line'>       S_IWOTH    00002     others have write permission
+</span><span class='line'>       S_IXOTH    00001     others have execute permission
+</span></code></pre></td></tr></table></div></figure>
 
 
-<p>这段代码主要使用 <code>js</code> 来加载评论。如果你觉得还没有满足你的需求，你也可以考虑下<a href="http://help.disqus.com/customer/portal/articles/565624-tightening-your-disqus-integration">定制化</a></p>
 
-<p>如下:</p>
-
-<p><img src="/images/blog/disqus.png" alt="my app" /></p>
 </div>
 
 
@@ -180,12 +281,12 @@
   
 
 
-<time datetime="2013-11-06T16:59:00+08:00" pubdate data-updated="true">Nov 6<span>th</span>, 2013</time>
+<time datetime="2014-05-23T23:08:00+08:00" pubdate data-updated="true">May 23<span>rd</span>, 2014</time>
       
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/comments/'>comments</a>, <a class='category' href='/blog/categories/disqus/'>disqus</a>
+    <a class='category' href='/blog/categories/permissions/'>permissions</a>
   
 </span>
 
@@ -194,7 +295,7 @@
     
       <div class="sharing">
   
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://SteveVallay.github.io/blog/2013/11/06/using-disqus-api/" data-via="zhibin_" data-counturl="http://SteveVallay.github.io/blog/2013/11/06/using-disqus-api/" >Tweet</a>
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://SteveVallay.github.io/blog/2014/05/23/file-access-permissions/" data-via="zhibin_" data-counturl="http://SteveVallay.github.io/blog/2014/05/23/file-access-permissions/" >Tweet</a>
   
   
   <div class="g-plusone" data-size="medium"></div>
@@ -205,10 +306,8 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2013/11/05/learn-rails-i18n/" title="Previous Post: learn rails i18n">&laquo; learn rails i18n</a>
+        <a class="basic-alignment left" href="/blog/2014/05/22/hearthstone-cards/" title="Previous Post: hearthstone_cards">&laquo; hearthstone_cards</a>
       
-      
-        <a class="basic-alignment right" href="/blog/2013/11/07/sendorderedbroadcast/" title="Next Post: Android sendOrderedBroadcast">Android sendOrderedBroadcast &raquo;</a>
       
     </p>
   </footer>
@@ -303,8 +402,8 @@
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://SteveVallay.github.io/blog/2013/11/06/using-disqus-api/';
-        var disqus_url = 'http://SteveVallay.github.io/blog/2013/11/06/using-disqus-api/';
+        var disqus_identifier = 'http://SteveVallay.github.io/blog/2014/05/23/file-access-permissions/';
+        var disqus_url = 'http://SteveVallay.github.io/blog/2014/05/23/file-access-permissions/';
         var disqus_script = 'embed.js';
       
     (function () {

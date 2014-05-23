@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: permissions | Zhibin's blog]]></title>
+  <link href="http://SteveVallay.github.io/blog/categories/permissions/atom.xml" rel="self"/>
+  <link href="http://SteveVallay.github.io/"/>
+  <updated>2014-05-24T00:14:32+08:00</updated>
+  <id>http://SteveVallay.github.io/</id>
+  <author>
+    <name><![CDATA[zhibin]]></name>
+    <email><![CDATA[zhibinwang.q@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[file access permissions summary ]]></title>
+    <link href="http://SteveVallay.github.io/blog/2014/05/23/file-access-permissions/"/>
+    <updated>2014-05-23T23:08:00+08:00</updated>
+    <id>http://SteveVallay.github.io/blog/2014/05/23/file-access-permissions</id>
+    <content type="html"><![CDATA[<!-- more -->
+
+
+<p></p>
+
+<p>总结一下常用的 file access permission bits. <code>man 2 stat</code> 可以看到几乎所有的 file permission bits.</p>
+
+<h3>S_ISUID</h3>
+
+<p>set-user-ID</p>
+
+<p>文件： 设置了 <code>S_ISUID</code> 的文件在执行的时候会使得进程的 effective UID 和 文件的 UID 相同。</p>
+
+<p>目录： not used</p>
+
+<h3>S_ISGID</h3>
+
+<p>set-group-ID</p>
+
+<p>文件： 如果文件的 group execute 位设置了，那么设置了 <code>S_ISGID</code> 的文件在执行的时候（group 的身份来执行）会使得进程的 effective GID 和 文件 GID 相同。</p>
+
+<p>目录： 目录内新建的文件的 GID 和 目录的GID 一样。</p>
+
+<h3>S_ISVTX</h3>
+
+<p>striky bit</p>
+
+<p>文件： 内存会对文件进行 cache</p>
+
+<p>目录： 只允许文件的 owner , 目录的 owner 和 super user 对 目录内文件进行 delete、rename。(目录的 other WX 都设置了的情况下）</p>
+
+<h3>S_IRUSR</h3>
+
+<p>user-read</p>
+
+<p>文件：user 读取文件内容</p>
+
+<p>目录：user 读取目录中文件的名称</p>
+
+<h3>S_IWUSR</h3>
+
+<p>user-write</p>
+
+<p>文件：user 写文件</p>
+
+<p>目录：user 对目录中文件进行 rename/delete/create (只有在 S_IXUSR 同时设置了才可以)</p>
+
+<h3>S_IXUSR</h3>
+
+<p>user-execute</p>
+
+<p>文件：user 执行文件</p>
+
+<p>目录：user 访问目录内文件， read/write/exexute/chmod</p>
+
+<h3>S_IRGRP</h3>
+
+<p>group-read</p>
+
+<p>文件：group 读取文件内容</p>
+
+<p>目录：group 读取目录中文件的名称</p>
+
+<h3>S_IWGRP</h3>
+
+<p>group-write</p>
+
+<p>文件：group 写文件</p>
+
+<p>目录：group 对目录中文件进行 rename/delete/create (只有在 S_IXUSR 同时设置了才可以)</p>
+
+<h3>S_IXGRP</h3>
+
+<p>group-execute</p>
+
+<p>文件：group 执行文件</p>
+
+<p>目录：group 访问目录内文件 &ndash; read/write/exexute/chmod</p>
+
+<h3>S_IROTH</h3>
+
+<p>other-read</p>
+
+<p>文件：other 读取文件内容</p>
+
+<p>目录：other 读取目录中文件的名称</p>
+
+<h3>S_IWOTH</h3>
+
+<p>other-write</p>
+
+<p>文件：other 写文件</p>
+
+<p>目录：other 对目录中文件进行 rename/delete/create (只有在 S_IXUSR 同时设置了才可以)</p>
+
+<h3>S_IXOTH</h3>
+
+<p>other-execute</p>
+
+<p>文件：other 执行文件</p>
+
+<p>目录：other 访问目录内文件 &ndash; read/write/exexute/chmod</p>
+
+<h3>S_IRWXU</h3>
+
+<p>= S_IRUSR | S_IWUSR | S_IXUSR</p>
+
+<h3>S_IRWXG</h3>
+
+<p>= S_IRGRP | S_IWGRP | S_IXGRP</p>
+
+<h3>S_IRWXO</h3>
+
+<p>= S_IROTH | S_IWOTH | S_IXOTH</p>
+
+<hr />
+
+<p>参考 <code>man 2 stat</code></p>
+
+<p>```</p>
+
+<pre><code>       S_ISUID    0004000   set UID bit
+       S_ISGID    0002000   set-group-ID bit (see below)
+       S_ISVTX    0001000   sticky bit (see below)
+       S_IRWXU    00700     mask for file owner permissions
+       S_IRUSR    00400     owner has read permission
+       S_IWUSR    00200     owner has write permission
+       S_IXUSR    00100     owner has execute permission
+       S_IRWXG    00070     mask for group permissions
+       S_IRGRP    00040     group has read permission
+       S_IWGRP    00020     group has write permission
+       S_IXGRP    00010     group has execute permission
+       S_IRWXO    00007     mask for permissions for others (not in group)
+       S_IROTH    00004     others have read permission
+       S_IWOTH    00002     others have write permission
+       S_IXOTH    00001     others have execute permission
+</code></pre>
+
+<p>```</p>
+]]></content>
+  </entry>
+  
+</feed>
