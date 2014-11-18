@@ -10,9 +10,10 @@ description: file access permission bits
 
 ---
 
+总结一下常用的 file access permission bits. `man 2 stat ` 可以看到几乎所有的 file permission bits. 
+
 <!-- more --> 
 
-总结一下常用的 file access permission bits. `man 2 stat ` 可以看到几乎所有的 file permission bits. 
 
 ###S_ISUID
 
