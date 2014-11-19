@@ -185,11 +185,11 @@ E/JavaBinder( 1147):    at dalvik.system.NativeStart.run(Native Method)
 D/AndroidRuntime(  845): Shutting down VM
 ```
 
-Then I use `procrank` to check status, find Vss of phone and testlink(my test app) are very high:
+Then I use `procrank` (`top` or `ps` also OK)to check status, find Vss of phone(mmssms provider running in phone process) and testlink(my test app) are very high:
 \> 2000M
 
 ``` sh
-# procrank
+\# procrank
   PID       Vss      Rss      Pss      Uss  cmdline
   919   643824K   61016K   33791K   30616K  system_server
  1147  2082976K   52676K   26426K   23688K  com.android.phone
@@ -198,6 +198,60 @@ Then I use `procrank` to check status, find Vss of phone and testlink(my test ap
 
 ```
 
+Then I use `cat /proc/1147/maps` to see the phone process's memory consumption for the its mappings.
+
+I can see 744 records of `CursorWindow` as below (samilar in testlink process's maps): 
+
+```
+61fb5000-621b5000 rw-s 00000000 00:04 146971     /dev/ashmem/CursorWindow: /data/data/com.android.providers.telephony/databases/mmssms.db (deleted)
+
+621b5000-623b5000 rw-s 00000000 00:04 146972     /dev/ashmem/CursorWindow: /data/data/com.android.providers.telephony/databases/mmssms.db (deleted)
+
+623b5000-625b5000 rw-s 00000000 00:04 146973     /dev/ashmem/CursorWindow: /data/data/com.android.providers.telephony/databases/mmssms.db (deleted)
+
+625b5000-627b5000 rw-s 00000000 00:04 146974     /dev/ashmem/CursorWindow: /data/data/com.android.providers.telephony/databases/mmssms.db (deleted)
+
+```
 
 
+Maybe `procmem` is better for this, I find `procmem` later. Use `procmem` to check  the phone process's maps :
 
+Also can see 744 records of `CursorWindow`, each one cost  2048K Vss.
+
+```
+Vss      Rss      Pss      Uss     ShCl     ShDi     PrCl     PrDi  Name
+
+-------  -------  -------  -------  -------  -------  -------  -------  
+...
+  2048K       4K       4K       4K       0K       0K       0K       4K  /dev/ashmem/CursorWindow:
+
+  2048K       4K       4K       4K       0K       0K       0K       4K  /dev/ashmem/CursorWindow:
+
+  2048K       4K       4K       4K       0K       0K       0K       4K  /dev/ashmem/CursorWindow:
+
+  2048K       4K       4K       4K       0K       0K       0K       4K  /dev/ashmem/CursorWindow:
+
+  2048K       4K       4K       4K       0K       0K       0K       4K  /dev/ashmem/CursorWindow:
+
+  2048K       4K       4K       4K       0K       0K       0K       4K  /dev/ashmem/CursorWindow:
+
+  2048K       4K       4K       4K       0K       0K       0K       4K  /dev/ashmem/CursorWindow:
+
+   132K      36K      16K      16K      20K       0K      16K       0K  [stack]
+
+     0K       0K       0K       0K       0K       0K       0K       0K  [vectors]
+
+-------  -------  -------  -------  -------  -------  -------  -------  
+
+2079416K   39824K   20503K   19360K   20412K      52K   16592K    2976K  TOTAL
+
+```
+
+Theoretically, on 32 bit OS, Vss limit can be 4GB, but on 32 bit Android, Vss limit is 2GB. A process can not use Vss more than this limit. I do not know why.
+
+
+Now, I can say, in case of my test app, every query try to use a new cursor which need allocate 2M 
+Vss . When alloacated Vss reach limit (2G) will return fail with errno 12 `ENOMEM`.
+
+
+But for the first case , opened cursor only 4, most consume
