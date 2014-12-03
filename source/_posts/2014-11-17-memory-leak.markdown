@@ -254,4 +254,185 @@ Now, I can say, in case of my test app, every query try to use a new cursor whic
 Vss . When alloacated Vss reach limit (2G) will return fail with errno 12 `ENOMEM`.
 
 
-But for the first case , opened cursor only 4, most consume
+But for the first case , opened cursor number is only 4, most consume 8M memory, should not cause memory exhaust.
+
+To find out what cost the memory, we need check maps of mms process from customer devices. Since we are not there with customer, we need a script to capture related logs.
+
+
+### Capture logs & fix first issue
+
+Then I wrote an bash script to capture related logs every half an hour.
+
+```bash 
+#!/system/bin/sh
+
+set `ps| grep com.android.mms`
+pidOfMms=$2
+echo "pid of mms is: $pidOfMms"
+
+set `ps|grep com.android.phone`
+pidOfPhone=$2
+echo "pid of phone is: $pidOfPhone"
+
+if [ ! -d "/sdcard/logs" ]; then
+    mkdir "/sdcard/logs"
+    echo "create new dir /sdcard/logs"
+fi
+
+while [ -d "/sdcard/logs" ]
+do
+    echo "start capture logs"
+    t=`date +"%Y-%m-%d-%H-%M-%S"`
+    echo $$ > /sdcard/logs/pid.log
+    procrank > "/sdcard/logs/procrank"$t".log"
+    dumpsys meminfo com.android.mms > "/sdcard/logs/meminfo.mms"$t".log"
+    dumpsys meminfo com.android.phone > "/sdcard/logs/meminfo.phone"$t".log"
+    cat /proc/$pidOfPhone/maps > "/sdcard/logs/maps.phone"$t".log"
+    cat /proc/$pidOfMms/maps > "/sdcard/logs/maps.mms"$t".log"
+    sleep 1800
+done
+```
+
+`push` this script to **/system/bin/** and add execute permission, run this `sh /system/bin/log.sh &` before test , it will capture logs ever half an hour.
+
+Then I got the maps of info of phone and mms process, after analysis , find 684 records of `/system/framework/framework-res.apk` as below:
+
+```
+b75f7000-b772a000 r--s 00907000 b3:10 853        /system/framework/framework-res.apk
+b7791000-b78c4000 r--s 00907000 b3:10 853        /system/framework/framework-res.apk
+b78c4000-b79f7000 r--s 00907000 b3:10 853        /system/framework/framework-res.apk
+b79f7000-b7b2a000 r--s 00907000 b3:10 853        /system/framework/framework-res.apk
+b7b2a000-b7c5d000 r--s 00907000 b3:10 853        /system/framework/framework-res.apk
+...
+bb165000-bb298000 r--s 00907000 b3:10 853        /system/framework/framework-res.apk
+bb298000-bb3cb000 r--s 00907000 b3:10 853        /system/framework/framework-res.apk
+```
+
+I find lots of overlay errors in adb logs as below: 
+
+```
+11-06 10:55:47: D/asset   ( 1241): createIdmapFileLocked: originalPath=/system/framework/framework-res.apk overlayPath=/vendor/ty/overlay/framework/framework-res.apk idmapPath=/data/resource-cache/vendor@ty@overlay@framework@framework-res.apk@idmap
+11-06 10:55:47: W/asset   ( 1241): failed to find resources.arsc in /vendor/ty/overlay/framework/framework-res.apk
+11-06 10:55:47: W/asset   ( 1241): failed to add overlay package /vendor/ty/overlay/framework/framework-res.apk
+...
+```
+
+Then, I think maybe [runtime overlay][100] failure caused **/system/framework/framework-res.apk**  loaded every time when app try to get framework resources. Lots of times load **/system/framework/framework-res.apk** without free previous cost memory caused memory leak. 
+
+[runtime overlay][100] failure is because **failed to find resources.arsc in /vendor/ty/overlay/framework/framework-res.apk**. After check **/vendor/ty/overlay/framework/framework-res.apk**, found no resources.arsc in this package because no resource in source code of this package.
+
+Then removed **/vendor/ty/overlay/framework/framework-res.apk** and verify, after testing 10 hours , issue not observed. 
+
+
+
+### Same error , another issue
+
+After running 40 hours , similar error observed. Check maps of mms process (before the error), found 576 records of `stack` as below: 
+
+```
+711fa000-712f7000 rw-p 00000000 00:00 0          [stack:1851]
+712fe000-713fb000 rw-p 00000000 00:00 0          [stack:1852]
+71402000-714ff000 rw-p 00000000 00:00 0          [stack:1853]
+7436d000-7446a000 rw-p 00000000 00:00 0          [stack:1854]
+7446b000-74568000 rw-p 00000000 00:00 0          [stack:1855]
+74569000-74666000 rw-p 00000000 00:00 0          [stack:1856]
+...
+```
+
+Also checked `top` info and `/proc/pid-of-mms/status` info , find Vss is high (1607952K) and lots of  threads (576) there: 
+
+- top info:
+
+```
+ PID PR CPU% S  #THR     VSS     RSS PCY UID      Name
+ 1847 0 1%   S   576 1607952K 210208K  fg u0_a9    com.android.mms
+```
+
+- status info:
+
+```
+Name:	com.android.mms
+State:	S (sleeping)
+Tgid:	1847
+Pid:	1847
+PPid:	203
+...
+Threads:	578
+```
+
+I think there are lots of unexpected thread created, so need capture threads info. Then wrote another script to capture threads info: 
+
+```
+#!/system/bin/sh
+
+set `ps| grep com.android.mms`
+pidOfMms=$2
+
+tasks=`ls /proc/$pidOfMms/task`
+
+if [ ! -d "/sdcard/logs" ]; then
+    mkdir "/sdcard/logs"
+    echo "create new dir /sdcard/logs"
+fi
+
+for var in $tasks; do
+    debuggerd -b $var > "/sdcard/logs/mms-tid-"$var".log"
+done
+```
+
+When got thread info, found lots of same name threads there: 
+
+```
+"k worker thread" sysTid=10137
+  #00  pc 00021a58  /system/lib/libc.so (__futex_syscall3+8)
+  #01  pc 0000f01c  /system/lib/libc.so (__pthread_cond_timedwait_relative+48)
+  #02  pc 0000f07c  /system/lib/libc.so (__pthread_cond_timedwait+64)
+  #03  pc 00055c67  /system/lib/libdvm.so
+  #04  pc 0006a5d5  /system/lib/libdvm.so
+  #05  pc 00029820  /system/lib/libdvm.so
+  #06  pc 00030cac  /system/lib/libdvm.so (dvmMterpStd(Thread*)+76)
+  #07  pc 0002e344  /system/lib/libdvm.so (dvmInterpret(Thread*, Method const*, JValue*)+184)
+  #08  pc 0006347d  /system/lib/libdvm.so (dvmCallMethodV(Thread*, Method const*, Object*, bool, JValue*, std::__va_list)+336)
+  #09  pc 000634a1  /system/lib/libdvm.so (dvmCallMethod(Thread*, Method const*, Object*, JValue*, ...)+20)
+  #10  pc 0005817f  /system/lib/libdvm.so
+  #11  pc 0000d228  /system/lib/libc.so (__thread_entry+72)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[100]:http://developer.sonymobile.com/2014/04/22/sony-contributes-runtime-resource-overlay-framework-to-android-code-example/
