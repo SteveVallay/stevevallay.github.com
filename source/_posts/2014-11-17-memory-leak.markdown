@@ -398,8 +398,234 @@ When got thread info, found lots of same name threads there:
   #11  pc 0000d228  /system/lib/libc.so (__thread_entry+72)
 ```
 
+Searched "k worker thread" in Mms code , find :
+
+```
+./src/com/android/mms/data/Contact.java:552:                }, "Contact.ContactsCache.TaskStack worker thread");
+```
+
+Actually "k worker thread" is truncated "Contact.ContactsCache.TaskStack worker thread". Show its code as below: 
+
+```java packages/apps/Mms/src/com/android/mms/data/Contact.java 
+        private static class TaskStack {
+            Thread mWorkerThread;
+            private final ArrayList<Runnable> mThingsToLoad;
+
+            public TaskStack() {
+                mThingsToLoad = new ArrayList<Runnable>();
+                mWorkerThread = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        while (true) {
+                            Runnable r = null;
+                            synchronized (mThingsToLoad) {
+                                if (mThingsToLoad.size() == 0) {
+                                    try {
+                                        mThingsToLoad.wait();
+                                    } catch (InterruptedException ex) {
+                                        // nothing to do
+                                    }
+                                }
+                                if (mThingsToLoad.size() > 0) {
+                                    r = mThingsToLoad.remove(0);
+                                }
+                            }
+                            if (r != null) {
+                                r.run();
+                            }
+                        }
+                    }
+                }, "Contact.ContactsCache.TaskStack worker thread");
+                mWorkerThread.setPriority(Thread.MIN_PRIORITY);
+                mWorkerThread.start();
+            }
+```
+
+We can see in constructor of TaskStack, a thread (mWorkerThread) will be created and this thread  never exit, if constructor of TaskStack called multiple times, will create one thread each time. 
+
+TaskStack created inside ContactsCache
+
+``` java packages/apps/Mms/src/com/android/mms/data/Contact.java 
+    private static class ContactsCache {
+        private final TaskStack mTaskQueue = new TaskStack();
+        private static final String SEPARATOR = ";";
+```
+
+ContactsCache created in **init** of Contact:
 
 
+```
+    public static void init(final Context context) {
+        sContactCache = new ContactsCache(context);
+
+        RecipientIdCache.init(context);
+        ...
+    }
+```
+
+Finally found when delete all conversations , it will call **Contact.init()** to rebuild contacts cache. So every time delte all conversations, will leak memory for a new thread. 
+
+```java packages/apps/Mms/src/com/android/mms/ui/ConversationList.java
+        protected void onDeleteComplete(int token, Object cookie, int result) {
+            super.onDeleteComplete(token, cookie, result);
+            switch (token) {
+            case DELETE_CONVERSATION_TOKEN:
+                long threadId = cookie != null ? (Long)cookie : -1;     // default to all threads
+                if (threadId < 0 || threadId == mLastDeletedThread) {
+                    mHandler.removeCallbacks(mShowProgressDialogRunnable);
+                    if (mProgressDialog != null && mProgressDialog.isShowing()) {
+                        mProgressDialog.dismiss();
+                    }
+                    mLastDeletedThread = -1;
+                }
+
+                if (threadId == -1) {
+                    // Rebuild the contacts cache now that all threads and their associated unique
+                    // recipients have been deleted.
+                    Contact.init(ConversationList.this);
+                } else {
+                ...
+```
+
+To fix this issue, no need create a new thread every time or destory previous thread when you create one. 
+
+Google has provide a fix for this issue on Android L version: 
+
+```
+Author: Emmanuel Berthier <emmanuel.berthier@intel.com>
+Date:   Tue Jul 17 16:48:10 2012 +0200
+
+    Stop previous TaskStack worker
+
+    Each time we delete all threads, a new TaskStack thread is started.
+    We need stop the previous one to avoid over memory consumption.
+
+    Change-Id: Ibee8dd7b8e757df0686c7989dc7d9878f9ef5102
+    Signed-off-by: Emmanuel Berthier <emmanuel.berthier@intel.com>
+
+diff --git a/src/com/android/mms/data/Contact.java b/src/com/android/mms/data/Contact.java
+index 5bc5bba..87dcfe0 100644
+--- a/src/com/android/mms/data/Contact.java
++++ b/src/com/android/mms/data/Contact.java
+@@ -355,6 +355,9 @@ public class Contact {
+     }
+
+     public static void init(final Context context) {
++        if (sContactCache != null) { // Stop previous Runnable
++            sContactCache.mTaskQueue.mWorkerThread.interrupt();
++        }
+         sContactCache = new ContactsCache(context);
+
+         RecipientIdCache.init(context);
+@@ -503,7 +506,7 @@ public class Contact {
+                                     try {
+                                         mThingsToLoad.wait();
+                                     } catch (InterruptedException ex) {
+-                                        // nothing to do
++                                        break;  // Exception sent by Contact.init() to stop Runnable
+                                     }
+                                 }
+                                 if (mThingsToLoad.size() > 0) {
+
+```
+
+With this fix, when new TaskStack created , it will stop previous thread inside it.
+
+
+### Summary
+
+For such **"Could not allocate ... due to -12"** issue,  need to check process memory status and make clear what consumed the memory.
+
+Use `top` , `meminfo`, `ps`, `procrank`,`procmem` to check summary of memory.
+Use `cat /proc/self/maps`, `cat /proc/self/status` to konw details.
+
+
+### Appendix
+
+- `man proc` to see `/proc/[pid]/maps` info:
+
+>
+ /proc/[pid]/maps
+              A file containing the currently mapped memory regions and
+              their access permissions.  See mmap(2) for some further
+              information about memory mappings.
+
+              The format of the file is:
+
+       address           perms offset  dev   inode       pathname
+       00400000-00452000 r-xp 00000000 08:02 173521      /usr/bin/dbus-daemon
+       00651000-00652000 r--p 00051000 08:02 173521      /usr/bin/dbus-daemon
+       00652000-00655000 rw-p 00052000 08:02 173521      /usr/bin/dbus-daemon
+       00e03000-00e24000 rw-p 00000000 00:00 0           [heap]
+       00e24000-011f7000 rw-p 00000000 00:00 0           [heap]
+       ...
+       35b1800000-35b1820000 r-xp 00000000 08:02 135522  /usr/lib64/ld-2.15.so
+       35b1a1f000-35b1a20000 r--p 0001f000 08:02 135522  /usr/lib64/ld-2.15.so
+       35b1a20000-35b1a21000 rw-p 00020000 08:02 135522  /usr/lib64/ld-2.15.so
+       35b1a21000-35b1a22000 rw-p 00000000 00:00 0
+       35b1c00000-35b1dac000 r-xp 00000000 08:02 135870  /usr/lib64/libc-2.15.so
+       35b1dac000-35b1fac000 ---p 001ac000 08:02 135870  /usr/lib64/libc-2.15.so
+       35b1fac000-35b1fb0000 r--p 001ac000 08:02 135870  /usr/lib64/libc-2.15.so
+       35b1fb0000-35b1fb2000 rw-p 001b0000 08:02 135870  /usr/lib64/libc-2.15.so
+       ...
+       f2c6ff8c000-7f2c7078c000 rw-p 00000000 00:00 0    [stack:986]
+       ...
+       7fffb2c0d000-7fffb2c2e000 rw-p 00000000 00:00 0   [stack]
+       7fffb2d48000-7fffb2d49000 r-xp 00000000 00:00 0   [vdso]
+
+              The address field is the address space in the process that the
+              mapping occupies.  The perms field is a set of permissions:
+
+                   r = read
+                   w = write
+                   x = execute
+                   s = shared
+                   p = private (copy on write)
+
+              The offset field is the offset into the file/whatever; dev is
+              the device (major:minor); inode is the inode on that device.
+              0 indicates that no inode is associated with the memory
+              region, as would be the case with BSS (uninitialized data).
+
+              The pathname field will usually be the file that is backing
+              the mapping.  For ELF files, you can easily coordinate with
+              the offset field by looking at the Offset field in the ELF
+              program headers (readelf -l).
+
+              There are additional helpful pseudo-paths:
+
+                   [stack]
+                          The initial process's (also known as the main
+                          thread's) stack.
+
+                   [stack:<tid>] (since Linux 3.4)
+                          A thread's stack (where the <tid> is a thread ID).
+                          It corresponds to the /proc/[pid]/task/[tid]/
+                          path.
+
+                   [vdso] The virtual dynamically linked shared object.
+
+                   [heap] The process's heap.
+
+              If the pathname field is blank, this is an anonymous mapping
+              as obtained via the mmap(2) function.  There is no easy way to
+              coordinate this back to a process's source, short of running
+              it through gdb(1), strace(1), or similar.
+
+              Under Linux 2.0, there is no field giving pathname.
+
+
+### Useful link
+
+
+- [android dev memory article](https://developer.android.com/training/articles/memory.html)
+- [Android_Memory_Usage](http://elinux.org/Android_Memory_Usage)
+- [man proc](http://man7.org/linux/man-pages/man5/proc.5.html)
+- [man mmap](http://man7.org/linux/man-pages/man2/mmap.2.html)
+- [understanding-linux-proc-id-maps](http://stackoverflow.com/questions/1401359/understanding-linux-proc-id-maps)
+- [Runtime_Memory_Measurement](http://elinux.org/Runtime_Memory_Measurement)
+- [Understanding the Linux Kernel, 3rd Edition](http://gauss.ececs.uc.edu/Courses/c4022/code/memory/understanding.pdf)
+- [Unserstanding the Linux Virtual Memory Manager](https://www.kernel.org/doc/gorman/pdf/understand.pdf)
 
 
 
