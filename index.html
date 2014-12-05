@@ -84,6 +84,49 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2014/11/17/memory-leak/">Android Memory Leak</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-11-17T14:27:00+08:00" pubdate data-updated="true">Nov 17<span>th</span>, 2014</time>
+        
+         | <a href="/blog/2014/11/17/memory-leak/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Record fix issue &ldquo;<strong>Could not allocate CursorWindow &lsquo;/data/data/com.android.providers.telephony/databases/mmssms.db&rsquo; of size 2097152 due to error -12</strong>&rdquo; issue.</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/11/17/memory-leak/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2014/05/23/file-access-permissions/">File Access Permissions Summary</a></h1>
     
     
@@ -109,7 +152,9 @@
   </header>
 
 
-  <div class="entry-content"></div>
+  <div class="entry-content"><p>总结一下常用的 file access permission bits. <code>man 2 stat</code> 可以看到几乎所有的 file permission bits.</p>
+
+</div>
   
   
     <footer>
@@ -473,57 +518,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2013/12/13/android-systemproperties/">Android System Properties</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-12-13T23:41:00+08:00" pubdate data-updated="true">Dec 13<span>th</span>, 2013</time>
-        
-         | <a href="/blog/2013/12/13/android-systemproperties/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>&mdash;直朝那个方向走，或许真的能到达那个地方。o(∩∩)o&hellip;哈哈</p>
-
-<p>Property system 是 Android 系统中一个重要的 Feature，它以一个 service 的形式来管理系统的配置和状态，每个 property 都是一个 key/value 组，key 和 value 都是字符串。</p>
-
-<p>这些配置和状态信息在 Android 的所有进程中都可以读取、设置和修改，所以 Property system 成了 Android 系统中控制全局配置的一种常用手段。你可以预置 system propterties 作为系统的初始设置，也可以运行是设置和改变 system properties 的值。</p>
-
-<p>因此，system properties 经常作为一些特定 Feature 的控制开关，运行时根据 properties 的值来区分打开/关闭某个 Feature.由于在所有进程都可以访问，也可以用来在 Android 的不同进程间进行简单信息协调，Java 和 native 都不受限制。</p>
-
-<p>下面我们就按自上而下的顺序看看 Android 的这个 Properties system 的实现（Kitkat 4.4)。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2013/12/13/android-systemproperties/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -539,6 +533,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/11/17/memory-leak/">Android Memory Leak</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/05/23/file-access-permissions/">File Access Permissions Summary</a>
       </li>
     
@@ -552,10 +550,6 @@
     
       <li class="post">
         <a href="/blog/2014/05/12/permissions-on-folder/">Permissions on Folder</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/04/28/unlink/">Unlink</a>
       </li>
     
   </ul>
